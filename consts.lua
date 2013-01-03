@@ -1,4 +1,6 @@
 options = {
+  ['BotEnabled'] = true,
+
   ['AutoHeal'] = false,
   ['HealSpellText'] = 'exura',
   ['HealthText'] = '75%',
@@ -171,10 +173,6 @@ t = {
     ["Select\nitem"] = "Selecionar\nitem",
     ["Magic Training"] = "Treinar nível mágico",
     ["Trains magic level (use a spell whenever mana is full)."] = "Treina nível mágico (usa uma magia sempre que a mana está cheia).",
-    ["Spell to use"] = "Magia a ser usada",
-
-
-
-
+    ["Spell to use"] = "Magia a ser usada"
 }}
-Locales.installLocale(t)
+--Locales.installLocale(t)

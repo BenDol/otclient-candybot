@@ -38,7 +38,7 @@ Panel
     anchors.top: AutoEat.top
     width: 140
     &option: g_settings.get('AutoEatSelect')
-    @onOptionChange: Events.changeOption(self:getId(), self:getText())
+    @onOptionChange: UIBotCore.changeOption(self:getId(), self:getText())
     options:
       - Meat
       - Fish
@@ -130,7 +130,7 @@ Panel
     anchors.top: AutoReplaceWeapon.top
     width: 100
     &option: g_settings.get('AutoEatSelect')
-    @onOptionChange: Events.changeOption(self:getId(), self:getText())
+    @onOptionChange: UIBotCore.changeOption(self:getId(), self:getText())
     options:
       - Left Hand
       - Right Hand

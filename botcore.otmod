@@ -1,5 +1,5 @@
 Module
-  name: kilouco_bot
+  name: game_botcore
   description: Bot Addon
   author: Alexandre Severino (kilouco)
   website: https://github.com/kilouco/otclient_bot
@@ -9,8 +9,8 @@ Module
   sandbox: true
 
   @onLoad: |
-    dofile 'bot'
-    Bot.init()
+    dofile 'botcore'
+    UIBotCore.init()
 
   @onUnload: |
-    Bot.terminate()
+    UIBotCore.terminate()

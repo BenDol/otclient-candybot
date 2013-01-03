@@ -1,19 +1,19 @@
 BotOptionLineEdit < TextEdit
-  @onTextChange: Events.changeOption(self:getId(), self:getText())
+  @onTextChange: UIBotCore.changeOption(self:getId(), self:getText())
 
 BotOptionCheckBox < CheckBox
-  @onCheckChange: Events.changeOption(self:getId(), self:isChecked())
+  @onCheckChange: UIBotCore.changeOption(self:getId(), self:isChecked())
 
 BotOptionTextList < TextList
-  @onCheckChange: Events.changeOption(self:getId(), self:isChecked())
+  @onCheckChange: UIBotCore.changeOption(self:getId(), self:isChecked())
 
 MainWindow
   id: botWindow
-  !text: tr('Kilouco\'s Bot')
+  !text: tr('Bot Helper')
   size: 300 500
   
-  @onEnter: Bot.hide()
-  @onEscape: Bot.hide()
+  @onEnter: UIBotCore.hide()
+  @onEscape: UIBotCore.hide()
 
   &save: true
 
@@ -22,18 +22,20 @@ MainWindow
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
+    margin-top: 25
 
   Panel
     id: botTabContent
     anchors.top: botTabBar.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.bottom: parent.bottom
-    margin-top: 10
+    anchors.bottom: next.top
+    margin-bottom: 10
+    margin-top: 8
 
   Button
     text: Hide
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    @onClick: Bot.hide()
+    @onClick: UIBotCore.hide()

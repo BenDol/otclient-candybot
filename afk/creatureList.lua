@@ -3,7 +3,7 @@ CreatureList = extends(UIWidget)
 local creatureListWindow
 
 function CreatureList.init()
-  creatureListWindow = g_ui.loadUI('creatureList.otui', Bot.getParent())
+  creatureListWindow = g_ui.loadUI('creatureList.otui', UIBotCore.getParent())
 
   creatureListWindow:setVisible(false)
   creatureListWindow:getChildById('UseBlackList'):setChecked(true)
@@ -29,13 +29,13 @@ end
 function CreatureList.show()
   if g_game.isOnline() then
     creatureListWindow:show()
-    Bot.getUi():setEnabled(false)
+    UIBotCore.getUI():setEnabled(false)
   end
 end
 
 function CreatureList.hide()
   creatureListWindow:hide()
-  Bot.getUi():setEnabled(true)
+  UIBotCore.getUI():setEnabled(true)
 end
 
 function CreatureList.addBlack()

@@ -49,7 +49,6 @@ Panel
     width: 100
     !text: tr('Health Item')
     !tooltip: tr('Automatically use health items/potions on self.')
-    anchors.left: AutoHeal.left
     anchors.top: prev.bottom
     margin-top: 10
 
