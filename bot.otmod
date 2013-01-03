@@ -1,0 +1,16 @@
+Module
+  name: kilouco_bot
+  description: Bot Addon
+  author: Alexandre Severino (kilouco)
+  website: https://github.com/kilouco/otclient_bot
+
+  autoload: true
+  autoload-priority: 1000
+  sandbox: true
+
+  @onLoad: |
+    dofile 'bot'
+    Bot.init()
+
+  @onUnload: |
+    Bot.terminate()

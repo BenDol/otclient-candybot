@@ -1,0 +1,178 @@
+ListRow < Label
+  font: verdana-11px-monochrome
+  background-color: alpha
+  text-offset: 2 0
+  focusable: true
+
+  $focus:
+    background-color: #ffffff22
+    color: #ffffff
+
+MainWindow
+  id: creatureList
+  !text: tr('Creature Lists')
+  size: 600 400
+  
+  @onEnter: CreatureList.hide()
+  @onEscape: CreatureList.hide()
+
+  &save: true
+
+  TextList
+    id: BlackList
+    anchors.top: parent.top
+    anchors.left: parent.left
+    margin-top: 15
+    margin-bottom: 5
+    padding: 1
+    focusable: false
+    vertical-scrollbar: BlackListScrollBar
+    width: 150
+    height: 300
+
+  VerticalScrollBar
+    id: BlackListScrollBar
+    anchors.top: BlackList.top
+    anchors.bottom: BlackList.bottom
+    anchors.right: BlackList.right
+    step: 14
+    pixels-scroll: true
+
+  Label
+    id: BlackListLabel
+    !text: ('Black List')
+    anchors.bottom: BlackList.top
+    anchors.left: BlackList.left
+    anchors.right: BlackList.right
+    text-align: center
+    margin-bottom: 5
+
+  TextList
+    id: WhiteList
+    anchors.top: BlackList.top
+    anchors.left: BlackList.right
+    margin-left: 20
+    padding: 1
+    focusable: false
+    vertical-scrollbar: WhiteListScrollBar
+    width: 150
+    height: 300
+
+  VerticalScrollBar
+    id: WhiteListScrollBar
+    anchors.top: WhiteList.top
+    anchors.bottom: WhiteList.bottom
+    anchors.right: WhiteList.right
+    step: 14
+    pixels-scroll: true
+
+  Label
+    id: WhiteListLabel
+    !text: ('White List')
+    anchors.bottom: WhiteList.top
+    anchors.left: WhiteList.left
+    anchors.right: WhiteList.right
+    text-align: center
+    margin-bottom: 5
+
+  Button
+    id: BlackListRemove
+    !text: ('Remove Selected')
+    width: 150
+    anchors.left: BlackList.left
+    anchors.top: BlackList.bottom
+    margin-top: 5
+    @onClick: CreatureList.remBlack()
+
+  Button
+    id: WhiteListRemove
+    !text: ('Remove Selected')
+    width: 150
+    anchors.left: WhiteList.left
+    anchors.top: WhiteList.bottom
+    margin-top: 5
+    @onClick: CreatureList.remWhite()
+
+  Button
+    text: Close
+    width: 64
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    @onClick: CreatureList.hide()
+
+  Label
+    id: BlackListLabel
+    text: Black List
+    anchors.bottom: BlackList.top
+    anchors.left: BlackList.left
+    anchors.right: BlackList.right
+    text-align: center
+    margin-bottom: 5
+
+  Label
+    id: Text1Label
+    !text: tr('Write the name of a player or any\ncreature in the following field:')
+    anchors.right: parent.right
+    anchors.top: parent.top
+    margin-top: 2
+    margin-right: 20
+    height: 30
+
+  TextEdit
+    id: TextField
+    anchors.right: Text1Label.right
+    anchors.top: Text1Label.bottom
+    margin-top: 2
+    width: 190
+
+  Button
+    id: AddBlack
+    !text: tr('Add to the Black List')
+    width: 140
+    anchors.right: prev.right
+    anchors.top: Text1Label.bottom
+    margin-top: 30
+    margin-right: 25
+    @onClick: CreatureList.addBlack()
+
+  Label
+    id: Text2Label
+    !text: tr('or')
+    anchors.left: prev.left
+    anchors.right: prev.right
+    anchors.top: prev.bottom
+    margin-top: 5
+    text-align: center
+
+  Button
+    id: AddWhite
+    !text: ('Add to the White List')
+    width: 140
+    anchors.right: AddBlack.right
+    anchors.top: AddBlack.bottom
+    margin-top: 25
+    @onClick: CreatureList.addWhite()
+
+  CheckBox
+    id: UseBlackList
+    !text: ('Alert for black-listed creatures.')
+    !tooltip: ('Will alert only when black-listed creatures enter on your screen.')
+    anchors.left: Text1Label.left
+    anchors.top: AddWhite.bottom
+    width: 200
+    margin-left: 5
+    margin-top: 20
+    @onCheckChange: CreatureList.checkBlack(self:isChecked())
+
+  CheckBox
+    id: UseWhiteList
+    !text: tr('Alert for non white-listed\ncreatures.')
+    !tooltip: tr('Will alert whenever a creature which is not on the white list appears.')
+    anchors.left: Text1Label.left
+    anchors.top: UseBlackList.bottom
+    width: 200
+    height: 30
+    margin-left: 5
+    margin-top: 5
+    @onCheckChange: CreatureList.checkWhite(self:isChecked())
+

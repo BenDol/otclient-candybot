@@ -1,0 +1,192 @@
+Panel
+
+  BotOptionCheckBox
+    id: CreatureAlert
+    width: 220
+    !text: tr('Alert on creature appearance')
+    !tooltip: tr('Play a sound alert when a creature appears.')
+    anchors.left: parent.left
+    anchors.top: parent.top
+
+  Button
+    id: CreatureAlertList
+    width: 120
+    !text: tr('Creature List')
+    anchors.left: parent.left
+    anchors.top: prev.bottom
+    margin-top: 10
+    @onClick: AfkModule.creatureListDialog()
+
+  HorizontalSeparator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 8
+
+  BotOptionCheckBox
+    id: AutoEat
+    !text: tr('Eat Food')
+    !tooltip: tr('Eat food automatically.')
+    anchors.left: CreatureAlert.left
+    anchors.top: prev.bottom
+    width: 180
+    margin-top: 10
+
+  ComboBox
+    id: AutoEatSelect
+    anchors.right: parent.right
+    anchors.top: AutoEat.top
+    width: 140
+    &option: g_settings.get('AutoEatSelect')
+    @onOptionChange: Events.changeOption(self:getId(), self:getText())
+    options:
+      - Meat
+      - Fish
+      - Fire Mushroom
+      - Ham
+      - Dragon Ham
+      - Brown Bread
+      - Brown Mushroom
+
+  HorizontalSeparator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 8
+
+  BotOptionCheckBox
+    id: AntiKick
+    !text: tr('Anti-kick')
+    !tooltip: tr('Character "dances" to avoid being kicked for being idle for too long.')
+    anchors.left: CreatureAlert.left
+    anchors.top: prev.bottom
+    width: 180
+    margin-top: 10
+
+  BotOptionCheckBox
+    id: AutoFishing
+    width: 120
+    !text: tr('Auto Fishing')
+    !tooltip: tr('Player will be fishing as long as there are worms.')
+    anchors.right: parent.right
+    anchors.top: prev.top
+
+  HorizontalSeparator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 8
+  
+  BotOptionCheckBox
+    id: RuneMake
+    !text: tr('Rune Maker')
+    !tooltip: tr('Automatically make runes.')
+    anchors.left: parent.left
+    anchors.top: prev.top
+    width: 180
+    margin-top: 10
+
+  Label
+    id: RuneSpellLabel
+    width: 100
+    !text: tr('Rune Spell Text')
+    anchors.right: parent.right
+    anchors.top: prev.top
+
+  BotOptionLineEdit
+    id: RuneSpellText
+    anchors.left: RuneSpellLabel.left
+    anchors.right: RuneSpellLabel.right
+    anchors.top: RuneSpellLabel.bottom
+    margin-top: 2
+
+  BotOptionCheckBox
+    id: RuneMakeOpenContainer
+    !text: tr('Check open containers')
+    !tooltip: tr('Check if there is a blank rune in an open container\nin order to avoid saying the spell words repetitively\nwithout the magic item.')
+    anchors.left: parent.left
+    anchors.top: prev.top
+    width: 180
+    margin-top: 5
+
+  HorizontalSeparator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 8
+
+  BotOptionCheckBox
+    id: AutoReplaceWeapon
+    !text: tr('Auto Replace Weapons')
+    !tooltip: tr('Automatically "refill" used throwing weapons (container of replacing items must be open).')
+    anchors.left: parent.left
+    anchors.top: prev.top
+    width: 180
+    margin-top: 10
+
+  ComboBox
+    id: AutoReplaceWeaponSelect
+    anchors.right: parent.right
+    anchors.top: AutoReplaceWeapon.top
+    width: 100
+    &option: g_settings.get('AutoEatSelect')
+    @onOptionChange: Events.changeOption(self:getId(), self:getText())
+    options:
+      - Left Hand
+      - Right Hand
+
+  Label
+    id: ItemToReplaceLabel
+    width: 120
+    !text: tr('Item to replace with')
+    anchors.left: parent.left
+    anchors.top: prev.bottom
+    margin-top: 20
+    margin-left: 18 
+
+  Item
+    id: ItemToReplace
+    anchors.left: prev.right
+    anchors.top: prev.top
+    margin-top: -10
+    margin-left: 10
+    virtual: true
+
+  Button
+    id: SelectReplaceItem
+    !text: tr('Select\nitem')
+    width: 70
+    height: 34
+    anchors.right: parent.right
+    anchors.top: prev.top
+    margin-left: 10
+    @onClick: AfkModule.startChooseReplaceItem()
+
+  HorizontalSeparator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 8
+
+  BotOptionCheckBox
+    id: MagicTrain
+    !text: tr('Magic Training')
+    !tooltip: tr('Trains magic level (use a spell whenever mana is full).')
+    anchors.left: parent.left
+    anchors.top: prev.top
+    width: 180
+    margin-top: 10
+
+  Label
+    id: MagicTrainSpell
+    width: 110
+    !text: tr('Spell to use')
+    anchors.right: parent.right
+    anchors.top: prev.top
+
+  BotOptionLineEdit
+    id: MagicTrainSpellText
+    anchors.left: MagicTrainSpell.left
+    anchors.right: MagicTrainSpell.right
+    anchors.top: MagicTrainSpell.bottom
+    margin-top: 2

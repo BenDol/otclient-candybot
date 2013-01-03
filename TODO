@@ -1,0 +1,11 @@
+- Skill Training
+  - Auto-stop attacking monster when it is low life
+  - Alert on player's low life
+- Statistics
+- Change the "getVisibleItem" so it gets info from inventory as well
+
+- Add moveToInventory, findTiles, findItems and findCreatures to native code (OTclient source itself)
+
+- Dash
+- PVP bot options
+- Change how event loops work
