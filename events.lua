@@ -1,145 +1,146 @@
+dofile('classes/event.lua')
+
 EventHandler = {}
 
-EventType = {
-  offState = 1,
-  onState = 2
+OptionState = {
+  off = 1,
+  on = 2
 }
 
-local botModules = {}
-
 function EventHandler.init()
-  botModules = {}
+  --
 end
 
 function EventHandler.terminate()
-  --botModules = {}
+  --
 end
 
-function EventHandler.isModuleRegistered(module)
-  if table.empty(botModules) or table.empty(botModules[module]) then
+function EventHandler.isEventRegistered(moduleId, eventId)
+  local module = Modules.getModule(moduleId)
+  if not module then
     return false
   end
-  local pass = false
+  local events = module:getEvents()
 
-  if type(module) == 'string' then
-    pass = botModules[module].module ~= nil
-  elseif type(module) == 'table' then
-    pass = table.contains(botModules, module)
-    for botModule in pairs(botModules) do
-      if botModule.module == module then pass = true break end
-    end
-  end
-  return pass
-end
-
-function EventHandler.registerModule(module)
-  if EventHandler.isModuleRegistered(module) then
-    error("This module is already registered")
-    return false
-  end
-  local moduleId = module.getModuleId()
-
-  botModules[moduleId] = {}
-  botModules[moduleId].module = module
-  botModules[moduleId].events = {}
-
-  -- register the modules events
-  --module.registration()
-  return true
-end
-
-function EventHandler.isEventRegistered(module, event)
-  if not EventHandler.isModuleRegistered(module) then
-    error("You have not registered any module with id: "..module)
-    return false
-  end
-  if table.empty(botModules[module].events) then
-    return false
-  end
-
-  for k, moduleEvent in pairs(botModules[module].events) do
-    if k == event and moduleEvent ~= nil then return true end
+  for k, event in pairs(events) do
+    if k == eventId and event ~= nil then return true end
   end
   return false
 end
 
-function EventHandler.registerEvent(module, event, callback, bypass)
-  if EventHandler.isEventRegistered(module, event) then
-    error("This event has already been registered for module '"..module.."'")
+function EventHandler.registerEvent(moduleId, eventId, callback, state, bypass)
+  if EventHandler.isEventRegistered(moduleId, eventId) then
+    error("This event has already been registered for module '"..moduleId.."'")
     return false
   end
   local bypass = bypass or false
+  local module = Modules.getModule(moduleId)
 
-  botModules[module].events[event] = {}
-  botModules[module].events[event].callback = callback
-  botModules[module].events[event].event = addEvent(function()
-    if UIBotCore.isEnabled() or bypass then callback(event) end
-  end)
+  local event = Event.new(eventId, addEvent(function()
+    if UIBotCore.isEnabled() or bypass then callback(eventId) end
+  end), callback, state)
+
+  module:addEvent(eventId, event)
   return true
 end
 
-function EventHandler.unregisterEvent(module, eventId)
-  if EventHandler.isEventRegistered(module, eventId) then
-    removeEvent(botModules[module].events[eventId].event)
-    botModules[module].events[eventId] = nil
+function EventHandler.unregisterEvent(moduleId, eventId, stop)
+  if EventHandler.isEventRegistered(moduleId, eventId) then
+    local module = Modules.getModule(moduleId)
+    module:removeEvent(eventId, stop or true)
   end
 end
 
-function EventHandler.unregisterEvents(module)
-  if EventHandler.isModuleRegistered(module) then
-    for k, moduleEvent in pairs(botModules[module].events) do
-      EventHandler.unregisterEvent(module, k)
+function EventHandler.unregisterEvents(moduleId)
+  if Modules.isModuleRegistered(moduleId) then
+    local module = Modules.getModule(moduleId)
+    for k, event in pairs(module:getEvents()) do
+      if event then EventHandler.unregisterEvent(moduleId, k) end
     end
   end
 end
 
-function EventHandler.rescheduleEvent(module, event, ticks, bypass)
-  if EventHandler.isModuleRegistered(module) then
+function EventHandler.rescheduleEvent(moduleId, eventId, ticks, bypass)
+  if Modules.isModuleRegistered(moduleId) then
     local bypass = bypass or false
-    for k, moduleEvent in pairs(botModules[module].events) do
-      if k == event then
-        local callback = moduleEvent.callback
-        removeEvent(moduleEvent.event)
+    local module = Modules.getModule(moduleId)
 
-        botModules[module].events[k].event = scheduleEvent(function() 
-          if UIBotCore.isEnabled() or bypass then callback(k) end 
-        end, ticks)
+    for k, event in pairs(module:getEvents()) do
+      if event then
+        if k == eventId then
+          module:removeEvent(k)
+
+          local callback = event.callback
+          event:setEvent(scheduleEvent(function() 
+            if UIBotCore.isEnabled() or bypass then callback(k) end
+          end, ticks))
+
+          module:addEvent(k, event)
+        end
       end
     end
   end
 end
 
-function EventHandler.notifyChange(key, status)
-  -- loop all registered modules to notify them of an option change
-  for k, botModule in pairs(botModules) do
-    botModule.module.notify(key, status)
+function EventHandler.stopEvent(moduleId, eventId)
+  if EventHandler.isEventRegistered(moduleId, eventId) then
+    local module = Modules.getModule(moduleId)
+    module:stopEvent(eventId)
   end
 end
 
-function EventHandler.response(module, events, key, state)
-  if state == 'string' then
+function EventHandler.stopEvents(moduleId)
+  if Modules.isModuleRegistered(moduleId) then
+    local module = Modules.getModule(moduleId)
+    for id, event in pairs(module:getEvents()) do
+      if event then module:stopEvents() end
+    end
+  end
+end
+
+function EventHandler.signal(ignore)
+  local ignores = Modules.getEventSignalIgnores()
+  if not table.empty(ignore) then
+    table.merge(ignores, ignore)
+  end
+
+  for k, module in pairs(Modules.getModules()) do
+    if module then
+      for i, event in pairs(module:getEvents()) do
+        if not ignores[k][i] then
+          module:notify(module:getEventInfo(i).option, event:getState())
+        end
+      end
+    end
+  end
+end
+
+function EventHandler.response(moduleId, events, key, state)
+  if type(state) == 'string' then
     state = (state ~= "")
   end
 
   for event, data in pairs(events) do
     if key == data.option then
-      local eventType = data.type or EventType.onState
-      local bypass = data.bypass or false
+      local optionState = data.state or OptionState.on
+      local bypass = (data.bypass or optionState == OptionState.off) or false
 
-      EventHandler.unregisterEvent(module, event)
-      if eventType == EventType.onState then
+      EventHandler.stopEvent(moduleId, event) -- stop event
+
+      EventHandler.unregisterEvent(moduleId, event, false)
+      if optionState == OptionState.on then
         if state then
-          EventHandler.registerEvent(module, event, data.callback, bypass)
+          EventHandler.registerEvent(moduleId, event, data.callback, state, bypass)
         end
-      elseif eventType == EventType.offState then
+      elseif optionState == OptionState.off then
         if not state then
-          EventHandler.registerEvent(module, event, data.callback, bypass)
+          EventHandler.registerEvent(moduleId, event, data.callback, state, bypass)
         end
       end
 
       --[[ 
         We are accounting for multiple event registries
-        that are checking for different EventTypes
+        that are checking for different OptionStates
       ]]
     end
   end

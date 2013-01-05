@@ -7,35 +7,106 @@ BotOptionCheckBox < CheckBox
 BotOptionTextList < TextList
   @onCheckChange: UIBotCore.changeOption(self:getId(), self:isChecked())
 
+BotOptionHorizontalScrollBar < HorizontalScrollBar
+  @onValueChange: UIBotCore.changeOption(self:getId(), self:getValue())
+
+BotOptionVerticalScrollBar < VerticalScrollBar
+  @onValueChange: UIBotCore.changeOption(self:getId(), self:getValue())
+
+LogLabel < UILabel
+  font: verdana-11px-antialised
+  height: 14
+  color: white
+  margin-left: 2
+  text-wrap: true
+  text-auto-resize: true
+
+BotTabBar < TabBar
+BotTabBarPanel < TabBarPanel
+BotTabBarButton < TabBarButton
+  height: 25
+  padding: 18
+
 MainWindow
   id: botWindow
   !text: tr('Bot Helper')
-  size: 300 500
+  size: 320 580
   
   @onEnter: UIBotCore.hide()
   @onEscape: UIBotCore.hide()
 
   &save: true
 
-  TabBar
+  BotTabBar
     id: botTabBar
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
     margin-top: 25
+    margin-left: -6
 
   Panel
     id: botTabContent
     anchors.top: botTabBar.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.bottom: next.top
-    margin-bottom: 10
-    margin-top: 8
+    height: 365
+    image-source: /images/contentpanel.png
+    image-color: #ffffff99
+    padding-left: 13
+    padding-right: 13
+    padding-top: 6
+    padding-bottom: 6
+    margin-top: 5
+    margin-bottom: 7
+    margin-left: -6
+    margin-right: -6
+
+  Panel
+    anchors.left: prev.left
+    anchors.right: prev.right
+    anchors.top: prev.bottom
+    anchors.bottom: hideButton.top
+    margin-top: 5
+    margin-bottom: 5
+
+    Window
+      id: logWindow
+      clipping: true
+      anchors.fill: parent
+      text: Log
+      //dragable: false
+      padding-top: 23
+      padding-left: 5
+      padding-right: 5
+      padding-bottom: 5
+
+      ScrollablePanel
+        id: logBuffer
+        vertical-scrollbar: logScrollBar
+        layout:
+          type: verticalBox
+          align-top: true
+        focusable: false
+        //inverted-scroll: true
+        anchors.fill: parent
+        background-color: #000000
+        opacity: 0.85
+
+      VerticalScrollBar
+        id: logScrollBar
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        step: 14
+        pixels-scroll: true
 
   Button
+    id: hideButton
     text: Hide
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom
+    margin-right: -6
+    margin-bottom: -5
     @onClick: UIBotCore.hide()

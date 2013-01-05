@@ -6,14 +6,21 @@ local Panel = {
 
 function BotModule.getPanel() return Panel end
 
-function BotModule.init()
+function BotModule.init(window)
   g_ui.importStyle('bot.otui')
-  Panel = g_ui.createWidget('BotPanel', UIBotCore.getUI())
+  Panel = g_ui.createWidget('BotPanel', window)
 
   Panel.BotEnabled = Panel:getChildById('BotEnabled')
 
-  -- register to events
-  EventHandler.registerModule(BotModule)
+  -- register module
+  Modules.registerModule(BotModule)
+end
+
+function BotModule.terminate()
+  BotModule.stop()
+
+  Panel:destroy()
+  Panel = nil
 end
 
 function BotModule.EnableEvent(event)
@@ -23,6 +30,8 @@ function BotModule.EnableEvent(event)
   botIcon:setTooltip("Enabled")
 
   UIBotCore.enable(true)
+  EventHandler.signal() -- signal events to start
+  ListenerHandler.signal() -- signal listeners to start
 end
 
 function BotModule.DisableEvent(event)

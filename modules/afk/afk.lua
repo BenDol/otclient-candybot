@@ -9,7 +9,7 @@ local uiCreatureList
 
 function AfkModule.getPanel() return Panel end
 
-function AfkModule.init()
+function AfkModule.init(window)
   Panel = g_ui.loadUI('afk.otui')
   g_sounds.preload('alert.ogg')
 
@@ -20,8 +20,11 @@ function AfkModule.init()
   Panel.ItemToReplace = Panel:getChildById('ItemToReplace')
   Panel.SelectReplaceItem = Panel:getChildById('SelectReplaceItem')
 
-  -- register to events
-  EventHandler.registerModule(AfkModule)
+  local botTabBar = window:getChildById('botTabBar')
+  botTabBar:addTab(tr('AFK'), Panel)
+
+  -- register module
+  Modules.registerModule(AfkModule)
 end
 
 function AfkModule.terminate()
@@ -30,6 +33,16 @@ function AfkModule.terminate()
 
   Panel:destroy()
   Panel = nil
+end
+
+function AfkModule.onModuleStop()
+  AfkModule.stopAlert()
+end
+
+function AfkModule.onStopEvent(event)
+  if event == AfkModule.creatureAlertEvent then
+    AfkModule.stopAlert()
+  end
 end
 
 function AfkModule.CreatureAlertEvent(event)
@@ -49,14 +62,16 @@ function AfkModule.CreatureAlertEvent(event)
 
   if CreatureList.getBlackOrWhite() then -- black
     for k, v in pairs (creatures) do
-      if v ~= player and CreatureList.isBlackListed(v:asCreature():getName()) then
+      if v ~= player and CreatureList.isBlackListed(v:getName()) then
         alert = true
+        break
       end
     end
   else -- white
     for k, v in pairs (creatures) do
       if v ~= player and not CreatureList.isWhiteListed(v:asCreature():getName()) then
         alert = true
+        break
       end
     end
   end
@@ -67,16 +82,51 @@ function AfkModule.CreatureAlertEvent(event)
     AfkModule.stopAlert()
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, 200)
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, 800)
 end
 
-function AfkModule.AutoEatEvent(event)
-  if g_game.isOnline() then
-    local food = foods[Panel:getChildById('AutoEatSelect'):getText()]
-    
+function AfkModule.onRegenerationChange(localPlayer, regenerationTime)
+  if not g_game.isOnline() then
+    return
+  end
+
+  local foodOption = Panel:getChildById('AutoEatSelect'):getText()
+  if foodOption == 'Any' then
+    for i, f in pairs(foods) do
+      local visibleItem = Helper.getVisibleItem(f)
+      if visibleItem[0] ~= nil then
+        food = f
+        break
+      end
+    end
+  else
+    local food = foods[foodOption]
+  end
+
+  if g_game.getFeature(GamePlayerRegenerationTime) then
+    if regenerationTime < 500 then
+      g_game.useInventoryItem(food)
+    end
+  else
     g_game.useInventoryItem(food)
   end
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, 15000)
+end
+
+function AfkModule.ConnectAutoEatListener(listener)
+  if g_game.getFeature(GamePlayerRegenerationTime) then
+    AfkModule.onRegenerationChange(nil, 0) -- start the regeneration process
+    connect(LocalPlayer, { onRegenerationChange = AfkModule.onRegenerationChange })
+  else
+    AfkModule.onRegenerationChange(nil, 0)
+
+    EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(20000, 60000))
+  end
+end
+
+function AfkModule.DisconnectAutoEatListener(listener)
+  if g_game.getFeature(GamePlayerRegenerationTime) then
+    disconnect(LocalPlayer, { onRegenerationChange = AfkModule.onRegenerationChange })
+  end
 end
 
 function AfkModule.AntiKickEvent(event)
@@ -90,13 +140,13 @@ function AfkModule.AntiKickEvent(event)
     g_game.turn(direction)
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, 5000)
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(4000, 6000))
 end
 
 function AfkModule.AutoFishingEvent(event)
   if g_game.isOnline() then
     local player = g_game.getLocalPlayer()
-    local tiles = AfkModule.getTileArray()
+    local tiles = Helper.getTileArray()
     local waterTiles = {}
     local j = 1
 
@@ -106,35 +156,40 @@ function AfkModule.AutoFishingEvent(event)
         j = j + 1
       end
     end
-    
-    if #waterTiles < 0 then
+
+    if #waterTiles > 0 then
       rdm = math.random(1, #waterTiles)
       g_game.useInventoryItemWith(fishing['fishing rod'], waterTiles[rdm]:getThing())
     end
   end
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, 2000)
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(500, 3000))
 end
 
 function AfkModule.RuneMakeEvent(event)
   if g_game.isOnline() then
 
     local player = g_game.getLocalPlayer()
+    -- @TODO: list all rune soul points required
+    if player:getSoul() > 5 then
     
-    if Panel:getChildById('RuneMakeOpenContainer'):isChecked() == false then
-      g_game.talk(spellText)
-      EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, 10000)
-    end
+      if Panel:getChildById('RuneMakeOpenContainer'):isChecked() == false then
+        g_game.talk(spellText)
+        EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(7000, 15000))
+      end
 
-    local visibleItem = AfkModule.getVisibleItem(3147) -- blank rune item
-    local blankRune = visibleItem[0]
-    local spellText = Panel:getChildById('RuneSpellText'):getText()
+      local visibleItem = Helper.getVisibleItem(runes.blank) -- blank rune item
+      local blankRune = visibleItem[0]
+      local spellText = Panel:getChildById('RuneSpellText'):getText()
 
-    if blankRune ~= nil then
-      g_game.talk(spellText)
+      if blankRune ~= nil then
+        g_game.talk(spellText)
+      end
+    else
+      BotLogger.warning("Not enough soul points to make this rune.")
     end
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, 2000)
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(3000, 7000))
 end
 
 function AfkModule.AutoReplaceWeaponEvent(event)
@@ -143,7 +198,7 @@ function AfkModule.AutoReplaceWeaponEvent(event)
     local player = g_game.getLocalPlayer()
     local selectedItem = Panel:getChildById('ItemToReplace'):getItem():getId()
 
-    local visibleItem = AfkModule.getVisibleItem(selectedItem) -- blank rune item
+    local visibleItem = Helper.getVisibleItem(selectedItem) -- blank rune item
     local item = visibleItem[0]
     local container = visibleItem[1]
     
@@ -168,7 +223,7 @@ function AfkModule.AutoReplaceWeaponEvent(event)
     end
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, 500)
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(400, 800))
 end
 
 function AfkModule.MagicTrainEvent(event)
@@ -180,7 +235,7 @@ function AfkModule.MagicTrainEvent(event)
     end
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, 2000)
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(3000, 5000))
 end
 
 function AfkModule.startChooseReplaceItem()
@@ -231,30 +286,6 @@ function AfkModule.onChooseReplaceItemMouseRelease(self, mousePosition, mouseBut
   self:destroy()
 end
 
-function AfkModule.getTileArray()
-  local tiles = {}
-
-  local player = g_game.getLocalPlayer()
-
-  if player == nil then
-    return nil
-  end
-
-  local firstTile = player:getPosition()
-  firstTile.x = firstTile.x - 7
-  firstTile.y = firstTile.y - 5
-
-  for i = 1, 165 do
-    local position = player:getPosition()
-    position.x = firstTile.x + (i % 15)
-    position.y = math.floor(firstTile.y + (i / 14))
-
-    tiles[i] = g_map.getTile(position)
-  end
-
-  return tiles
-end
-
 function AfkModule.alert()
   g_sounds.playMusic('alert.ogg', 0)
 end
@@ -268,27 +299,6 @@ function AfkModule.creatureListDialog()
     CreatureList:toggle()
     --CreatureList:focus()
   end
-end
-
-function AfkModule.getVisibleItem(itemid)
-
-  itemPtr = nil
-  local containerPtr = nil
-
-  for i, container in pairs(g_game.getContainers()) do
-    for _i, item in pairs(container:getItems()) do
-      if item:getId() == itemid then
-        itemPtr = item
-        containerPtr = container
-        break
-      end
-    end
-  end
-
-  t = {}
-  t[0] = itemPtr
-  t[1] = containerPtr
-  return t
 end
 
 return AfkModule

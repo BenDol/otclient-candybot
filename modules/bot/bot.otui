@@ -11,7 +11,6 @@ BotPanel < Panel
     anchors.left: parent.left
     anchors.top: parent.top
     !tooltip: tr('Disabled')
-    enabled: false
 
     $!disabled:
       icon-color: #ffffff
@@ -29,3 +28,4 @@ BotPanel < Panel
     anchors.left: prev.right
     anchors.top: parent.top
     margin-left: 8
+    margin-top: 1

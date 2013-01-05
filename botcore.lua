@@ -2,28 +2,28 @@ UIBotCore = extends(UIWidget)
 UIBotCore.options = {}
 
 dofile('consts.lua')
+dofile('helper.lua')
+dofile('logger.lua')
 UIBotCore.defaultOptions = options
 
 local botWindow
 local botButton
 local botTabBar
 
-local panelBot
-local panelCreatureList
-local panelProtection
-local panelAfk
-
 local enabled
 
 local function initModules()
-  dofile('bot/bot_handler.lua')
-  BotModule.init()
+  dofile('modules.lua')
+  Modules.init(botWindow)
 
-  dofile('protection/protection_handler.lua')
-  ProtectionModule.init()
+  dofile('modules/bot/bot_handler.lua')
+  BotModule.init(botWindow)
 
-  dofile('afk/afk_handler.lua')
-  AfkModule.init()
+  dofile('modules/protection/protection_handler.lua')
+  ProtectionModule.init(botWindow)
+
+  dofile('modules/afk/afk_handler.lua')
+  AfkModule.init(botWindow)
 end
 
 function UIBotCore.init()
@@ -36,24 +36,18 @@ function UIBotCore.init()
   -- bind keys
   g_keyboard.bindKeyDown('Ctrl+Shift+B', UIBotCore.toggle)
 
-  -- load event handler before modules
-  dofile('events.lua')
-  EventHandler.init()
+  botTabBar = botWindow:getChildById('botTabBar')
+  botTabBar:setContentWidget(botWindow:getChildById('botTabContent'))
+  botTabBar:setTabSpacing(-1)
+  
+  g_keyboard.bindKeyPress('Tab', function() botTabBar:selectNextTab() end, botWindow)
+  g_keyboard.bindKeyPress('Shift+Tab', function() botTabBar:selectPrevTab() end, botWindow)
 
   -- loads the modules and event handler
   initModules()
 
-  -- layout setup
-  panelBot = BotModule.getPanel()
-  panelProtection = ProtectionModule.getPanel()
-  panelAfk = AfkModule.getPanel()
-  panelCreatureList = CreatureList.getPanel()
-  
-  botTabBar = botWindow:getChildById('botTabBar')
-  botTabBar:setContentWidget(botWindow:getChildById('botTabContent'))
-
-  botTabBar:addTab(tr('Protection'), panelProtection)
-  botTabBar:addTab(tr('AFK'), panelAfk)
+  -- load bot logger
+  BotLogger.init()
 
   -- hook functions
   connect(g_game, { 
@@ -71,20 +65,21 @@ end
 
 function UIBotCore.terminate()
   UIBotCore.hide()
-  disconnect(g_game, { onGameStart = UIBotCore.online,
-  onGameEnd = UIBotCore.offline})
+  disconnect(g_game, {
+    onGameStart = UIBotCore.online,
+    onGameEnd = UIBotCore.offline
+  })
 
   if g_game.isOnline() then
     UIBotCore.offline()
   end
 
-  g_keyboard.unbindKeyDown('Ctrl+Shift+B')
+  Modules.terminate()
 
-  ProtectionModule.terminate()
-  AfkModule.terminate()
-
-  botButton:destroy()
-  botButton = nil
+  if botButton then
+    botButton:destroy()
+    botButton = nil
+  end
 
   g_settings.setNode('Bot', UIBotCore.options)
 
@@ -96,10 +91,11 @@ function UIBotCore.online()
 end
 
 function UIBotCore.offline()
-  ProtectionModule.stop()
-  AfkModule.stop()
+  Modules.stop()
 
   UIBotCore.hide()
+
+  g_keyboard.unbindKeyDown('Ctrl+Shift+B')
   -- do not remove autoReconnectEvent since it must be running even on offline state
 end
 
@@ -127,6 +123,7 @@ end
 
 function UIBotCore.enable(state)
   enabled = state
+  if not state then Modules.stop() end
 end
 
 function UIBotCore.isEnabled()
@@ -166,26 +163,19 @@ function UIBotCore.changeOption(key, state, loading)
   end
 
   if g_game.isOnline() then
-    EventHandler.notifyChange(key, state)
+    Modules.notifyChange(key, state)
 
-    local tab
+    local panel = botWindow
 
     if loading then
 
-      if panelBot:getChildById(key) ~= nil then
-        tab = panelBot
-      elseif panelProtection:getChildById(key) ~= nil then
-        tab = panelProtection
-      elseif panelAfk:getChildById(key) ~= nil then
-        tab = panelAfk
-      elseif panelCreatureList:getChildById(key) ~= nil then
-        tab = panelCreatureList
-      else
-        tab = botWindow
+      for k, p in pairs(Modules.getPanels()) do
+        if p:getChildById(key) ~= nil then
+          panel = p
+        end
       end
 
-      local widget = tab:recursiveGetChildById(key)
-
+      local widget = panel:getChildById(key)
       if not widget then
         return
       end
@@ -193,11 +183,13 @@ function UIBotCore.changeOption(key, state, loading)
       local style = widget:getStyle().__class
 
       if style == 'UITextEdit' or style == 'UIComboBox' then
-        tab:getChildById(key):setText(state)
+        panel:getChildById(key):setText(state)
       elseif style == 'UICheckBox' then
-        tab:getChildById(key):setChecked(state)
+        panel:getChildById(key):setChecked(state)
       elseif style == 'UIItem' then
-        tab:getChildById(key):setItemId(state)
+        panel:getChildById(key):setItemId(state)
+      elseif style == 'UIScrollBar' then
+        panel:getChildById(key):setValue(state)
       end
     end
 

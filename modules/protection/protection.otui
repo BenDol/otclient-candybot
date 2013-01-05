@@ -6,7 +6,7 @@ Panel
     !tooltip: tr('Heal your character automatically.')
     anchors.left: parent.left
     anchors.top: parent.top
-    width: 180
+    width: 80
 
   Label
     id: HealthSpellLabel
@@ -31,12 +31,16 @@ Panel
     anchors.top: HealthSpellLabel.top
     margin-left: 18
 
-  BotOptionLineEdit
-    id: HealthText
+  BotOptionHorizontalScrollBar
+    id: HealthBar
     width: 120
     anchors.right: parent.right
     anchors.top: HealthLabel.bottom
-    margin-top: 2
+    margin-top: 8
+    show-value: true
+    symbol: %
+    minimum: 1
+    maximum: 100
 
   HorizontalSeparator
     anchors.left: parent.left
@@ -76,12 +80,16 @@ Panel
     anchors.top: CurrentHealthItem.top
     anchors.right: HealthLabel.right
 
-  BotOptionLineEdit
-    id: ItemHealthText
+  BotOptionHorizontalScrollBar
+    id: ItemHealthBar
     width: 120
     anchors.right: ItemHealthLabel.right
     anchors.top: ItemHealthLabel.bottom
-    margin-top: 2
+    margin-top: 8
+    show-value: true
+    symbol: %
+    minimum: 1
+    maximum: 100
 
   BotOptionCheckBox
     id: AutoManaItem
@@ -115,12 +123,16 @@ Panel
     anchors.right: parent.right
     anchors.top: CurrentManaItem.top
     
-  BotOptionLineEdit
-    id: ItemManaText
+  BotOptionHorizontalScrollBar
+    id: ItemManaBar
     width: 120
     anchors.right: ItemHealthLabel.right
     anchors.top: ItemManaLabel.bottom
-    margin-top: 2
+    margin-top: 8
+    show-value: true
+    symbol: %
+    minimum: 1
+    maximum: 100
 
   HorizontalSeparator
     anchors.left: parent.left
@@ -163,12 +175,16 @@ Panel
     height: 30
     margin-top: -16
 
-  BotOptionLineEdit
-    id: HasteText
+  BotOptionHorizontalScrollBar
+    id: HasteHealthBar
     width: 120
     anchors.right: HasteLabel.right
     anchors.top: HasteLabel.bottom
-    margin-top: 2
+    margin-top: 8
+    show-value: true
+    symbol: %
+    minimum: 1
+    maximum: 100
     
   HorizontalSeparator
     anchors.left: parent.left

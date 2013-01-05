@@ -3,19 +3,19 @@ options = {
 
   ['AutoHeal'] = false,
   ['HealSpellText'] = 'exura',
-  ['HealthText'] = '75%',
+  ['HealthBar'] = '75%',
 
   ['AutoHealthItem'] = false,
-  ['ItemHealthText'] = '75%',
+  ['ItemHealthBar'] = '75%',
   ['CurrentHealthItem'] = 266,
   
   ['AutoManaItem'] = false,
-  ['ItemManaText'] = '75%',
+  ['ItemManaBar'] = '75%',
   ['CurrentManaItem'] = 268,
 
   ['AutoHaste'] = false,
   ['HasteSpellText'] = 'utani hur',
-  ['HasteText'] = '50%',
+  ['HasteHealthBar'] = '50%',
 
   ['AutoParalyzeHeal'] = false,
   ['ParalyzeHealText'] = 'utani hur',
@@ -106,12 +106,6 @@ spells = {
   ['Charge'] = 'utani tempo hur'
 }
 
-dashDelays = {
-  ['Slow'] = 300,
-  ['Normal'] = 120,
-  ['Fast'] = 0
-}
-
 spears = {
   ['Spear'] = 3277,
   ['Enchanted Spear'] = 7367,
@@ -124,6 +118,10 @@ spears = {
 fishing = {
   ['fishing rod'] = 3483,
   ['worm'] = 3492
+}
+
+runes = {
+  blank = 3147
 }
 
 water = { 4599 }
