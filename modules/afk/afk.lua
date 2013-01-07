@@ -76,7 +76,7 @@ function AfkModule.CreatureAlertEvent(event)
     end
   else -- white
     for k, v in pairs (creatures) do
-      if v ~= player and not CreatureList.isWhiteListed(v:asCreature():getName()) then
+      if v ~= player and not CreatureList.isWhiteListed(v:getName()) then
         alert = true
         break
       end
@@ -97,7 +97,12 @@ function AfkModule.onRegenerationChange(localPlayer, regenerationTime)
     return
   end
 
-  local foodOption = Panel:getChildById('AutoEatSelect'):getText()
+  --[[ 
+      @TODO:
+        * Fix compatibility with servers that dont support regeneration time
+        * Make it schedule a check to reinitialize the regeneration
+    ]]
+  local foodOption, food = Panel:getChildById('AutoEatSelect'):getText(), nil
   if foodOption == 'Any' then
     for i, f in pairs(foods) do
       local visibleItem = Helper.getVisibleItem(f)
@@ -107,7 +112,7 @@ function AfkModule.onRegenerationChange(localPlayer, regenerationTime)
       end
     end
   else
-    local food = foods[foodOption]
+    food = foods[foodOption]
   end
 
   if g_game.getFeature(GamePlayerRegenerationTime) then
@@ -125,8 +130,6 @@ function AfkModule.ConnectAutoEatListener(listener)
     connect(LocalPlayer, { onRegenerationChange = AfkModule.onRegenerationChange })
   else
     AfkModule.onRegenerationChange(nil, 0)
-
-    EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(20000, 60000))
   end
 end
 
@@ -138,15 +141,14 @@ end
 
 function AfkModule.AntiKickEvent(event)
   if g_game.isOnline() then
-    local direction = g_game.getLocalPlayer():getDirection()
-    direction = direction + 1
+    local oldDir = g_game.getLocalPlayer():getDirection()
+    direction = oldDir + 1
     if direction > 3 then
       direction = 0
     end
 
-    local oldDir = g_game.getLocalPlayer():getDirection()
-    g_game.turn(direction)
-    scheduleEvent(g_game.turn(oldDir), math.random(500, 2000))
+    addEvent(function() g_game.turn(direction) end)
+    scheduleEvent(function() g_game.turn(oldDir) end, math.random(700, 3000))
   end
 
   EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(180000, 300000))
@@ -160,7 +162,7 @@ function AfkModule.AutoFishingEvent(event)
     local j = 1
 
     for i = 1, 165 do
-      if not table.empty(tiles) and tiles[i]:getThing() then
+      if not table.empty(tiles) and tiles[i] and tiles[i]:getThing() then
         if table.contains(fishing['tiles'], tiles[i]:getThing():getId()) then
           table.insert(waterTiles, j, tiles[i])
           j = j + 1
@@ -195,7 +197,7 @@ function AfkModule.RuneMakeEvent(event)
     
     if not Panel:getChildById('RuneMakeOpenContainer'):isChecked() then
       g_game.talk(words)
-      EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(7000, 15000))
+      EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(6000, 15000))
     end
 
     local visibleItem = Helper.getVisibleItem(runes.blank) -- blank rune item

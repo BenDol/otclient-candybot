@@ -41,6 +41,8 @@ BotTabBarPanel < TabBarPanel
     anchors.top: parent.top
     anchors.bottom: parent.bottom
     anchors.right: parent.right
+    padding-top: -6
+    padding-bottom: -6
     step: 14
     pixels-scroll: true
 
@@ -80,7 +82,6 @@ MainWindow
     margin-top: 5
     margin-bottom: 7
     margin-left: -6
-    margin-right: -6
 
   Panel
     anchors.left: botContent.left

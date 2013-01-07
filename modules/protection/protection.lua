@@ -12,6 +12,9 @@ local Panel = {
   SelectManaItem
 }
 
+local nextHeal = {}
+local nextMana = nil
+
 function ProtectionModule.getPanel() return Panel end
 function ProtectionModule.setPanel(panel) Panel = panel end
 
@@ -43,33 +46,45 @@ function ProtectionModule.terminate()
   Panel = nil
 end
 
-function ProtectionModule.onHealthChange(localPlayer, health, maxHealth, restoreType, tries)
-  local tries = tries or 5
+-- Auto Healing
+
+function ProtectionModule.onHealthChange(localPlayer, health, maxHealth, oldHealth, restoreType, tries)
+  if tries == nil and (oldHealth - health < 0) then
+    return -- don't process healing from a heal
+  end
+  local ping = g_game.getPing()
+  if ping < 1 then
+    ping = 150
+  end
+
+  local tries = tries or 10
+
   if restoreType == RestoreType.cast then
     local spellText = Panel:getChildById('HealSpellText'):getText()
-    local healthValue = tonumber(Panel:getChildById('HealthBar'):getValue())
-    local percent = healthValue and true or false
+    local healthValue = Panel:getChildById('HealthBar'):getValue()
     
-    if healthValue ~= nil then
-      if percent then
-        if (health/maxHealth)*100 < tonumber(healthValue) then
-          g_game.talk(spellText)
-        end
-      else
-        if health < healthValue then
-          g_game.talk(spellText)
-        end
-      end
+    if (health/maxHealth)*100 < healthValue then
+      addEvent(function() g_game.talk(spellText) end)
 
-      -- check if another heal is required
-      health, maxHealth = localPlayer:getHealth(), localPlayer:getMaxHealth()
-      if (health/maxHealth)*100 < tonumber(healthValue) and tries > 0 then
-        tries = tries - 1
-        ProtectionModule.onHealthChange(localPlayer, health, maxHealth, restoreType, tries)
+      if BotModule.isPrecisionMode() then
+        local spell = Spells.getSpellByWords(spellText)
+        if spell then ping = spell.exhaustion + (ping / 3) end
+      else
+        ping = ping * 2
       end
-    else
-      Panel:getChildById('AutoHeal'):setChecked(false)
     end
+
+    nextHeal[RestoreType.cast] = scheduleEvent(function()
+      local localPlayer = g_game.getLocalPlayer()
+      if not localPlayer then return end
+      health, maxHealth = localPlayer:getHealth(), localPlayer:getMaxHealth()
+      if (health/maxHealth)*100 < healthValue and tries > 0 then
+        tries = tries - 1
+        ProtectionModule.onHealthChange(localPlayer, health, maxHealth, health, restoreType, tries) 
+      else
+        removeEvent(nextHeal[RestoreType.cast])
+      end
+    end, ping)
 
   elseif restoreType == RestoreType.item then
 
@@ -81,41 +96,37 @@ function ProtectionModule.onHealthChange(localPlayer, health, maxHealth, restore
     local potion = item:getId()
     local count = item:getCount()
 
-    local healthValue = tonumber(Panel:getChildById('ItemHealthBar'):getValue())
-    local percent = healthText and true or false
+    local healthValue = Panel:getChildById('ItemHealthBar'):getValue()
+    ping = ping + 200
 
-    if healthValue ~= nil then
-      if percent then
-        if (health/maxHealth)*100 < tonumber(healthValue) then
-          g_game.useInventoryItemWith(potion, localPlayer)
-        end
-      else
-        if health < healthValue then
-          g_game.useInventoryItemWith(potion, localPlayer)
-        end
-      end
-
-      -- check if another heal is required
-      health, maxHealth = localPlayer:getHealth(), localPlayer:getMaxHealth()
-      if (health/maxHealth)*100 < tonumber(healthValue) and tries > 0 then
-        tries = tries - 1
-        ProtectionModule.onHealthChange(localPlayer, health, maxHealth, restoreType, tries)
-      end
-    else
-      Panel:getChildById('AutoHealthItem'):setChecked(false)
+    if (health/maxHealth)*100 < healthValue then
+      addEvent(function() g_game.useInventoryItemWith(potion, localPlayer) end)
     end
+
+    -- check if another heal is required
+    nextHeal[RestoreType.item] = scheduleEvent(function()
+      local localPlayer = g_game.getLocalPlayer()
+      if not localPlayer then return end
+      health, maxHealth = localPlayer:getHealth(), localPlayer:getMaxHealth()
+      if (health/maxHealth)*100 < healthValue and tries > 0 then
+        tries = tries - 1
+        ProtectionModule.onHealthChange(localPlayer, health, maxHealth, health, restoreType, tries) 
+      else
+        removeEvent(nextHeal[RestoreType.item])
+      end
+    end, ping)
   end
 end
 
-function ProtectionModule.executeCastAutoHeal(localPlayer, health, maxHealth)
-  ProtectionModule.onHealthChange(localPlayer, health, maxHealth, RestoreType.cast)
+function ProtectionModule.executeCastAutoHeal(localPlayer, health, maxHealth, oldHealth)
+  ProtectionModule.onHealthChange(localPlayer, health, maxHealth, oldHealth, RestoreType.cast)
 end
 
 function ProtectionModule.ConnectAutoHealListener(listener)
   if g_game.isOnline() then
     local localPlayer = g_game.getLocalPlayer()
     addEvent(ProtectionModule.onHealthChange(localPlayer, localPlayer:getHealth(),
-      localPlayer:getMaxHealth(), RestoreType.cast))
+      localPlayer:getMaxHealth(), localPlayer:getHealth(), RestoreType.cast))
   end
 
   connect(LocalPlayer, { onHealthChange = ProtectionModule.executeCastAutoHeal })
@@ -125,15 +136,15 @@ function ProtectionModule.DisconnectAutoHealListener(listener)
   disconnect(LocalPlayer, { onHealthChange = ProtectionModule.executeCastAutoHeal })
 end
 
-function ProtectionModule.executeItemAutoHeal(localPlayer, health, maxHealth)
-  ProtectionModule.onHealthChange(localPlayer, health, maxHealth, RestoreType.item)
+function ProtectionModule.executeItemAutoHeal(localPlayer, health, maxHealth, oldHealth)
+  ProtectionModule.onHealthChange(localPlayer, health, maxHealth, oldHealth, RestoreType.item)
 end
 
 function ProtectionModule.ConnectItemAutoHealListener(listener)
   if g_game.isOnline() then
     local localPlayer = g_game.getLocalPlayer()
     addEvent(ProtectionModule.onHealthChange(localPlayer, localPlayer:getHealth(),
-      localPlayer:getMaxHealth(), RestoreType.item))
+      localPlayer:getMaxHealth(), localPlayer:getHealth(), RestoreType.item))
   end
 
   connect(LocalPlayer, { onHealthChange = ProtectionModule.executeItemAutoHeal })
@@ -143,7 +154,17 @@ function ProtectionModule.DisconnectItemAutoHealListener(listener)
   disconnect(LocalPlayer, { onHealthChange = ProtectionModule.executeItemAutoHeal })
 end
 
-function ProtectionModule.onManaChange(localPlayer, mana, maxMana, restoreType, tries)
+-- Auto Mana
+
+function ProtectionModule.onManaChange(localPlayer, mana, maxMana, oldMana, restoreType, tries)
+  if not tries and (oldMana - mana) < 0 then
+    return -- don't process manaing from a mana
+  end
+  local ping = g_game.getPing()
+  if ping < 1 then
+    ping = 150
+  end
+
   local tries = tries or 5
 
   if restoreType == RestoreType.item then
@@ -155,41 +176,37 @@ function ProtectionModule.onManaChange(localPlayer, mana, maxMana, restoreType, 
     local potion = item:getId()
     local count = item:getCount()
 
-    local manaValue = tonumber(Panel:getChildById('ItemManaBar'):getValue())
-    local percent = manaValue and true or false
+    local manaValue = Panel:getChildById('ItemManaBar'):getValue()
+    ping = ping + 200
 
-    if manaValue ~= nil then
-      if percent then
-        if (mana/maxMana)*100 < tonumber(manaValue) then
-          g_game.useInventoryItemWith(potion, localPlayer)
-        end
-      else
-        if mana < manaValue then
-          g_game.useInventoryItemWith(potion, localPlayer)
-        end
-      end
-
-      -- check if another mana is required
-      mana, maxMana = localPlayer:getMana(), localPlayer:getMaxMana()
-      if (mana/maxMana)*100 < tonumber(manaValue) and tries > 0 then
-        tries = tries - 1
-        ProtectionModule.onManaChange(localPlayer, mana, maxMana, restoreType, tries)
-      end
-    else
-      Panel:getChildById('AutoManaItem'):setChecked(false)
+    if (mana/maxMana)*100 < manaValue then
+      addEvent(function() g_game.useInventoryItemWith(potion, localPlayer) end)
     end
+
+    -- check if another mana is required
+    nextMana = scheduleEvent(function()
+      local localPlayer = g_game.getLocalPlayer()
+      if not localPlayer then return end
+      mana, maxMana = localPlayer:getMana(), localPlayer:getMaxMana()
+      if (mana/maxMana)*100 < manaValue and tries > 0 then
+        tries = tries - 1
+        ProtectionModule.onManaChange(localPlayer, mana, maxMana, mana, restoreType, tries) 
+      else
+        removeEvent(nextMana)
+      end
+    end, ping)
   end
 end
 
-function ProtectionModule.executeItemAutoMana(localPlayer, mana, maxMana)
-  ProtectionModule.onManaChange(localPlayer, mana, maxMana, RestoreType.item)
+function ProtectionModule.executeItemAutoMana(localPlayer, mana, maxMana, oldMana)
+  ProtectionModule.onManaChange(localPlayer, mana, maxMana, oldMana, RestoreType.item)
 end
 
 function ProtectionModule.ConnectItemAutoManaListener(listener)
   if g_game.isOnline() then
     local localPlayer = g_game.getLocalPlayer()
     addEvent(ProtectionModule.onManaChange(localPlayer, localPlayer:getMana(),
-      localPlayer:getMaxMana(), RestoreType.item))
+      localPlayer:getMaxMana(), localPlayer:getMana(), RestoreType.item))
   end
 
   connect(LocalPlayer, { onManaChange = ProtectionModule.executeItemAutoMana })
@@ -199,20 +216,108 @@ function ProtectionModule.DisconnectItemAutoManaListener(listener)
   disconnect(LocalPlayer, { onManaChange = ProtectionModule.executeItemAutoMana })
 end
 
-function ProtectionModule.startChooseHealthItem()
-  local mouseGrabberWidget = g_ui.createWidget('UIWidget')
-  mouseGrabberWidget:setVisible(false)
-  mouseGrabberWidget:setFocusable(false)
+-- Auto Haste
 
-  connect(mouseGrabberWidget, { onMouseRelease = ProtectionModule.onChooseHealthItemMouseRelease })
-  
-  mouseGrabberWidget:grabMouse()
-  g_mouse.setTargetCursor()
+function ProtectionModule.ConnectAutoHasteListener(listener)
+  if g_game.isOnline() then
+    local localPlayer = g_game.getLocalPlayer()
+    addEvent(ProtectionModule.checkAutoHaste(localPlayer, localPlayer:getStates()))
+  end
 
-  UIBotCore.hide()
+  connect(LocalPlayer, { onStatesChange = ProtectionModule.checkAutoHaste })
 end
 
-function ProtectionModule.onChooseHealthItemMouseRelease(self, mousePosition, mouseButton)
+function ProtectionModule.DisconnectAutoHasteListener(listener)
+  disconnect(LocalPlayer, { onStatesChange = ProtectionModule.checkAutoHaste })
+end
+
+function ProtectionModule.checkAutoHaste(localPlayer, states, oldStates)
+  if not Helper.hasState(PlayerStates.Haste, states) then
+    ProtectionModule.executeAutoHaste(localPlayer)
+  end
+end
+
+function ProtectionModule.executeAutoHaste(localPlayer)
+  if g_game.isOnline() then
+
+    local spellText = Panel:getChildById('HasteSpellText'):getText()
+    local hasteHealth = tonumber(Panel:getChildById('HasteHealthBar'):getValue())
+    local percent = hasteHealth and true or false
+    
+    if hasteHealth ~= nil then
+      if percent then
+        if (localPlayer:getHealth()/localPlayer:getMaxHealth())*100 < tonumber(hasteHealth) then
+          return
+        end
+      else
+        if localPlayer:getHealth() < hasteHealth then
+          return
+        end
+      end
+    end
+
+    scheduleEvent(function() g_game.talk(spellText) end, math.random(200, 300))
+  end
+end
+
+-- Auto Paralyze Healer
+
+function ProtectionModule.ConnectAutoParalyzeHealListener(listener)
+  if g_game.isOnline() then
+    local localPlayer = g_game.getLocalPlayer()
+    addEvent(ProtectionModule.checkAutoParalyzeHeal(localPlayer, localPlayer:getStates()))
+  end
+
+  connect(LocalPlayer, { onStatesChange = ProtectionModule.checkAutoParalyzeHeal })
+end
+
+function ProtectionModule.DisconnectAutoParalyzeHealListener(listener)
+  disconnect(LocalPlayer, { onStatesChange = ProtectionModule.checkAutoParalyzeHeal })
+end
+
+function ProtectionModule.checkAutoParalyzeHeal(localPlayer, states, oldStates)
+  if Helper.hasState(PlayerStates.Paralyze, states) then
+    ProtectionModule.executeAutoParalyzeHeal()
+  end
+end
+
+function ProtectionModule.executeAutoParalyzeHeal()
+  if g_game.isOnline() then
+    local text = Panel:getChildById('ParalyzeHealText'):getText()
+    scheduleEvent(function() g_game.talk(text) end, math.random(50, 150))
+  end
+end
+
+-- Auto Mana Shield
+
+function ProtectionModule.ConnectAutoManaShieldListener(listener)
+  if g_game.isOnline() then
+    local localPlayer = g_game.getLocalPlayer()
+    addEvent(ProtectionModule.checkAutoManaShield(localPlayer, localPlayer:getStates()))
+  end
+
+  connect(LocalPlayer, { onStatesChange = ProtectionModule.checkAutoManaShield })
+end
+
+function ProtectionModule.DisconnectAutoManaShieldListener(listener)
+  disconnect(LocalPlayer, { onStatesChange = ProtectionModule.checkAutoManaShield })
+end
+
+function ProtectionModule.checkAutoManaShield(localPlayer, states, oldStates)
+  if not Helper.hasState(PlayerStates.ManaShield, states) then
+    ProtectionModule.executeAutoManaShield()
+  end
+end
+
+function ProtectionModule.executeAutoManaShield()
+  if g_game.isOnline() then
+    scheduleEvent(function() g_game.talk('utamo vita') end, math.random(200, 300))
+  end
+end
+
+-- Item Selection Callbacks
+
+function ProtectionModule.onChooseHealthItem(self, mousePosition, mouseButton)
   local item = nil
   
   if mouseButton == MouseLeftButton then
@@ -246,20 +351,7 @@ function ProtectionModule.onChooseHealthItemMouseRelease(self, mousePosition, mo
   self:destroy()
 end
 
-function ProtectionModule.startChooseManaItem()
-  local mouseGrabberWidget = g_ui.createWidget('UIWidget')
-  mouseGrabberWidget:setVisible(false)
-  mouseGrabberWidget:setFocusable(false)
-
-  connect(mouseGrabberWidget, { onMouseRelease = ProtectionModule.onChooseManaItemMouseRelease })
-  
-  mouseGrabberWidget:grabMouse()
-  g_mouse.setTargetCursor()
-
-  UIBotCore.hide()
-end
-
-function ProtectionModule.onChooseManaItemMouseRelease(self, mousePosition, mouseButton)
+function ProtectionModule.onChooseManaItem(self, mousePosition, mouseButton)
   local item = nil
   
   if mouseButton == MouseLeftButton then
@@ -292,57 +384,6 @@ function ProtectionModule.onChooseManaItemMouseRelease(self, mousePosition, mous
   g_mouse.restoreCursor()
   self:ungrabMouse()
   self:destroy()
-end
-
-function ProtectionModule.AutoHasteEvent(event)
-  if g_game.isOnline() then
-
-    local spellText = Panel:getChildById('HasteSpellText'):getText()
-    local hasteHealth = tonumber(Panel:getChildById('HasteHealthBar'):getValue())
-    local percent = hasteHealth and true or false
-    
-    local localPlayer = g_game.getLocalPlayer()
-    if hasteHealth ~= nil then
-      if percent then
-        if (localPlayer:getHealth()/localPlayer:getMaxHealth())*100 < tonumber(hasteHealth) then
-          EventHandler.rescheduleEvent(ProtectionModule.getModuleId(), event, 100)
-          return
-        end
-      else
-        if localPlayer:getHealth() < hasteHealth then
-          EventHandler.rescheduleEvent(ProtectionModule.getModuleId(), event, 100)
-          return
-        end
-      end
-    end
-
-    if not Helper.hasState(PlayerStates.Haste) then
-      g_game.talk(spellText)
-    end
-  end
-
-  EventHandler.rescheduleEvent(ProtectionModule.getModuleId(), event, math.random(300, 500))
-end
-
-function ProtectionModule.AutoParalyzeHealEvent(event)
-  if g_game.isOnline() then
-
-    local spellText = Panel:getChildById('ParalyzeHealText'):getText()
-    
-    if Helper.hasState(PlayerStates.Paralyze) then
-      g_game.talk(spellText)
-    end
-  end
-  
-  EventHandler.rescheduleEvent(ProtectionModule.getModuleId(), event, math.random(300, 500))
-end
-
-function ProtectionModule.AutoManaShieldEvent(event)
-  if g_game.isOnline() and not Helper.hasState(PlayerStates.ManaShield) then
-    g_game.talk('utamo vita')
-  end
-
-  EventHandler.rescheduleEvent(ProtectionModule.getModuleId(), event, math.random(300, 500))
 end
 
 return ProtectionModule

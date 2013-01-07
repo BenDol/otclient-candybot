@@ -57,10 +57,11 @@ function Helper.getTileArray()
   return tiles
 end
 
-function Helper.hasState(_state)
-
-  local localPlayer = g_game.getLocalPlayer()
-  local states = localPlayer:getStates()
+function Helper.hasState(_state, states)
+  if not states and g_game.isOnline() then
+    local localPlayer = g_game.getLocalPlayer()
+    states = localPlayer:getStates()
+  end
 
   for i = 1, 32 do
     local pow = math.pow(2, i-1)
@@ -71,6 +72,21 @@ function Helper.hasState(_state)
       return true
     end
   end
-
   return false
+end
+
+function Helper.startChooseItem(releaseCallback)
+  if not releaseCallback then
+    error("No mouse release callback parameter set.")
+  end
+  local mouseGrabberWidget = g_ui.createWidget('UIWidget')
+  mouseGrabberWidget:setVisible(false)
+  mouseGrabberWidget:setFocusable(false)
+
+  connect(mouseGrabberWidget, { onMouseRelease = releaseCallback })
+  
+  mouseGrabberWidget:grabMouse()
+  g_mouse.setTargetCursor()
+
+  UIBotCore.hide()
 end
