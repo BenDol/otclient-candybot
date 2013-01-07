@@ -1,4 +1,10 @@
 Panel
+  id: afkPanel
+  anchors.left: parent.left
+  anchors.right: parent.right
+  anchors.top: parent.top
+  padding-right: 8
+  height: 400
 
   BotOptionCheckBox
     id: CreatureAlert
@@ -26,19 +32,19 @@ Panel
   BotOptionCheckBox
     id: AutoEat
     !text: tr('Eat Food')
-    !tooltip: tr('Eat food automatically.')
+    !tooltip: tr('Eat food automatically from open bags or inventory.')
     anchors.left: CreatureAlert.left
     anchors.top: prev.bottom
     width: 180
     margin-top: 10
 
-  ComboBox
+  BotOptionComboBox
     id: AutoEatSelect
     anchors.right: parent.right
     anchors.top: AutoEat.top
     width: 140
+    mouse-scroll: false
     &option: g_settings.get('AutoEatSelect')
-    @onOptionChange: UIBotCore.changeOption(self:getId(), self:getText())
     options:
       - Any
       - Meat
@@ -56,20 +62,20 @@ Panel
     margin-top: 8
 
   BotOptionCheckBox
-    id: AntiKick
-    !text: tr('Anti-kick')
-    !tooltip: tr('Character "dances" to avoid being kicked for being idle for too long.')
-    anchors.left: CreatureAlert.left
-    anchors.top: prev.bottom
-    width: 180
+    id: AutoFishing
+    width: 95
+    !text: tr('Auto Fishing')
+    !tooltip: tr('Player will be fishing as long as there are worms.')
+    anchors.left: prev.left
+    anchors.top: prev.top
     margin-top: 10
 
   BotOptionCheckBox
-    id: AutoFishing
-    width: 120
-    !text: tr('Auto Fishing')
-    !tooltip: tr('Player will be fishing as long as there are worms.')
-    anchors.right: parent.right
+    id: AutoFishingCheckCap
+    width: 80
+    !text: tr('Check Cap')
+    !tooltip: tr('Check that you have enough capacity to hold fish.')
+    anchors.left: AutoEatSelect.left
     anchors.top: prev.top
 
   HorizontalSeparator
@@ -122,35 +128,25 @@ Panel
     !tooltip: tr('Automatically "refill" used throwing weapons (container of replacing items must be open).')
     anchors.left: parent.left
     anchors.top: prev.top
-    width: 180
+    width: 160
     margin-top: 10
 
-  ComboBox
+  BotOptionComboBox
     id: AutoReplaceWeaponSelect
     anchors.right: parent.right
-    anchors.top: AutoReplaceWeapon.top
+    anchors.top: prev.top
     width: 100
-    &option: g_settings.get('AutoEatSelect')
-    @onOptionChange: UIBotCore.changeOption(self:getId(), self:getText())
+    mouse-scroll: false
+    &option: g_settings.get('AutoReplaceWeaponSelect')
     options:
       - Left Hand
       - Right Hand
 
-  Label
-    id: ItemToReplaceLabel
-    width: 120
-    !text: tr('Item to replace with')
-    anchors.left: parent.left
-    anchors.top: prev.bottom
-    margin-top: 20
-    margin-left: 18 
-
   Item
     id: ItemToReplace
-    anchors.left: prev.right
-    anchors.top: prev.top
-    margin-top: -10
-    margin-left: 10
+    anchors.left: AutoReplaceWeapon.left
+    anchors.top: AutoReplaceWeapon.bottom
+    margin-top: 5
     virtual: true
 
   Button
@@ -158,7 +154,7 @@ Panel
     !text: tr('Select\nitem')
     width: 70
     height: 34
-    anchors.right: parent.right
+    anchors.left: prev.right
     anchors.top: prev.top
     margin-left: 10
     @onClick: AfkModule.startChooseReplaceItem()
@@ -172,7 +168,7 @@ Panel
   BotOptionCheckBox
     id: MagicTrain
     !text: tr('Magic Training')
-    !tooltip: tr('Trains magic level (use a spell whenever mana is full).')
+    !tooltip: tr('Trains magic level (use a spell whenever possible).')
     anchors.left: parent.left
     anchors.top: prev.top
     width: 180
@@ -181,13 +177,28 @@ Panel
   Label
     id: MagicTrainSpell
     width: 110
-    !text: tr('Spell to use')
+    !text: tr('Spell to use:')
     anchors.right: parent.right
-    anchors.top: prev.top
+    anchors.top: MagicTrain.top
 
   BotOptionLineEdit
     id: MagicTrainSpellText
     anchors.left: MagicTrainSpell.left
     anchors.right: MagicTrainSpell.right
     anchors.top: MagicTrainSpell.bottom
-    margin-top: 2
+    margin-top: 4
+
+  HorizontalSeparator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 8
+
+  BotOptionCheckBox
+    id: AntiKick
+    !text: tr('Anti-kick')
+    !tooltip: tr('Character "dances" to avoid being kicked for being idle for too long.')
+    anchors.left: prev.left
+    anchors.top: prev.bottom
+    width: 180
+    margin-top: 10

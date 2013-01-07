@@ -8,20 +8,27 @@ local Panel = {
 local uiCreatureList
 
 function AfkModule.getPanel() return Panel end
+function AfkModule.setPanel(panel) Panel = panel end
 
 function AfkModule.init(window)
-  Panel = g_ui.loadUI('afk.otui')
   g_sounds.preload('alert.ogg')
 
-  dofile('creatureList.lua')
+  dofile('creaturelist.lua')
   CreatureList.init()
   uiCreatureList = CreatureList.getPanel()
+
+  -- create tab
+  local botTabBar = window:getChildById('botTabBar')
+  local tab = botTabBar:addTab(tr('AFK'))
+
+  local tabPanel = botTabBar:getTabPanel(tab)
+  local tabBuffer = tabPanel:getChildById('tabBuffer')
+  Panel = g_ui.loadUI('afk.otui', tabBuffer)
 
   Panel.ItemToReplace = Panel:getChildById('ItemToReplace')
   Panel.SelectReplaceItem = Panel:getChildById('SelectReplaceItem')
 
-  local botTabBar = window:getChildById('botTabBar')
-  botTabBar:addTab(tr('AFK'), Panel)
+  AfkModule.parentUI = window
 
   -- register module
   Modules.registerModule(AfkModule)
@@ -137,10 +144,12 @@ function AfkModule.AntiKickEvent(event)
       direction = 0
     end
 
+    local oldDir = g_game.getLocalPlayer():getDirection()
     g_game.turn(direction)
+    scheduleEvent(g_game.turn(oldDir), math.random(500, 2000))
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(4000, 6000))
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(180000, 300000))
 end
 
 function AfkModule.AutoFishingEvent(event)
@@ -151,15 +160,19 @@ function AfkModule.AutoFishingEvent(event)
     local j = 1
 
     for i = 1, 165 do
-      if tiles[i]:getThing():getId() == 4599 then
-        table.insert(waterTiles, j, tiles[i])
-        j = j + 1
+      if not table.empty(tiles) and tiles[i]:getThing() then
+        if table.contains(fishing['tiles'], tiles[i]:getThing():getId()) then
+          table.insert(waterTiles, j, tiles[i])
+          j = j + 1
+        end
       end
     end
 
     if #waterTiles > 0 then
       rdm = math.random(1, #waterTiles)
       g_game.useInventoryItemWith(fishing['fishing rod'], waterTiles[rdm]:getThing())
+    else
+      BotLogger.warning("No water tiles found for fishing.")
     end
   end
   EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(500, 3000))
@@ -167,25 +180,29 @@ end
 
 function AfkModule.RuneMakeEvent(event)
   if g_game.isOnline() then
+    local words = Panel:getChildById('RuneSpellText'):getText()
 
-    local player = g_game.getLocalPlayer()
-    -- @TODO: list all rune soul points required
-    if player:getSoul() > 5 then
+    if BotModule.isPrecisionMode() then
+      local spell, player = Spells.getSpellByWords(words), g_game.getLocalPlayer()
+
+      if spell and player:getSoul() < spell.soul then
+        BotLogger.warning("Not enough soul points("..spell.soul..") to make this rune.")
+
+        EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(3000, 7000))
+        return false
+      end
+    end
     
-      if Panel:getChildById('RuneMakeOpenContainer'):isChecked() == false then
-        g_game.talk(spellText)
-        EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(7000, 15000))
-      end
+    if not Panel:getChildById('RuneMakeOpenContainer'):isChecked() then
+      g_game.talk(words)
+      EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(7000, 15000))
+    end
 
-      local visibleItem = Helper.getVisibleItem(runes.blank) -- blank rune item
-      local blankRune = visibleItem[0]
-      local spellText = Panel:getChildById('RuneSpellText'):getText()
+    local visibleItem = Helper.getVisibleItem(runes.blank) -- blank rune item
+    local blankRune = visibleItem[0]
 
-      if blankRune ~= nil then
-        g_game.talk(spellText)
-      end
-    else
-      BotLogger.warning("Not enough soul points to make this rune.")
+    if blankRune ~= nil then
+      g_game.talk(words)
     end
   end
 
@@ -228,14 +245,23 @@ end
 
 function AfkModule.MagicTrainEvent(event)
   if g_game.isOnline() then
-    local spellText = Panel:getChildById('MagicTrainSpellText'):getText()
-    
-    if g_game.getLocalPlayer():getMana() == g_game.getLocalPlayer():getMaxMana() then
-      g_game.talk(spellText)
+    local words = Panel:getChildById('MagicTrainSpellText'):getText()
+
+    local spell = nil
+    if BotModule.isPrecisionMode() then
+      spell = Spells.getSpellByWords(words)
+    end
+
+    if spell then
+      if g_game.getLocalPlayer():getMana() >= spell.mana then
+        g_game.talk(spell.words)
+      end
+    else
+      g_game.talk(words)
     end
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(3000, 5000))
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(1500, 3000))
 end
 
 function AfkModule.startChooseReplaceItem()
@@ -302,5 +328,3 @@ function AfkModule.creatureListDialog()
 end
 
 return AfkModule
-
---g_game.talk(spellText)

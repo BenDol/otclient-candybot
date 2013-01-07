@@ -5,6 +5,10 @@ function BotModule.getModuleId()
   return "BotModule"
 end
 
+BotModule.dependencies = {
+  --
+}
+
 --[[ Events ]]
 
 table.merge(BotModule, {
@@ -22,6 +26,8 @@ BotModule.events = {
 BotModule.listeners = {
   --
 }
+
+-- [[ Functions ]]
 
 function BotModule.stop()
   EventHandler.stopEvents(BotModule.getModuleId())

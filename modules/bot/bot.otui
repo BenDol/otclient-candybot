@@ -2,6 +2,7 @@ BotPanel < Panel
   id: botPanel
   size: 196 122
   anchors.left: parent.left
+  anchors.right: parent.right
   anchors.top: parent.top
 
   UIWidget
@@ -29,3 +30,13 @@ BotPanel < Panel
     anchors.top: parent.top
     margin-left: 8
     margin-top: 1
+
+  BotOptionCheckBox
+    id: BotPrecisionMode
+    width: 100
+    !text: tr('Precision Mode')
+    !tooltip: tr('Enable precision mode for more\nprecise information checking.\nExample: Spell checks\n\nNote: Not recommended for servers\nthat have alot of custom features')
+    anchors.right: parent.right
+    anchors.top: parent.top
+    margin-top: 1
+

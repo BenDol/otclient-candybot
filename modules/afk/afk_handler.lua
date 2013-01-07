@@ -5,6 +5,10 @@ function AfkModule.getModuleId()
   return "AfkModule"
 end
 
+AfkModule.dependencies = {
+  "BotModule"
+}
+
 --[[ Events ]]
 
 table.merge(AfkModule, {
@@ -34,6 +38,8 @@ table.merge(AfkModule, {
 AfkModule.listeners = {
   [AfkModule.autoEatListener] = {option = "AutoEat", connect = AfkModule.ConnectAutoEatListener, disconnect = AfkModule.DisconnectAutoEatListener},
 }
+
+-- [[ Functions ]]
 
 function AfkModule.stop()
   EventHandler.stopEvents(AfkModule.getModuleId())

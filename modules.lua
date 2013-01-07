@@ -72,18 +72,48 @@ function Modules.isModuleRegistered(moduleId)
   return modules[moduleId] ~= nil
 end
 
-function Modules.registerModule(handler, events)
-  events, moduleId = events or {}, handler.getModuleId()
+function Modules.registerModule(handler) 
+  local moduleId = handler.getModuleId()
   if Modules.isModuleRegistered(moduleId) then
     error("This module("..moduleId..") is already registered")
     return false
   end
-  local module = Module.new(moduleId, handler, events)
+  local module = Module.new(moduleId, handler)
 
   modules[moduleId] = module
   -- register the modules events
   --module:registration()
   return true
+end
+
+function Modules.checkDependencies()
+  local list = {}
+  for k, module in pairs(modules) do
+    if module then
+      list[k] = Modules.getMissingDependancies(k)
+      if not table.empty(list) then
+        for i, dependency in pairs(list[k]) do
+          g_logger.error("[BotCore] "..k.." missing dependency module: "..dependency)
+        end
+      end
+    end
+  end
+  return list
+end
+
+function Modules.getMissingDependancies(moduleId)
+  local module = Modules.getModule(moduleId)
+  if module then
+    local dependencies = module:getDependancies()
+
+    local list = {}
+    for k,id in pairs(dependencies) do
+      if not Modules.isModuleRegistered(id) then
+        table.insert(list, id)
+      end
+    end
+    return list
+  end
 end
 
 function Modules.unregisterModule(moduleId)

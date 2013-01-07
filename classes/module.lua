@@ -4,7 +4,7 @@ Module.__index = Module
 Module.__class = "Module"
 
 Module.new = function(id, handler, events, listeners)
-  handler, events, listeners = handler or {}, events or {}, listeners or {}
+  local handler, events, listeners = handler or {}, events or {}, listeners or {}
   mod = {
     id = "",
     handler = {},
@@ -62,6 +62,10 @@ function Module:getListenerInfo(listenerId)
   end
 end
 
+function Module:setParentUI(parent)
+  self.handler.parentUI = parent
+end
+
 function Module:getEvent(id)
   return self.events[id]
 end
@@ -80,6 +84,10 @@ function Module:getEventInfo(eventId)
   else
     return self.handler.events
   end
+end
+
+function Module:getParentUI()
+  return self.handler.parentUI
 end
 
 function Module:getPanel()
@@ -128,6 +136,10 @@ function Module:registration()
   if self.handler.onRegistration then
     self.handler.onRegistration()
   end
+end
+
+function Module:getDependancies()
+  return self.handler.dependencies
 end
 
 function Module:addEvent(id, event)

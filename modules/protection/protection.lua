@@ -13,18 +13,24 @@ local Panel = {
 }
 
 function ProtectionModule.getPanel() return Panel end
+function ProtectionModule.setPanel(panel) Panel = panel end
 
 function ProtectionModule.init(window)
-  Panel = g_ui.loadUI('protection.otui')
+  -- create tab
+  local botTabBar = window:getChildById('botTabBar')
+  local tab = botTabBar:addTab(tr('Protection'))
+
+  local tabPanel = botTabBar:getTabPanel(tab)
+  local tabBuffer = tabPanel:getChildById('tabBuffer')
+  Panel = g_ui.loadUI('protection.otui', tabBuffer)
 
   Panel.CurrentHealthItem = Panel:getChildById('CurrentHealthItem')
   Panel.SelectHealthItem = Panel:getChildById('SelectHealthItem')
 
   Panel.CurrentManaItem = Panel:getChildById('CurrentManaItem')
-  Panel.SelectManaItem = Panel:getChildById('SelectManaItem')
+  Panel.SelectManaItem = Panel:getChildById('SelectManaItem')  
 
-  local botTabBar = window:getChildById('botTabBar')
-  botTabBar:addTab(tr('Protection'), Panel)
+  ProtectionModule.parentUI = window
 
   -- register module
   Modules.registerModule(ProtectionModule)
@@ -340,5 +346,3 @@ function ProtectionModule.AutoManaShieldEvent(event)
 end
 
 return ProtectionModule
-
---g_game.talk(spellText)

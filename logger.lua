@@ -6,6 +6,8 @@ BotLogTypes = {
   debug = 3
 }
 
+local MAX_LINES = 35
+
 local logBuffer
 local logWindow
 
@@ -45,6 +47,9 @@ function BotLogger.print(type, msg)
 end
 
 function BotLogger.createLabel(text, color)
+  if logBuffer:getChildCount() > MAX_LINES then
+    logBuffer:getFirstChild():destroy()
+  end
   local label = g_ui.createWidget('LogLabel', logBuffer)
   label:setId('consoleLabel' .. logWindow:getChildCount())
   label:setText(text)

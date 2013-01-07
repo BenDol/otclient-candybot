@@ -2,8 +2,12 @@ dofile('protection.lua')
 
 -- required by the event handler
 function ProtectionModule.getModuleId()
-  return "ProtectionModule"
+  return 'ProtectionModule'
 end
+
+ProtectionModule.dependencies = {
+  'BotModule'
+}
 
 --[[ Events ]]
 
@@ -33,6 +37,8 @@ ProtectionModule.listeners = {
   [ProtectionModule.itemAutoHealListener] = {option = "AutoHealthItem", connect = ProtectionModule.ConnectItemAutoHealListener, disconnect = ProtectionModule.DisconnectItemAutoHealListener},
   [ProtectionModule.itemAutoManaListener] = {option = "AutoManaItem", connect = ProtectionModule.ConnectItemAutoManaListener, disconnect = ProtectionModule.DisconnectItemAutoManaListener}
 }
+
+-- [[ Functions ]]
 
 function ProtectionModule.stop()
   EventHandler.stopEvents(ProtectionModule.getModuleId())

@@ -13,6 +13,11 @@ BotOptionHorizontalScrollBar < HorizontalScrollBar
 BotOptionVerticalScrollBar < VerticalScrollBar
   @onValueChange: UIBotCore.changeOption(self:getId(), self:getValue())
 
+BotOptionComboBoxPopupMenuButton < ComboBoxPopupMenuButton
+BotOptionComboBoxPopupMenu < ComboBoxPopupMenu
+BotOptionComboBox < ComboBox
+  @onOptionChange: UIBotCore.changeOption(self:getId(), self:getText())
+
 LogLabel < UILabel
   font: verdana-11px-antialised
   height: 14
@@ -23,14 +28,30 @@ LogLabel < UILabel
 
 BotTabBar < TabBar
 BotTabBarPanel < TabBarPanel
+
+  ScrollablePanel
+    id: tabBuffer
+    vertical-scrollbar: tabScrollBar
+    anchors.fill: parent
+    padding: 1
+    margin-right: 12
+
+  VerticalScrollBar
+    id: tabScrollBar
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    step: 14
+    pixels-scroll: true
+
 BotTabBarButton < TabBarButton
   height: 25
   padding: 18
 
 MainWindow
   id: botWindow
-  !text: tr('Bot Helper')
-  size: 320 580
+  !text: tr('BotCore')
+  size: 335 525
   
   @onEnter: UIBotCore.hide()
   @onEscape: UIBotCore.hide()
@@ -46,15 +67,14 @@ MainWindow
     margin-left: -6
 
   Panel
-    id: botTabContent
+    id: botContent
     anchors.top: botTabBar.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 365
+    height: 320
     image-source: /images/contentpanel.png
     image-color: #ffffff99
-    padding-left: 13
-    padding-right: 13
+    padding-left: 9
     padding-top: 6
     padding-bottom: 6
     margin-top: 5
@@ -63,9 +83,9 @@ MainWindow
     margin-right: -6
 
   Panel
-    anchors.left: prev.left
-    anchors.right: prev.right
-    anchors.top: prev.bottom
+    anchors.left: botContent.left
+    anchors.right: botContent.right
+    anchors.top: botContent.bottom
     anchors.bottom: hideButton.top
     margin-top: 5
     margin-bottom: 5
@@ -98,13 +118,14 @@ MainWindow
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-        step: 14
+        step: 8
         pixels-scroll: true
 
   Button
     id: hideButton
     text: Hide
     width: 64
+    height: 15
     anchors.right: parent.right
     anchors.bottom: parent.bottom
     margin-right: -6

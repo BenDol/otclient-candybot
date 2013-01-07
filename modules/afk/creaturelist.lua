@@ -3,7 +3,7 @@ CreatureList = extends(UIWidget)
 local creatureListWindow
 
 function CreatureList.init()
-  creatureListWindow = g_ui.loadUI('creatureList.otui', UIBotCore.getParent())
+  creatureListWindow = g_ui.loadUI('creaturelist.otui', UIBotCore.getParent())
 
   creatureListWindow:setVisible(false)
   creatureListWindow:getChildById('UseBlackList'):setChecked(true)

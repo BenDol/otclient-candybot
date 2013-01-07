@@ -14,7 +14,7 @@ local enabled
 
 local function initModules()
   dofile('modules.lua')
-  Modules.init(botWindow)
+  Modules.init()
 
   dofile('modules/bot/bot_handler.lua')
   BotModule.init(botWindow)
@@ -24,6 +24,8 @@ local function initModules()
 
   dofile('modules/afk/afk_handler.lua')
   AfkModule.init(botWindow)
+
+  Modules.checkDependencies()
 end
 
 function UIBotCore.init()
@@ -37,7 +39,7 @@ function UIBotCore.init()
   g_keyboard.bindKeyDown('Ctrl+Shift+B', UIBotCore.toggle)
 
   botTabBar = botWindow:getChildById('botTabBar')
-  botTabBar:setContentWidget(botWindow:getChildById('botTabContent'))
+  botTabBar:setContentWidget(botWindow:getChildById('botContent'))
   botTabBar:setTabSpacing(-1)
   
   g_keyboard.bindKeyPress('Tab', function() botTabBar:selectNextTab() end, botWindow)
@@ -83,7 +85,7 @@ function UIBotCore.terminate()
 
   g_settings.setNode('Bot', UIBotCore.options)
 
-  -- botWindow:destroy() -- was destroying twice (gotta take a look at this).
+  botWindow:destroy()
 end
 
 function UIBotCore.online()

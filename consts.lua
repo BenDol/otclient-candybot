@@ -1,5 +1,6 @@
 options = {
   ['BotEnabled'] = true,
+  ['BotPrecisionMode'] = false,
 
   ['AutoHeal'] = false,
   ['HealSpellText'] = 'exura',
@@ -28,7 +29,7 @@ options = {
   ['AutoEat'] = false,
   ['AutoEatSelect'] = 'Meat',
 
-  ['AntiKick'] = false,
+  ['AutoFishingCheckCap'] = false,
   ['AutoFishing'] = false,
 
   ['RuneMake'] = false,
@@ -40,7 +41,8 @@ options = {
   ['ItemToReplace'] = 3277,
 
   ['MagicTrain'] = false,
-  ['MagicTrainSpellText'] = 'utani hur'
+  ['MagicTrainSpellText'] = 'utani hur',
+  ['AntiKick'] = false
 }
 
 potions = {
@@ -117,7 +119,8 @@ spears = {
 
 fishing = {
   ['fishing rod'] = 3483,
-  ['worm'] = 3492
+  ['worm'] = 3492,
+  ['tiles'] = {4597,4598,4599,4600,4601,4602}
 }
 
 runes = {

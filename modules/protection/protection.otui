@@ -1,4 +1,10 @@
 Panel
+  id: protectionPanel
+  anchors.left: parent.left
+  anchors.right: parent.right
+  anchors.top: parent.top
+  padding-right: 10
+  height: 400
 
   BotOptionCheckBox
     id: AutoHeal
@@ -142,7 +148,7 @@ Panel
 
   BotOptionCheckBox
     id: AutoHaste
-    width: 140
+    width: 100
     !text: tr('Auto Haste')
     !tooltip: tr('Haste your character automatically.')
     anchors.left: AutoHeal.left
@@ -205,7 +211,7 @@ Panel
     id: ParalyzeHealText
     anchors.right: HasteLabel.right
     anchors.top: AutoParalyzeHeal.top
-    width: 100
+    width: 120
     !tooltip: tr('Spell to use when paralyzed.')
 
   HorizontalSeparator
@@ -219,6 +225,6 @@ Panel
     !text: tr('Auto Magic Shield')
     !tooltip: tr('Automatically keeps character magic shielded.')
     anchors.left: parent.left
-    anchors.right: parent.right
     anchors.top: prev.bottom
     margin-top: 10 
+    width: 125
