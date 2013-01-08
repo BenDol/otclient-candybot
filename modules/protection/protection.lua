@@ -52,11 +52,6 @@ function ProtectionModule.onHealthChange(localPlayer, health, maxHealth, oldHeal
   if tries == nil and (oldHealth - health < 0) then
     return -- don't process healing from a heal
   end
-  local ping = g_game.getPing()
-  if ping < 1 then
-    ping = 150
-  end
-
   local tries = tries or 10
 
   if restoreType == RestoreType.cast then
@@ -66,12 +61,7 @@ function ProtectionModule.onHealthChange(localPlayer, health, maxHealth, oldHeal
     if (health/maxHealth)*100 < healthValue then
       addEvent(function() g_game.talk(spellText) end)
 
-      if BotModule.isPrecisionMode() then
-        local spell = Spells.getSpellByWords(spellText)
-        if spell then ping = spell.exhaustion + (ping / 3) end
-      else
-        ping = ping * 2
-      end
+      delay = Helper.getSpellDelay(spellText)
     end
 
     nextHeal[RestoreType.cast] = scheduleEvent(function()
@@ -84,7 +74,7 @@ function ProtectionModule.onHealthChange(localPlayer, health, maxHealth, oldHeal
       else
         removeEvent(nextHeal[RestoreType.cast])
       end
-    end, ping)
+    end, delay)
 
   elseif restoreType == RestoreType.item then
 
@@ -97,7 +87,7 @@ function ProtectionModule.onHealthChange(localPlayer, health, maxHealth, oldHeal
     local count = item:getCount()
 
     local healthValue = Panel:getChildById('ItemHealthBar'):getValue()
-    ping = ping + 200
+    local delay = Helper.getItemUseDelay()
 
     if (health/maxHealth)*100 < healthValue then
       addEvent(function() g_game.useInventoryItemWith(potion, localPlayer) end)
@@ -114,7 +104,7 @@ function ProtectionModule.onHealthChange(localPlayer, health, maxHealth, oldHeal
       else
         removeEvent(nextHeal[RestoreType.item])
       end
-    end, ping)
+    end, delay)
   end
 end
 
@@ -160,11 +150,6 @@ function ProtectionModule.onManaChange(localPlayer, mana, maxMana, oldMana, rest
   if not tries and (oldMana - mana) < 0 then
     return -- don't process manaing from a mana
   end
-  local ping = g_game.getPing()
-  if ping < 1 then
-    ping = 150
-  end
-
   local tries = tries or 5
 
   if restoreType == RestoreType.item then
@@ -177,7 +162,7 @@ function ProtectionModule.onManaChange(localPlayer, mana, maxMana, oldMana, rest
     local count = item:getCount()
 
     local manaValue = Panel:getChildById('ItemManaBar'):getValue()
-    ping = ping + 200
+    local delay = Helper.getItemUseDelay()
 
     if (mana/maxMana)*100 < manaValue then
       addEvent(function() g_game.useInventoryItemWith(potion, localPlayer) end)
@@ -194,7 +179,7 @@ function ProtectionModule.onManaChange(localPlayer, mana, maxMana, oldMana, rest
       else
         removeEvent(nextMana)
       end
-    end, ping)
+    end, delay)
   end
 end
 
@@ -231,16 +216,22 @@ function ProtectionModule.DisconnectAutoHasteListener(listener)
   disconnect(LocalPlayer, { onStatesChange = ProtectionModule.checkAutoHaste })
 end
 
-function ProtectionModule.checkAutoHaste(localPlayer, states, oldStates)
+function ProtectionModule.checkAutoHaste(localPlayer, states, oldStates, tries)
   if not Helper.hasState(PlayerStates.Haste, states) then
-    ProtectionModule.executeAutoHaste(localPlayer)
+    ProtectionModule.executeAutoHaste(localPlayer, tries)
   end
 end
 
-function ProtectionModule.executeAutoHaste(localPlayer)
+function ProtectionModule.executeAutoHaste(localPlayer, tries)
+  if not Panel:getChildById('AutoHaste'):isChecked() then
+    return -- has since been unchecked
+  end
+  local tries = tries or 5
+  local words = Panel:getChildById('HasteSpellText'):getText()
+
+  local delay = 0
   if g_game.isOnline() then
 
-    local spellText = Panel:getChildById('HasteSpellText'):getText()
     local hasteHealth = tonumber(Panel:getChildById('HasteHealthBar'):getValue())
     local percent = hasteHealth and true or false
     
@@ -256,7 +247,22 @@ function ProtectionModule.executeAutoHaste(localPlayer)
       end
     end
 
-    scheduleEvent(function() g_game.talk(spellText) end, math.random(200, 300))
+    delay = math.random(200, 300)
+    if BotModule.isPrecisionMode() then
+      if Helper.hasEnoughMana(localPlayer, words) then
+        scheduleEvent(function() g_game.talk(words) end, delay)
+      end
+    else
+      scheduleEvent(function() g_game.talk(words) end, delay)
+    end
+  end
+  if tries > 0 then
+    delay = delay + Helper.getSpellDelay(words)
+
+    tries = tries - 1
+    scheduleEvent(function() ProtectionModule.checkAutoHaste(localPlayer, nil, nil, tries) end, delay)
+  else
+    -- tried too many times, need to connect this event to onManaChanged
   end
 end
 
@@ -275,16 +281,38 @@ function ProtectionModule.DisconnectAutoParalyzeHealListener(listener)
   disconnect(LocalPlayer, { onStatesChange = ProtectionModule.checkAutoParalyzeHeal })
 end
 
-function ProtectionModule.checkAutoParalyzeHeal(localPlayer, states, oldStates)
+function ProtectionModule.checkAutoParalyzeHeal(localPlayer, states, oldStates, tries)
   if Helper.hasState(PlayerStates.Paralyze, states) then
-    ProtectionModule.executeAutoParalyzeHeal()
+    ProtectionModule.executeAutoParalyzeHeal(localPlayer, tries)
   end
 end
 
-function ProtectionModule.executeAutoParalyzeHeal()
+function ProtectionModule.executeAutoParalyzeHeal(localPlayer, tries)
+  if not Panel:getChildById('AutoParalyzeHeal'):isChecked() then
+    return -- has since been unchecked
+  end
+  local tries = tries or 5
+  local words = Panel:getChildById('ParalyzeHealText'):getText()
+
+  local delay = 0
   if g_game.isOnline() then
-    local text = Panel:getChildById('ParalyzeHealText'):getText()
-    scheduleEvent(function() g_game.talk(text) end, math.random(50, 150))
+    delay = math.random(50, 150)
+    if BotModule.isPrecisionMode() then
+      if Helper.hasEnoughMana(localPlayer, words) then
+        scheduleEvent(function() g_game.talk(words) end, delay)
+      end
+    else
+      scheduleEvent(function() g_game.talk(words) end, delay)
+    end
+  end
+
+  if tries > 0 then
+    delay = delay + Helper.getSpellDelay(words)
+
+    tries = tries - 1
+    scheduleEvent(function() ProtectionModule.checkAutoParalyzeHeal(localPlayer, nil, nil, tries) end, delay)
+  else
+    -- tried too many times, need to connect this event to onManaChanged
   end
 end
 
@@ -303,15 +331,43 @@ function ProtectionModule.DisconnectAutoManaShieldListener(listener)
   disconnect(LocalPlayer, { onStatesChange = ProtectionModule.checkAutoManaShield })
 end
 
-function ProtectionModule.checkAutoManaShield(localPlayer, states, oldStates)
+function ProtectionModule.checkAutoManaShield(localPlayer, states, oldStates, tries)
   if not Helper.hasState(PlayerStates.ManaShield, states) then
-    ProtectionModule.executeAutoManaShield()
+    ProtectionModule.executeAutoManaShield(localPlayer, tries)
   end
 end
 
-function ProtectionModule.executeAutoManaShield()
+function ProtectionModule.executeAutoManaShield(localPlayer, tries)
+  if not Panel:getChildById('AutoManaShield'):isChecked() then
+    return -- has since been unchecked
+  end
+  local tries = tries or 5
+  local words = 'utamo vita'
+
+  local delay = 0
   if g_game.isOnline() then
-    scheduleEvent(function() g_game.talk('utamo vita') end, math.random(200, 300))
+    delay = math.random(200, 300)
+    if BotModule.isPrecisionMode() then
+      if Helper.hasEnoughMana(localPlayer, words) then
+        scheduleEvent(function() g_game.talk(words) end, delay)
+      end
+    else
+      scheduleEvent(function() g_game.talk(words) end, delay)
+    end
+  end
+
+  if tries > 0 then
+    delay = delay + Helper.getSpellDelay(words)
+
+    tries = tries - 1
+    scheduleEvent(function() ProtectionModule.checkAutoManaShield(localPlayer, nil, nil, tries) end, delay)
+  else
+    -- tried too many times, need to connect this event to onManaChanged
+    --[[local listener = ListenerHandler.getListener(ProtectionModule.getModuleId(), ProtectionModule.autoManaShieldListener)
+    if listener then
+      listener:
+      connect(LocalPlayer, { onManaChange = executeAutoManaShield })
+    end]]
   end
 end
 

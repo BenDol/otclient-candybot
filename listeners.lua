@@ -10,21 +10,21 @@ function ListenerHandler.terminate()
   --
 end
 
-function ListenerHandler.isListenerRegistered(moduleId, listenerId)
+function ListenerHandler.getListener(moduleId, listenerId)
   local module = Modules.getModule(moduleId)
   if not module then
     return false
   end
   local listeners = module:getListeners()
 
-  if table.empty(listeners) then
-    return false
-  end
-
   for k, listener in pairs(listeners) do
-    if k == listenerId and listener ~= nil then return true end
+    if k == listenerId and listener ~= nil then return listener end
   end
-  return false
+  return nil
+end
+
+function ListenerHandler.isListenerRegistered(moduleId, listenerId)
+  return ListenerHandler.getListener(moduleId, listenerId) ~= nil
 end
 
 function ListenerHandler.isListenerConnected(moduleId, listenerId)

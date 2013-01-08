@@ -1,5 +1,35 @@
 Helper = {}
 
+function Helper.hasEnoughMana(player, words)
+  local spell = Spells.getSpellByWords(words)
+  if spell then
+    return player:getMana() >= spell.mana
+  else
+    return false
+  end
+end
+
+function Helper.getSpellDelay(words)
+  local delay = 0
+  local ping = g_game.getPing()
+  if ping < 1 then ping = 150 end
+
+  delay = ping * 2 -- default delay
+  if BotModule.isPrecisionMode() then
+    local spell = Spells.getSpellByWords(words)
+    if spell then
+      delay = spell.exhaustion + (ping / 3)
+    end
+  end
+  return delay
+end
+
+function Helper.getItemUseDelay()
+  local ping = g_game.getPing()
+  if ping < 1 then ping = 150 end
+  return ping + 200
+end
+
 function Helper.getVisibleItem(itemid)
 
   itemPtr = nil
