@@ -185,13 +185,13 @@ function UIBotCore.changeOption(key, state, loading)
       local style = widget:getStyle().__class
 
       if style == 'UITextEdit' or style == 'UIComboBox' then
-        panel:getChildById(key):setText(state)
+        widget:setText(state)
       elseif style == 'UICheckBox' then
-        panel:getChildById(key):setChecked(state)
+        widget:setChecked(state)
       elseif style == 'UIItem' then
-        panel:getChildById(key):setItemId(state)
+        widget:setItemId(state)
       elseif style == 'UIScrollBar' then
-        panel:getChildById(key):setValue(state)
+        widget:setValue(tonumber(state))
       end
     end
 
