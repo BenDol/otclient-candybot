@@ -31,6 +31,9 @@ function Helper.getItemUseDelay()
 end
 
 function Helper.getVisibleItem(itemid)
+  if not g_game.isOnline() then
+    return nil
+  end
 
   itemPtr = nil
   local containerPtr = nil
@@ -88,7 +91,10 @@ function Helper.getTileArray()
 end
 
 function Helper.hasState(_state, states)
-  if not states and g_game.isOnline() then
+  if not g_game.isOnline() then
+    return false
+
+  if not states then
     local localPlayer = g_game.getLocalPlayer()
     states = localPlayer:getStates()
   end

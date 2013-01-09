@@ -158,6 +158,9 @@ end
 
 function UIBotCore.changeOption(key, state, loading)
   loading = loading or false
+  if state == nil then
+    return
+  end
   
   if UIBotCore.defaultOptions[key] == nil then
     UIBotCore.options[key] = nil
@@ -191,7 +194,8 @@ function UIBotCore.changeOption(key, state, loading)
       elseif style == 'UIItem' then
         widget:setItemId(state)
       elseif style == 'UIScrollBar' then
-        widget:setValue(tonumber(state))
+        local value = tonumber(state)
+        if value then widget:setValue(value) end
       end
     end
 
