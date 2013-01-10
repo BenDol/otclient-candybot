@@ -30,42 +30,6 @@ function Helper.getItemUseDelay()
   return ping + 200
 end
 
-function Helper.getVisibleItem(itemid)
-  if not g_game.isOnline() then
-    return nil
-  end
-
-  itemPtr = nil
-  local containerPtr = nil
-
-  local player = g_game.getLocalPlayer()
-  if player then
-    for i=InventorySlotFirst,InventorySlotLast do
-      local item = player:getInventoryItem(i)
-      if item and item:getId() == itemid then
-        itemPtr = item
-      end
-    end
-  end
-
-  if not itemPtr then
-    for i, container in pairs(g_game.getContainers()) do
-      for _i, item in pairs(container:getItems()) do
-        if item:getId() == itemid then
-          itemPtr = item
-          containerPtr = container
-          break
-        end
-      end
-    end
-  end
-
-  t = {}
-  t[0] = itemPtr
-  t[1] = containerPtr
-  return t
-end
-
 function Helper.getTileArray()
   local tiles = {}
 
@@ -90,27 +54,6 @@ function Helper.getTileArray()
   return tiles
 end
 
-function Helper.hasState(_state, states)
-  if not g_game.isOnline() then
-    return false
-
-  if not states then
-    local localPlayer = g_game.getLocalPlayer()
-    states = localPlayer:getStates()
-  end
-
-  for i = 1, 32 do
-    local pow = math.pow(2, i-1)
-    if pow > states then break end
-    
-    local states = bit32.band(states, pow)
-    if states == _state then
-      return true
-    end
-  end
-  return false
-end
-
 function Helper.startChooseItem(releaseCallback)
   if not releaseCallback then
     error("No mouse release callback parameter set.")
@@ -126,3 +69,13 @@ function Helper.startChooseItem(releaseCallback)
 
   UIBotCore.hide()
 end
+
+function Helper.getActiveRingId(itemid)
+  return rings[itemid] or 0
+end
+
+--[[function getTargetsInArea(pos, radius, aggressiveness) --this function will be deprecated completely in the near future, do not use
+    local n = #Self.GetTargets(radius)
+    local safe = Self.isAreaPvPSafe(radius+2, true, true) or aggressiveness == 4
+    return safe and n or 0
+end]]

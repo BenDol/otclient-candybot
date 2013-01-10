@@ -1,3 +1,25 @@
+General:
+- Add more food to the food array
+- Add check capacity for auto fishing
+- Add a dock feature to minimize the main body of the bot
+- Make the BotOptionScrollBar's non-mouse-scrollable
+- Make Listeners more robust on how they can change connections
+
+Support Module:
+- Add different levels of cast healing (heal priority 1, 2, and 3)
+- Auto invisible feature
+
+AFK Module:
+- Add a mana bar option to select the mana required to mana training
+- Add check cap to the rune maker
+
+Hunting Module: IMPLEMENT THIS!
+- 
+
+PvP Module: IMPLEMENT THIS!
+- 
+
+Pre-Rework TODO's:
 - Skill Training
   - Auto-stop attacking monster when it is low life
   - Alert on player's low life
@@ -6,6 +28,5 @@
 
 - Add moveToInventory, findTiles, findItems and findCreatures to native code (OTclient source itself)
 
-- Dash
 - PVP bot options
 - Change how event loops work

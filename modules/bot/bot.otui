@@ -33,7 +33,7 @@ BotPanel < Panel
 
   BotOptionCheckBox
     id: BotPrecisionMode
-    width: 100
+    width: 105
     !text: tr('Precision Mode')
     !tooltip: tr('Enable precision mode for more\nprecise information checking.\nExample: Spell checks\n\nNote: Not recommended for servers\nthat have alot of custom features')
     anchors.right: parent.right

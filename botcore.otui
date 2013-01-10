@@ -53,7 +53,7 @@ BotTabBarButton < TabBarButton
 MainWindow
   id: botWindow
   !text: tr('BotCore')
-  size: 335 525
+  size: 335 535
   
   @onEnter: UIBotCore.hide()
   @onEscape: UIBotCore.hide()
@@ -73,7 +73,7 @@ MainWindow
     anchors.top: botTabBar.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 320
+    height: 330
     image-source: /images/contentpanel.png
     image-color: #ffffff99
     padding-left: 9

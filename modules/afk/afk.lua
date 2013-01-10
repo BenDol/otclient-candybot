@@ -92,7 +92,7 @@ function AfkModule.CreatureAlertEvent(event)
   EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, 800)
 end
 
-function AfkModule.onRegenerationChange(localPlayer, regenerationTime)
+function AfkModule.onRegenerationChange(player, regenerationTime)
   if not g_game.isOnline() then
     return
   end
@@ -105,8 +105,8 @@ function AfkModule.onRegenerationChange(localPlayer, regenerationTime)
   local foodOption, food = Panel:getChildById('AutoEatSelect'):getText(), nil
   if foodOption == 'Any' then
     for i, f in pairs(foods) do
-      local visibleItem = Helper.getVisibleItem(f)
-      if visibleItem[0] ~= nil then
+      local item = player:getItem(f)
+      if item ~= nil then
         food = f
         break
       end
@@ -126,10 +126,10 @@ end
 
 function AfkModule.ConnectAutoEatListener(listener)
   if g_game.getFeature(GamePlayerRegenerationTime) then
-    AfkModule.onRegenerationChange(nil, 0) -- start the regeneration process
+    AfkModule.onRegenerationChange(g_game.getLocalPlayer(), 0) -- start the regeneration process
     connect(LocalPlayer, { onRegenerationChange = AfkModule.onRegenerationChange })
   else
-    AfkModule.onRegenerationChange(nil, 0)
+    AfkModule.onRegenerationChange(g_game.getLocalPlayer(), 0)
   end
 end
 
@@ -157,24 +157,34 @@ end
 function AfkModule.AutoFishingEvent(event)
   if g_game.isOnline() then
     local player = g_game.getLocalPlayer()
-    local tiles = Helper.getTileArray()
-    local waterTiles = {}
-    local j = 1
 
-    for i = 1, 165 do
-      if not table.empty(tiles) and tiles[i] and tiles[i]:getThing() then
-        if table.contains(fishing['tiles'], tiles[i]:getThing():getId()) then
-          table.insert(waterTiles, j, tiles[i])
-          j = j + 1
-        end
+    local allowFishing = true
+    if Panel:getChildById('AutoFishingCheckCap'):isChecked() then
+      if player:getFreeCapacity() < fishing['weight'] then
+        allowFishing = false
       end
     end
 
-    if #waterTiles > 0 then
-      rdm = math.random(1, #waterTiles)
-      g_game.useInventoryItemWith(fishing['fishing rod'], waterTiles[rdm]:getThing())
-    else
-      BotLogger.warning("No water tiles found for fishing.")
+    if allowFishing then
+      local tiles = Helper.getTileArray()
+      local waterTiles = {}
+      local j = 1
+
+      for i = 1, 165 do
+        if not table.empty(tiles) and tiles[i] and tiles[i]:getThing() then
+          if table.contains(fishing['tiles'], tiles[i]:getThing():getId()) then
+            table.insert(waterTiles, j, tiles[i])
+            j = j + 1
+          end
+        end
+      end
+
+      if #waterTiles > 0 then
+        rdm = math.random(1, #waterTiles)
+        g_game.useInventoryItemWith(fishing['fishing rod'], waterTiles[rdm]:getThing())
+      else
+        BotLogger.warning("No water tiles found for fishing.")
+      end
     end
   end
   EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(500, 3000))
@@ -183,9 +193,10 @@ end
 function AfkModule.RuneMakeEvent(event)
   if g_game.isOnline() then
     local words = Panel:getChildById('RuneSpellText'):getText()
+    local player = g_game.getLocalPlayer()
 
     if BotModule.isPrecisionMode() then
-      local spell, player = Spells.getSpellByWords(words), g_game.getLocalPlayer()
+      local spell = Spells.getSpellByWords(words)
 
       if spell and player:getSoul() < spell.soul then
         BotLogger.warning("Not enough soul points("..spell.soul..") to make this rune.")
@@ -200,9 +211,7 @@ function AfkModule.RuneMakeEvent(event)
       EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(6000, 15000))
     end
 
-    local visibleItem = Helper.getVisibleItem(runes.blank) -- blank rune item
-    local blankRune = visibleItem[0]
-
+    local blankRune = player:getItem(runes.blank) -- blank rune item
     if blankRune ~= nil then
       g_game.talk(words)
     end
@@ -217,9 +226,8 @@ function AfkModule.AutoReplaceWeaponEvent(event)
     local player = g_game.getLocalPlayer()
     local selectedItem = Panel:getChildById('ItemToReplace'):getItem():getId()
 
-    local visibleItem = Helper.getVisibleItem(selectedItem) -- blank rune item
-    local item = visibleItem[0]
-    local container = visibleItem[1]
+    local item = player:getItem(selectedItem) -- blank rune item
+    local container = item.container
     
     local hand = 0
 
@@ -247,19 +255,25 @@ end
 
 function AfkModule.MagicTrainEvent(event)
   if g_game.isOnline() then
-    local words = Panel:getChildById('MagicTrainSpellText'):getText()
+    local player = g_game.getLocalPlayer()
+    if not player then return end
 
-    local spell = nil
-    if BotModule.isPrecisionMode() then
-      spell = Spells.getSpellByWords(words)
-    end
+    local manaRequired = Panel:getChildById('MagicTrainManaRequired'):getValue()
+    if player:getManaPercent() >= manaRequired then
+      local words = Panel:getChildById('MagicTrainSpellText'):getText()
 
-    if spell then
-      if g_game.getLocalPlayer():getMana() >= spell.mana then
-        g_game.talk(spell.words)
+      local spell = nil
+      if BotModule.isPrecisionMode() then
+        spell = Spells.getSpellByWords(words)
       end
-    else
-      g_game.talk(words)
+
+      if spell then
+        if g_game.getLocalPlayer():getMana() >= spell.mana then
+          g_game.talk(spell.words)
+        end
+      else
+        g_game.talk(words)
+      end
     end
   end
 

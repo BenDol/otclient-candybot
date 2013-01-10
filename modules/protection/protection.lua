@@ -58,7 +58,7 @@ function ProtectionModule.onHealthChange(player, health, maxHealth, oldHealth, r
     local spellText = Panel:getChildById('HealSpellText'):getText()
     local healthValue = Panel:getChildById('HealthBar'):getValue()
     
-    if (health/maxHealth)*100 < healthValue then
+    if player:getHealthPercent() < healthValue then
       addEvent(function() g_game.talk(spellText) end)
 
       delay = Helper.getSpellDelay(spellText)
@@ -68,7 +68,7 @@ function ProtectionModule.onHealthChange(player, health, maxHealth, oldHealth, r
       local player = g_game.getLocalPlayer()
       if not player then return end
       health, maxHealth = player:getHealth(), player:getMaxHealth()
-      if (health/maxHealth)*100 < healthValue and tries > 0 then
+      if player:getHealthPercent() < healthValue and tries > 0 then
         tries = tries - 1
         ProtectionModule.onHealthChange(player, health, maxHealth, health, restoreType, tries) 
       else
@@ -89,7 +89,7 @@ function ProtectionModule.onHealthChange(player, health, maxHealth, oldHealth, r
     local healthValue = Panel:getChildById('ItemHealthBar'):getValue()
     local delay = Helper.getItemUseDelay()
 
-    if (health/maxHealth)*100 < healthValue then
+    if player:getHealthPercent() < healthValue then
       addEvent(function() g_game.useInventoryItemWith(potion, player) end)
     end
 
@@ -98,7 +98,7 @@ function ProtectionModule.onHealthChange(player, health, maxHealth, oldHealth, r
       local player = g_game.getLocalPlayer()
       if not player then return end
       health, maxHealth = player:getHealth(), player:getMaxHealth()
-      if (health/maxHealth)*100 < healthValue and tries > 0 then
+      if player:getHealthPercent() < healthValue and tries > 0 then
         tries = tries - 1
         ProtectionModule.onHealthChange(player, health, maxHealth, health, restoreType, tries) 
       else
@@ -164,7 +164,7 @@ function ProtectionModule.onManaChange(player, mana, maxMana, oldMana, restoreTy
     local manaValue = Panel:getChildById('ItemManaBar'):getValue()
     local delay = Helper.getItemUseDelay()
 
-    if (mana/maxMana)*100 < manaValue then
+    if player:getManaPercent() < manaValue then
       addEvent(function() g_game.useInventoryItemWith(potion, player) end)
     end
 
@@ -173,7 +173,7 @@ function ProtectionModule.onManaChange(player, mana, maxMana, oldMana, restoreTy
       local player = g_game.getLocalPlayer()
       if not player then return end
       mana, maxMana = player:getMana(), player:getMaxMana()
-      if (mana/maxMana)*100 < manaValue and tries > 0 then
+      if player:getManaPercent() < manaValue and tries > 0 then
         tries = tries - 1
         ProtectionModule.onManaChange(player, mana, maxMana, mana, restoreType, tries) 
       else
@@ -217,7 +217,7 @@ function ProtectionModule.DisconnectAutoHasteListener(listener)
 end
 
 function ProtectionModule.checkAutoHaste(player, states, oldStates, tries)
-  if not Helper.hasState(PlayerStates.Haste, states) then
+  if not player:hasState(PlayerStates.Haste, states) then
     ProtectionModule.executeAutoHaste(player, tries)
   end
 end
@@ -237,7 +237,7 @@ function ProtectionModule.executeAutoHaste(player, tries)
     
     if hasteHealth ~= nil then
       if percent then
-        if (player:getHealth()/player:getMaxHealth())*100 < tonumber(hasteHealth) then
+        if player:getManaPercent() < tonumber(hasteHealth) then
           return
         end
       else
@@ -282,7 +282,7 @@ function ProtectionModule.DisconnectAutoParalyzeHealListener(listener)
 end
 
 function ProtectionModule.checkAutoParalyzeHeal(player, states, oldStates, tries)
-  if Helper.hasState(PlayerStates.Paralyze, states) then
+  if player:hasState(PlayerStates.Paralyze, states) then
     ProtectionModule.executeAutoParalyzeHeal(player, tries)
   end
 end
@@ -332,7 +332,7 @@ function ProtectionModule.DisconnectAutoManaShieldListener(listener)
 end
 
 function ProtectionModule.checkAutoManaShield(player, states, oldStates, tries)
-  if not Helper.hasState(PlayerStates.ManaShield, states) then
+  if not player:hasState(PlayerStates.ManaShield, states) then
     ProtectionModule.executeAutoManaShield(player, tries)
   end
 end
@@ -361,6 +361,61 @@ function ProtectionModule.executeAutoManaShield(player, tries)
 
     tries = tries - 1
     scheduleEvent(function() ProtectionModule.checkAutoManaShield(player, nil, nil, tries) end, delay)
+  else
+    -- tried too many times, need to connect this event to onManaChanged
+    --[[local listener = ListenerHandler.getListener(ProtectionModule.getModuleId(), ProtectionModule.autoManaShieldListener)
+    if listener then
+      listener:
+      connect(LocalPlayer, { onManaChange = executeAutoManaShield })
+    end]]
+  end
+end
+
+-- Auto Invisible
+
+function ProtectionModule.ConnectAutoInvisibleListener(listener)
+  if g_game.isOnline() then
+    local player = g_game.getLocalPlayer()
+    addEvent(ProtectionModule.checkAutoInvisible(player, player:getOutfit(), nil))
+  end
+
+  connect(LocalPlayer, { onOutfitChange = ProtectionModule.checkAutoInvisible })
+end
+
+function ProtectionModule.DisconnectAutoInvisibleListener(listener)
+  disconnect(LocalPlayer, { onOutfitChange = ProtectionModule.checkAutoInvisible })
+end
+
+function ProtectionModule.checkAutoInvisible(player, outfit, oldOutfit)
+  if not player:isInvisible() then
+    ProtectionModule.executeAutoInvisible(player, tries)
+  end
+end
+
+function ProtectionModule.executeAutoInvisible(player, tries)
+  if not Panel:getChildById('AutoInvisible'):isChecked() then
+    return -- has since been unchecked
+  end
+  local tries = tries or 5
+  local words = 'utana vid'
+
+  local delay = 0
+  if g_game.isOnline() then
+    delay = math.random(200, 300)
+    if BotModule.isPrecisionMode() then
+      if Helper.hasEnoughMana(player, words) then
+        scheduleEvent(function() g_game.talk(words) end, delay)
+      end
+    else
+      scheduleEvent(function() g_game.talk(words) end, delay)
+    end
+  end
+
+  if tries > 0 then
+    delay = delay + Helper.getSpellDelay(words)
+
+    tries = tries - 1
+    scheduleEvent(function() ProtectionModule.checkAutoInvisible(player, nil, nil, tries) end, delay)
   else
     -- tried too many times, need to connect this event to onManaChanged
     --[[local listener = ListenerHandler.getListener(ProtectionModule.getModuleId(), ProtectionModule.autoManaShieldListener)

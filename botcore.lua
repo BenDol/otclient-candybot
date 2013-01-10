@@ -28,6 +28,10 @@ local function initModules()
   Modules.checkDependencies()
 end
 
+local function loadExtensions()
+  dofiles('extensions')
+end
+
 function UIBotCore.init()
   botWindow = g_ui.displayUI('botcore.otui')
   botWindow:setVisible(false)
@@ -45,10 +49,13 @@ function UIBotCore.init()
   g_keyboard.bindKeyPress('Tab', function() botTabBar:selectNextTab() end, botWindow)
   g_keyboard.bindKeyPress('Shift+Tab', function() botTabBar:selectPrevTab() end, botWindow)
 
-  -- loads the modules and event handler
+  -- load extensions
+  loadExtensions()
+
+  -- init modules
   initModules()
 
-  -- load bot logger
+  -- init bot logger
   BotLogger.init()
 
   -- hook functions

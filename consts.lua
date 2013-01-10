@@ -4,24 +4,26 @@ options = {
 
   ['AutoHeal'] = false,
   ['HealSpellText'] = 'exura',
-  ['HealthBar'] = '75%',
+  ['HealthBar'] = 75,
 
   ['AutoHealthItem'] = false,
-  ['ItemHealthBar'] = '75%',
+  ['ItemHealthBar'] = 75,
   ['CurrentHealthItem'] = 266,
   
   ['AutoManaItem'] = false,
-  ['ItemManaBar'] = '75%',
+  ['ItemManaBar'] = 75,
   ['CurrentManaItem'] = 268,
 
   ['AutoHaste'] = false,
   ['HasteSpellText'] = 'utani hur',
-  ['HasteHealthBar'] = '50%',
+  ['HasteHealthBar'] = 50,
 
   ['AutoParalyzeHeal'] = false,
   ['ParalyzeHealText'] = 'utani hur',
 
   ['AutoManaShield'] = false,
+  ['AutoInvisible'] = false,
+
   ['CreatureAlert'] = false,
   ['BlackList'] = '',
   ['WhiteList'] = '',
@@ -41,7 +43,8 @@ options = {
   ['ItemToReplace'] = 3277,
 
   ['MagicTrain'] = false,
-  ['MagicTrainSpellText'] = 'utani hur',
+  ['MagicTrainSpellText'] = 'utana vid',
+  ['MagicTrainManaRequired'] = 50,
   ['AntiKick'] = false
 }
 
@@ -57,14 +60,20 @@ potions = {
 }
 
 foods = {
+  ['Walnut'] = 836,
+  ['Peanut'] = 841,
+  ['Marlin'] = 901,
+  ['Cream Cake'] = 904,
   ['Carrot'] = 3595,
   ['Meat'] = 3577,
   ['Fish'] = 3578,
   ['Salmon'] = 3579,
+  ['Shrimp'] = 3581,
   ['Ham'] = 3582,
   ['Dragon Ham'] = 3583,
   ['Pears'] = 3584,
   ['Bread'] = 3600,
+  ['Northern Pike'] = 3580,
   ['Pear'] = 3584,
   ['Apple'] = 3585,
   ['Orange'] = 3586,
@@ -76,23 +85,68 @@ foods = {
   ['Grape'] = 3592,
   ['Melon'] = 3593,
   ['Pumpkin'] = 3594,
+  ['Tomato'] = 3596,
+  ['Corn'] = 3597,
   ['Cookie'] = 3598,
   ['Candy Cane'] = 3599,
   ['Roll'] = 3601,
   ['Brown Bread'] = 3602,
+  ['Lump of Dough'] = 3604,
+  ['Egg'] = 3606,
   ['Cheese'] = 3607,
+  ['Red Mushroom'] = 3724,
+  ['White Mushroom '] = 3723,
   ['Brown Mushroom'] = 3725,
+  ['Orange Mushroom'] = 3726,
+  ['Dark Mushroom'] = 3728,
+  ['Some Mushrooms (Brown)'] = 3729,
+  ['Some Mushrooms'] = 3730,
+  ['Fire Mushroom'] = 3731,
+  ['Green Mushroom'] = 3732,
+  ['Mango'] = 5096,
   ['Tortoise Eggs'] = 5678,
-  ['Fire Mushroom'] = 3731
+  ['Cake'] = 6277,
+  ['Lump of Cake Dough'] = 6276,
+  ['Decorated Cake'] = 6278,
+  ['Valentine\'s Cake'] = 6392,
+  ['Gingerbreadman'] = 6500,
+  ['Coloured Egg (Blue)'] = 6543,
+  ['Coloured Egg (Green)'] = 6544,
+  ['Coloured Egg (Purple)'] = 6545,
+  ['Coloured Egg (Red)'] = 6542,
+  ['Coloured Egg (Yellow)'] = 6541,
+  ['Candy'] = 6569,
+  ['Bar of Chocolate'] = 6574,
+  ['Rainbow Trout'] = 7158,
+  ['Green Perch'] = 7159,
+  ['Ice Cream Cone (Crispy Chocolate Chips)'] = 7372,
+  ['Ice Cream Cone (Velvet Vanilla)'] = 7373,
+  ['Ice Cream Cone (Chilly Cherry)'] = 7375,
+  ['Potato'] = 8010,
+  ['Plum'] = 8011,
+  ['Raspberry'] = 8012,
+  ['Lemon'] = 8013,
+  ['Cucumber'] = 8014,
+  ['Onion'] = 8015,
+  ['Beetroot'] = 8017,
+  ['Lump of Chocolate Dough'] = 8018,
+  ['Chocolate Cake'] = 8019,
+  ['Yummy Gummy Worm'] = 8177,
+  ['Bulb of Garlic'] = 8197,
+  ['Baking Tray (With Dough)'] = 8020,
+  ['Rice Ball'] = 10329,
+  ['Ectoplasmic Sushi'] = 11681,
+  ['Haunch of Boar'] = 12310,
+  ['Deepling Filet'] = 14085,
+  ['Soft Cheese'] = 17820,
+  ['Rat Cheese'] = 17821
 }
 
 rings = {
-  ['Time Ring'] = 3053,
-  ['Energy Ring'] = 3051,
-  ['Stealth Ring'] = 3049,
-  ['Ring of Healing'] = 3098,
-  ['Life Ring'] = 3052,
-  ['Might Ring'] = 3048
+  [3092] = 3095, [3091] = 3094, [3093] = 3096, [3052] = 3089, [3098] = 3100,
+  [3097] = 3099, [3051] = 3088, [3053] = 3090, [3049] = 3086, [9593] = 9593,
+  [9393] = 9392, [3007] = 3007, [6299] = 6300, [9585] = 9585, [3048] = 3048,
+  [3050] = 3087, [3245] = 3245, [3006] = 3006, [349] = 349, [3004] = 3004
 }
 
 amulets = {
@@ -120,7 +174,8 @@ spears = {
 fishing = {
   ['fishing rod'] = 3483,
   ['worm'] = 3492,
-  ['tiles'] = {4597,4598,4599,4600,4601,4602}
+  ['tiles'] = {4597,4598,4599,4600,4601,4602},
+  ['weight'] = 5.20
 }
 
 runes = {
@@ -128,6 +183,8 @@ runes = {
 }
 
 water = { 4599 }
+
+flasks = { 283, 284, 285 }
 
 t = {
   name = "pt",

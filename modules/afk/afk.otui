@@ -4,7 +4,7 @@ Panel
   anchors.right: parent.right
   anchors.top: parent.top
   padding-right: 8
-  height: 400
+  height: 340
 
   BotOptionCheckBox
     id: CreatureAlert
@@ -171,28 +171,39 @@ Panel
     !tooltip: tr('Trains magic level (use a spell whenever possible).')
     anchors.left: parent.left
     anchors.top: prev.top
-    width: 180
+    width: 120
     margin-top: 10
-
-  Label
-    id: MagicTrainSpell
-    width: 110
-    !text: tr('Spell to use:')
-    anchors.right: parent.right
-    anchors.top: MagicTrain.top
 
   BotOptionLineEdit
     id: MagicTrainSpellText
-    anchors.left: MagicTrainSpell.left
-    anchors.right: MagicTrainSpell.right
-    anchors.top: MagicTrainSpell.bottom
+    anchors.left: MagicTrain.left
+    anchors.right: MagicTrain.right
+    anchors.top: MagicTrain.bottom
     margin-top: 4
+
+  Label
+    id: MagicTrainSpell
+    width: 130
+    !text: tr('Mana required:')
+    anchors.right: parent.right
+    anchors.top: MagicTrain.top
+
+  BotOptionHorizontalScrollBar
+    id: MagicTrainManaRequired
+    width: 120
+    anchors.left: MagicTrainSpell.left
+    anchors.top: MagicTrainSpell.bottom
+    margin-top: 6
+    show-value: true
+    symbol: %
+    minimum: 1
+    maximum: 100
 
   HorizontalSeparator
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: prev.bottom
-    margin-top: 8
+    margin-top: 14
 
   BotOptionCheckBox
     id: AntiKick

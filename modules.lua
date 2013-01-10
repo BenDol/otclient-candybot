@@ -7,10 +7,11 @@ local modules = {}
 function Modules.init()
   modules = {}
 
-  -- initiate the module event handler
+  -- initiate the modules event handler
   dofile('events.lua')
   EventHandler.init()
 
+  -- initiate the modules listener handler
   dofile('listeners.lua')
   ListenerHandler.init()
 end

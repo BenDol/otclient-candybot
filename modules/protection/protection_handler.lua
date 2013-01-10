@@ -27,7 +27,8 @@ table.merge(ProtectionModule, {
   itemAutoManaListener = 3,
   autoHasteListener = 4,
   autoParalyzeHealListener = 5,
-  autoManaShieldListener = 6
+  autoManaShieldListener = 6,
+  autoInvisibleListener = 7
 })
 
 ProtectionModule.listeners = {
@@ -36,7 +37,8 @@ ProtectionModule.listeners = {
   [ProtectionModule.itemAutoManaListener] = {option = "AutoManaItem", connect = ProtectionModule.ConnectItemAutoManaListener, disconnect = ProtectionModule.DisconnectItemAutoManaListener},
   [ProtectionModule.autoHasteListener] = {option = "AutoHaste", connect = ProtectionModule.ConnectAutoHasteListener, disconnect = ProtectionModule.DisconnectAutoHasteListener},
   [ProtectionModule.autoParalyzeHealListener] = {option = "AutoParalyzeHeal", connect = ProtectionModule.ConnectAutoParalyzeHealListener, disconnect = ProtectionModule.DisconnectAutoParalyzeHealListener},
-  [ProtectionModule.autoManaShieldListener] = {option = "AutoManaShield", connect = ProtectionModule.ConnectAutoManaShieldListener, disconnect = ProtectionModule.DisconnectAutoManaShieldListener}
+  [ProtectionModule.autoManaShieldListener] = {option = "AutoManaShield", connect = ProtectionModule.ConnectAutoManaShieldListener, disconnect = ProtectionModule.DisconnectAutoManaShieldListener},
+  [ProtectionModule.autoInvisibleListener] = {option = "AutoInvisible", connect = ProtectionModule.ConnectAutoInvisibleListener, disconnect = ProtectionModule.DisconnectAutoInvisibleListener}
 }
 
 -- [[ Functions ]]

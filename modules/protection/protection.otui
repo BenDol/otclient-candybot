@@ -4,7 +4,7 @@ Panel
   anchors.right: parent.right
   anchors.top: parent.top
   padding-right: 10
-  height: 400
+  height: 360
 
   BotOptionCheckBox
     id: AutoHeal
@@ -227,4 +227,13 @@ Panel
     anchors.left: parent.left
     anchors.top: prev.bottom
     margin-top: 10 
+    width: 125
+
+  BotOptionCheckBox
+    id: AutoInvisible
+    !text: tr('Auto Invisible')
+    !tooltip: tr('Automatically keeps character invisible.')
+    anchors.left: ParalyzeHealText.left
+    anchors.top: AutoManaShield.top
+    //margin-right: 10 
     width: 125
