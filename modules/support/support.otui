@@ -1,5 +1,5 @@
 Panel
-  id: protectionPanel
+  id: supportPanel
   anchors.left: parent.left
   anchors.right: parent.right
   anchors.top: parent.top
@@ -78,7 +78,7 @@ Panel
     anchors.left: prev.right
     anchors.top: prev.top
     margin-left: 10
-    @onClick: Helper.startChooseItem(ProtectionModule.onChooseHealthItem)
+    @onClick: Helper.startChooseItem(SupportModule.onChooseHealthItem)
 
   Label
     id: ItemHealthLabel
@@ -121,7 +121,7 @@ Panel
     anchors.left: prev.right
     anchors.top: prev.top
     margin-left: 10
-    @onClick: Helper.startChooseItem(ProtectionModule.onChooseManaItem)
+    @onClick: Helper.startChooseItem(SupportModule.onChooseManaItem)
 
   Label
     id: ItemManaLabel

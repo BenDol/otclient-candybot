@@ -190,7 +190,7 @@ t = {
   name = "pt",
   translation = {
     ["Kilouco\'s Bot"] = 'Bot do Kilouco',
-    ["Protection"] = 'Proteção',
+    ["Support"] = 'Apoiar',
 
     ["Auto Heal"] = "Auto Recuperação",
     ["Heal your character automatically."] = 'Recupera o personagem automaticamente.',

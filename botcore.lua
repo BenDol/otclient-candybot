@@ -19,8 +19,8 @@ local function initModules()
   dofile('modules/bot/bot_handler.lua')
   BotModule.init(botWindow)
 
-  dofile('modules/protection/protection_handler.lua')
-  ProtectionModule.init(botWindow)
+  dofile('modules/support/support_handler.lua')
+  SupportModule.init(botWindow)
 
   dofile('modules/afk/afk_handler.lua')
   AfkModule.init(botWindow)
