@@ -237,7 +237,7 @@ function ProtectionModule.executeAutoHaste(player, tries)
     
     if hasteHealth ~= nil then
       if percent then
-        if player:getManaPercent() < tonumber(hasteHealth) then
+        if player:getHealthPercent() < tonumber(hasteHealth) then
           return
         end
       else

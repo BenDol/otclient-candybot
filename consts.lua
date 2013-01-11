@@ -175,7 +175,7 @@ fishing = {
   ['fishing rod'] = 3483,
   ['worm'] = 3492,
   ['tiles'] = {4597,4598,4599,4600,4601,4602},
-  ['weight'] = 5.20
+  ['weight'] = 8.30
 }
 
 runes = {
