@@ -4,8 +4,8 @@ end
 
 function Player:getFlaskItems()
   local count = 0
-  for i=1,#flasks do
-    count = count + self:getItemsCount(flasks[i])
+  for i=1,#Flasks do
+    count = count + self:getItemsCount(Flasks[i])
   end
   return count
 end

@@ -9,6 +9,13 @@ BotModule.dependencies = {
   --
 }
 
+-- [[ Default Options ]]
+
+BotModule.options = {
+  ['BotEnabled'] = true,
+  ['BotPrecisionMode'] = false
+}
+
 --[[ Events ]]
 
 table.merge(BotModule, {
@@ -17,8 +24,8 @@ table.merge(BotModule, {
 })
 
 BotModule.events = {
-  [BotModule.enableBot] = {option = "BotEnabled", state = OptionState.on, callback = BotModule.EnableEvent, bypass = true, signalIgnore = true},
-  [BotModule.disableBot] = {option = "BotEnabled", state = OptionState.off, callback = BotModule.DisableEvent, bypass = true, signalIgnore = true}
+  [BotModule.enableBot] = {option = "BotEnabled", state = OptionState.on, callback = BotModule.Enable.Event, bypass = true, signalIgnore = true},
+  [BotModule.disableBot] = {option = "BotEnabled", state = OptionState.off, callback = BotModule.Disable.Event, bypass = true, signalIgnore = true}
 }
 
 --[[ Listeners ]]

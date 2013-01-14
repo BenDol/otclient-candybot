@@ -13,7 +13,7 @@ end
 function ListenerHandler.getListener(moduleId, listenerId)
   local module = Modules.getModule(moduleId)
   if not module then
-    return false
+    return nil
   end
   local listeners = module:getListeners()
 

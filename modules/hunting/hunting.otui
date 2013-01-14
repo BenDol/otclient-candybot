@@ -1,0 +1,52 @@
+ListRow < Label
+  font: verdana-11px-monochrome
+  background-color: alpha
+  text-offset: 2 0
+  focusable: true
+
+  $focus:
+    background-color: #ffffff22
+    color: #ffffff
+
+Panel
+  id: huntingPanel
+  anchors.left: parent.left
+  anchors.right: parent.right
+  anchors.top: parent.top
+  padding-right: 8
+  height: 340
+
+  Label
+    id: targetListLabel
+    text: Target List
+    anchors.top: parent.top
+    anchors.left: parent.left
+    margin-top: 5
+
+  TextList
+    id: TargetList
+    anchors.top: targetListLabel.bottom
+    anchors.left: targetListLabel.left
+    margin-bottom: 5
+    margin-top: 5
+    padding: 1
+    focusable: false
+    vertical-scrollbar: targetScrollBar
+    width: 150
+    height: 150
+
+  VerticalScrollBar
+    id: targetScrollBar
+    anchors.top: TargetList.top
+    anchors.bottom: TargetList.bottom
+    anchors.right: TargetList.right
+    step: 14
+    pixels-scroll: true
+
+  Button
+    id: newTargetButton
+    text: New Target
+    anchors.left: TargetList.left
+    anchors.right: targetScrollBar.right
+    anchors.top: TargetList.bottom
+    margin-top: 5

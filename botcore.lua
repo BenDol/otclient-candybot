@@ -1,16 +1,24 @@
 UIBotCore = extends(UIWidget)
 UIBotCore.options = {}
+UIBotCore.defaultOptions = {}
 
 dofile('consts.lua')
 dofile('helper.lua')
 dofile('logger.lua')
-UIBotCore.defaultOptions = options
 
 local botWindow
 local botButton
 local botTabBar
 
 local enabled
+
+local function setupDefaultOptions()
+  for _, module in pairs(Modules.getOptions()) do
+    for k, option in pairs(module) do
+      UIBotCore.defaultOptions[k] = option
+    end
+  end
+end
 
 local function initModules()
   dofile('modules.lua')
@@ -25,7 +33,11 @@ local function initModules()
   dofile('modules/afk/afk_handler.lua')
   AfkModule.init(botWindow)
 
+  dofile('modules/hunting/hunting_handler.lua')
+  HuntingModule.init(botWindow)
+
   Modules.checkDependencies()
+  setupDefaultOptions()
 end
 
 local function loadExtensions()

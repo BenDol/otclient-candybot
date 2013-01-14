@@ -9,6 +9,33 @@ AfkModule.dependencies = {
   "BotModule"
 }
 
+--[[ Default Options ]]
+
+AfkModule.options = {
+  ['CreatureAlert'] = false,
+  ['BlackList'] = '',
+  ['WhiteList'] = '',
+
+  ['AutoEat'] = false,
+  ['AutoEatSelect'] = 'Meat',
+
+  ['AutoFishingCheckCap'] = false,
+  ['AutoFishing'] = false,
+
+  ['RuneMake'] = false,
+  ['RuneSpellText'] = 'adori gran',
+  ['RuneMakeOpenContainer'] = true,
+  
+  ['AutoReplaceWeapon'] = false,
+  ['AutoReplaceWeaponSelect'] = 'Left Hand',
+  ['ItemToReplace'] = 3277,
+
+  ['MagicTrain'] = false,
+  ['MagicTrainSpellText'] = 'utana vid',
+  ['MagicTrainManaRequired'] = 50,
+  ['AntiKick'] = false
+}
+
 --[[ Events ]]
 
 table.merge(AfkModule, {
@@ -21,12 +48,12 @@ table.merge(AfkModule, {
 })
 
 AfkModule.events = {
-  [AfkModule.creatureAlertEvent] = {option = "CreatureAlert", callback = AfkModule.CreatureAlertEvent},
-  [AfkModule.antiKickEvent] = {option = "AntiKick", callback = AfkModule.AntiKickEvent},
-  [AfkModule.autoFishingEvent] = {option = "AutoFishing", callback = AfkModule.AutoFishingEvent},
-  [AfkModule.runeMakeEvent] = {option = "RuneMake", callback = AfkModule.RuneMakeEvent},
-  [AfkModule.autoReplaceWeaponEvent] = {option = "AutoReplaceWeapon", callback = AfkModule.AutoReplaceWeaponEvent},
-  [AfkModule.magicTrainEvent] = {option = "MagicTrain", callback = AfkModule.MagicTrainEvent}
+  [AfkModule.creatureAlertEvent] = {option = "CreatureAlert", callback = AfkModule.CreatureAlert.Event},
+  [AfkModule.antiKickEvent] = {option = "AntiKick", callback = AfkModule.AntiKick.Event},
+  [AfkModule.autoFishingEvent] = {option = "AutoFishing", callback = AfkModule.AutoFishing.Event},
+  [AfkModule.runeMakeEvent] = {option = "RuneMake", callback = AfkModule.RuneMake.Event},
+  [AfkModule.autoReplaceWeaponEvent] = {option = "AutoReplaceWeapon", callback = AfkModule.AutoReplaceHands.Event},
+  [AfkModule.magicTrainEvent] = {option = "MagicTrain", callback = AfkModule.MagicTrain.Event}
 }
 
 --[[ Listeners ]]
@@ -36,7 +63,7 @@ table.merge(AfkModule, {
 })
 
 AfkModule.listeners = {
-  [AfkModule.autoEatListener] = {option = "AutoEat", connect = AfkModule.ConnectAutoEatListener, disconnect = AfkModule.DisconnectAutoEatListener},
+  [AfkModule.autoEatListener] = {option = "AutoEat", connect = AfkModule.AutoEat.ConnectListener, disconnect = AfkModule.AutoEat.DisconnectListener},
 }
 
 -- [[ Functions ]]

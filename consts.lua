@@ -1,54 +1,9 @@
-options = {
-  ['BotEnabled'] = true,
-  ['BotPrecisionMode'] = false,
-
-  ['AutoHeal'] = false,
-  ['HealSpellText'] = 'exura',
-  ['HealthBar'] = 75,
-
-  ['AutoHealthItem'] = false,
-  ['ItemHealthBar'] = 75,
-  ['CurrentHealthItem'] = 266,
-  
-  ['AutoManaItem'] = false,
-  ['ItemManaBar'] = 75,
-  ['CurrentManaItem'] = 268,
-
-  ['AutoHaste'] = false,
-  ['HasteSpellText'] = 'utani hur',
-  ['HasteHealthBar'] = 50,
-
-  ['AutoParalyzeHeal'] = false,
-  ['ParalyzeHealText'] = 'utani hur',
-
-  ['AutoManaShield'] = false,
-  ['AutoInvisible'] = false,
-
-  ['CreatureAlert'] = false,
-  ['BlackList'] = '',
-  ['WhiteList'] = '',
-
-  ['AutoEat'] = false,
-  ['AutoEatSelect'] = 'Meat',
-
-  ['AutoFishingCheckCap'] = false,
-  ['AutoFishing'] = false,
-
-  ['RuneMake'] = false,
-  ['RuneSpellText'] = 'adori gran',
-  ['RuneMakeOpenContainer'] = true,
-  
-  ['AutoReplaceWeapon'] = false,
-  ['AutoReplaceWeaponSelect'] = 'Left Hand',
-  ['ItemToReplace'] = 3277,
-
-  ['MagicTrain'] = false,
-  ['MagicTrainSpellText'] = 'utana vid',
-  ['MagicTrainManaRequired'] = 50,
-  ['AntiKick'] = false
+RestoreType = {
+  cast = 1,
+  item = 2
 }
 
-potions = {
+Potions = {
   ['Ultimate HP'] = 8473,
   ['Great HP'] = 7591,
   ['Strong HP'] = 7588,
@@ -59,7 +14,7 @@ potions = {
   ['Great SP'] = 7642
 }
 
-foods = {
+Foods = {
   ['Walnut'] = 836,
   ['Peanut'] = 841,
   ['Marlin'] = 901,
@@ -142,27 +97,21 @@ foods = {
   ['Rat Cheese'] = 17821
 }
 
-rings = {
+Rings = {
   [3092] = 3095, [3091] = 3094, [3093] = 3096, [3052] = 3089, [3098] = 3100,
   [3097] = 3099, [3051] = 3088, [3053] = 3090, [3049] = 3086, [9593] = 9593,
   [9393] = 9392, [3007] = 3007, [6299] = 6300, [9585] = 9585, [3048] = 3048,
   [3050] = 3087, [3245] = 3245, [3006] = 3006, [349] = 349, [3004] = 3004
 }
 
-amulets = {
+Amulets = {
   ['Stone Skin Amulet'] = 3081,
   ['Glacier Amulet'] = 815,
   ['Dragon Necklace'] = 3085,
   ['Sacred Tree Amulet'] = 9302
 }
 
-spells = {
-  ['Strong Haste'] = 'utani gran hur',
-  ['Haste'] = 'utani hur',
-  ['Charge'] = 'utani tempo hur'
-}
-
-spears = {
+Spears = {
   ['Spear'] = 3277,
   ['Enchanted Spear'] = 7367,
   ['Royal Spear'] = 7378,
@@ -171,22 +120,22 @@ spears = {
   ['Assassin Star'] = 7368
 }
 
-fishing = {
-  ['fishing rod'] = 3483,
-  ['worm'] = 3492,
-  ['tiles'] = {4597,4598,4599,4600,4601,4602},
-  ['weight'] = 8.30
+Fishing = {
+  ['Fishing Rod'] = 3483,
+  ['Worm'] = 3492,
+  ['Tiles'] = {4597,4598,4599,4600,4601,4602},
+  ['Weight'] = 8.30
 }
 
-runes = {
+Runes = {
   blank = 3147
 }
 
-water = { 4599 }
+Water = { 4599 }
 
-flasks = { 283, 284, 285 }
+Flasks = { 283, 284, 285 }
 
-t = {
+--[[Locales.installLocale({
   name = "pt",
   translation = {
     ["Kilouco\'s Bot"] = 'Bot do Kilouco',
@@ -232,5 +181,5 @@ t = {
     ["Magic Training"] = "Treinar nível mágico",
     ["Trains magic level (use a spell whenever mana is full)."] = "Treina nível mágico (usa uma magia sempre que a mana está cheia).",
     ["Spell to use"] = "Magia a ser usada"
-}}
---Locales.installLocale(t)
+  }
+})]]

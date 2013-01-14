@@ -9,12 +9,12 @@ ListRow < Label
     color: #ffffff
 
 MainWindow
-  id: creatureList
-  !text: tr('Creature Lists')
+  id: alertList
+  !text: tr('Alert Lists')
   size: 600 400
   
-  @onEnter: CreatureList.hide()
-  @onEscape: CreatureList.hide()
+  @onEnter: AlertList.hide()
+  @onEscape: AlertList.hide()
 
   &save: true
 
@@ -82,7 +82,7 @@ MainWindow
     anchors.left: BlackList.left
     anchors.top: BlackList.bottom
     margin-top: 5
-    @onClick: CreatureList.remBlack()
+    @onClick: AlertList.remBlack()
 
   Button
     id: WhiteListRemove
@@ -91,14 +91,14 @@ MainWindow
     anchors.left: WhiteList.left
     anchors.top: WhiteList.bottom
     margin-top: 5
-    @onClick: CreatureList.remWhite()
+    @onClick: AlertList.remWhite()
 
   Button
     text: Close
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    @onClick: CreatureList.hide()
+    @onClick: AlertList.hide()
 
   Label
     id: BlackListLabel
@@ -133,7 +133,7 @@ MainWindow
     anchors.top: Text1Label.bottom
     margin-top: 30
     margin-right: 25
-    @onClick: CreatureList.addBlack()
+    @onClick: AlertList.addBlack()
 
   Label
     id: Text2Label
@@ -151,7 +151,7 @@ MainWindow
     anchors.right: AddBlack.right
     anchors.top: AddBlack.bottom
     margin-top: 25
-    @onClick: CreatureList.addWhite()
+    @onClick: AlertList.addWhite()
 
   CheckBox
     id: UseBlackList
@@ -162,7 +162,7 @@ MainWindow
     width: 200
     margin-left: 5
     margin-top: 20
-    @onCheckChange: CreatureList.checkBlack(self:isChecked())
+    @onCheckChange: AlertList.checkBlack(self:isChecked())
 
   CheckBox
     id: UseWhiteList
@@ -174,5 +174,5 @@ MainWindow
     height: 30
     margin-left: 5
     margin-top: 5
-    @onCheckChange: CreatureList.checkWhite(self:isChecked())
+    @onCheckChange: AlertList.checkWhite(self:isChecked())
 

@@ -66,6 +66,14 @@ function Modules.getListenerSignalIgnores()
   return ignores
 end
 
+function Modules.getOptions()
+  local options = {}
+  for k, module in pairs(modules) do
+    if module then options[module:getId()] = module:getOptions() end
+  end
+  return options
+end
+
 function Modules.isModuleRegistered(moduleId)
   if table.empty(modules) then
     return false

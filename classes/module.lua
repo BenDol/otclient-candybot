@@ -114,6 +114,10 @@ function Module:getListenerSignalIgnores()
   return ignores
 end
 
+function Module:getOptions()
+  return self.handler.options
+end
+
 -- methods
 
 function Module:notify(key, state)

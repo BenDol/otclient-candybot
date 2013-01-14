@@ -71,7 +71,7 @@ function Helper.startChooseItem(releaseCallback)
 end
 
 function Helper.getActiveRingId(itemid)
-  return rings[itemid] or 0
+  return Rings[itemid] or 0
 end
 
 --[[function getTargetsInArea(pos, radius, aggressiveness) --this function will be deprecated completely in the near future, do not use

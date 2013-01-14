@@ -21,7 +21,7 @@ Panel
     anchors.left: parent.left
     anchors.top: prev.bottom
     margin-top: 10
-    @onClick: AfkModule.creatureListDialog()
+    @onClick: AfkModule.toggleAlertList()
 
   HorizontalSeparator
     anchors.left: parent.left
@@ -47,13 +47,6 @@ Panel
     &option: g_settings.get('AutoEatSelect')
     options:
       - Any
-      - Meat
-      - Fish
-      - Fire Mushroom
-      - Ham
-      - Dragon Ham
-      - Brown Bread
-      - Brown Mushroom
 
   HorizontalSeparator
     anchors.left: parent.left
@@ -194,6 +187,7 @@ Panel
     anchors.left: MagicTrainSpell.left
     anchors.top: MagicTrainSpell.bottom
     margin-top: 6
+    mouse-scroll: false
     show-value: true
     symbol: %
     minimum: 1
