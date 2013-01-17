@@ -1,39 +1,37 @@
-ListRow < Label
-  font: verdana-11px-monochrome
-  background-color: alpha
-  text-offset: 2 0
-  focusable: true
-
-  $focus:
-    background-color: #ffffff22
-    color: #ffffff
-
 Panel
   id: huntingPanel
   anchors.left: parent.left
   anchors.right: parent.right
   anchors.top: parent.top
   padding-right: 8
-  height: 340
+  height: 540
 
-  Label
-    id: targetListLabel
-    text: Target List
-    anchors.top: parent.top
+  BotOptionCheckBox
+    id: AutoTarget
+    width: 90
+    !text: tr('Auto Target')
+    !tooltip: tr('Automatically target creatures in the target list.')
     anchors.left: parent.left
-    margin-top: 5
+    anchors.top: parent.top
+
+  //Label
+    //id: targetListLabel
+    //!text: tr('Target List')
+    //anchors.top: AutoTarget.bottom
+    //anchors.left: parent.left
+    //margin-top: 5
 
   TextList
     id: TargetList
-    anchors.top: targetListLabel.bottom
-    anchors.left: targetListLabel.left
+    anchors.top: AutoTarget.bottom
+    anchors.left: AutoTarget.left
     margin-bottom: 5
     margin-top: 5
     padding: 1
     focusable: false
     vertical-scrollbar: targetScrollBar
     width: 150
-    height: 150
+    height: 180
 
   VerticalScrollBar
     id: targetScrollBar
@@ -43,10 +41,96 @@ Panel
     step: 14
     pixels-scroll: true
 
+  Panel
+    id: settingPanel
+    anchors.left: TargetList.right
+    anchors.right: parent.right
+    anchors.top: parent.top
+    anchors.bottom: newTargetButton.bottom
+    enabled: false
+
+    Button
+      id: prevSettingButton
+      !text: tr('<')
+      anchors.left: parent.left
+      anchors.top: parent.top
+      margin-bottom: 5
+      width: 15
+      height: 15
+
+    Button
+      id: newSettingButton
+      !text: tr('New Setting')
+      anchors.right: nextSettingButton.left
+      anchors.left: prevSettingButton.right
+      anchors.top: prevSettingButton.top
+      margin-left: 8
+      margin-right: 8
+      width: 91
+      height: 15
+
+    Button
+      id: nextSettingButton
+      !text: tr('>')
+      anchors.right: parent.right
+      anchors.top: prevSettingButton.top
+      width: 15
+      height: 15
+
+    Panel
+      anchors.top: prevSettingButton.bottom
+      anchors.bottom: parent.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      //border-width: 1
+
+      Label
+        id: targetSettingLabel
+        !text: tr('Setting:')
+        anchors.top: parent.top
+        anchors.left: parent.left
+        margin-left: 5
+        margin-top: 5
+
+      Label
+        id: targetSettingNumber
+        !text: tr('1/1')
+        anchors.top: targetSettingLabel.top
+        anchors.left: targetSettingLabel.right
+        margin-left: 5
+
+      Label
+        id: settingHpRangeLabel
+        !text: tr('Health Range')
+        !tooltip: tr('The minimum health percent required to target.')
+        anchors.top: targetSettingLabel.bottom
+        anchors.left: targetSettingLabel.left
+        margin-top: 5
+        margin-left: 5
+
+      HorizontalScrollBar
+        id: healthRangeScrollBar
+        width: 120
+        anchors.left: settingHpRangeLabel.left
+        anchors.right: parent.right
+        anchors.top: settingHpRangeLabel.bottom
+        margin-top: 6
+        mouse-scroll: false
+        show-value: true
+        symbol: %
+        minimum: 1
+        maximum: 100
+
   Button
     id: newTargetButton
-    text: New Target
+    !text: tr('New Target')
     anchors.left: TargetList.left
     anchors.right: targetScrollBar.right
     anchors.top: TargetList.bottom
     margin-top: 5
+
+  HorizontalSeparator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 10

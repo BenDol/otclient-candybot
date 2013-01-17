@@ -6,6 +6,9 @@ dofile('consts.lua')
 dofile('helper.lua')
 dofile('logger.lua')
 
+dofile('classes/target.lua')
+dofile('classes/attack.lua')
+
 local botWindow
 local botButton
 local botTabBar

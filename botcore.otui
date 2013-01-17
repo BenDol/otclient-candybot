@@ -53,7 +53,7 @@ BotTabBarButton < TabBarButton
 MainWindow
   id: botWindow
   !text: tr('BotCore')
-  size: 335 535
+  size: 355 535
   
   @onEnter: UIBotCore.hide()
   @onEscape: UIBotCore.hide()

@@ -14,7 +14,7 @@ function AutoFishing.Event(event)
     end
 
     if allowFishing then
-      local tiles = Helper.getTileArray()
+      local tiles = player:getTileArray()
       local waterTiles = {}
       local j = 1
 

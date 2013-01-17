@@ -9,7 +9,7 @@ Panel
   BotOptionCheckBox
     id: CreatureAlert
     width: 220
-    !text: tr('Alert on creature appearance')
+    !text: tr('Alert Creature Appearance')
     !tooltip: tr('Play a sound alert when a creature appears.')
     anchors.left: parent.left
     anchors.top: parent.top
@@ -102,7 +102,7 @@ Panel
 
   BotOptionCheckBox
     id: RuneMakeOpenContainer
-    !text: tr('Check open containers')
+    !text: tr('Check Open Containers')
     !tooltip: tr('Check if there is a blank rune in an open container\nin order to avoid saying the spell words repetitively\nwithout the magic item.')
     anchors.left: parent.left
     anchors.top: prev.top
@@ -144,7 +144,7 @@ Panel
 
   Button
     id: SelectReplaceItem
-    !text: tr('Select\nitem')
+    !text: tr('Select\nItem')
     width: 70
     height: 34
     anchors.left: prev.right
@@ -177,7 +177,7 @@ Panel
   Label
     id: MagicTrainSpell
     width: 130
-    !text: tr('Mana required:')
+    !text: tr('Mana Required:')
     anchors.right: parent.right
     anchors.top: MagicTrain.top
 

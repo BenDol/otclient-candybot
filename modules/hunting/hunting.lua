@@ -5,8 +5,6 @@ local Panel = {
   SelectReplaceItem
 }
 
-local uiCreatureList
-
 function HuntingModule.getPanel() return Panel end
 function HuntingModule.setPanel(panel) Panel = panel end
 

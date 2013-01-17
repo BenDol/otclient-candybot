@@ -30,30 +30,6 @@ function Helper.getItemUseDelay()
   return ping + 200
 end
 
-function Helper.getTileArray()
-  local tiles = {}
-
-  local player = g_game.getLocalPlayer()
-
-  if player == nil then
-    return nil
-  end
-
-  local firstTile = player:getPosition()
-  firstTile.x = firstTile.x - 7
-  firstTile.y = firstTile.y - 5
-
-  for i = 1, 165 do
-    local position = player:getPosition()
-    position.x = firstTile.x + (i % 15)
-    position.y = math.floor(firstTile.y + (i / 14))
-
-    tiles[i] = g_map.getTile(position)
-  end
-
-  return tiles
-end
-
 function Helper.startChooseItem(releaseCallback)
   if not releaseCallback then
     error("No mouse release callback parameter set.")

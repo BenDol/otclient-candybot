@@ -2,6 +2,8 @@
 AfkModule.CreatureAlert = {}
 CreatureAlert = AfkModule.CreatureAlert
 
+local alertSoundChannel = g_sounds.getChannel(1)
+
 function CreatureAlert.Event(event)
   local blackList = CreatureList.getBlackList()
   local whiteList = CreatureList.getWhiteList()
@@ -19,14 +21,14 @@ function CreatureAlert.Event(event)
 
   if CreatureList.getBlackOrWhite() then -- black
     for k, v in pairs (creatures) do
-      if v ~= player and CreatureList.isBlackListed(v:getName()) then
+      if v ~= player and AlertList.isBlackListed(v:getName()) then
         alert = true
         break
       end
     end
   else -- white
     for k, v in pairs (creatures) do
-      if v ~= player and not CreatureList.isWhiteListed(v:getName()) then
+      if v ~= player and not AlertList.isWhiteListed(v:getName()) then
         alert = true
         break
       end
@@ -43,9 +45,9 @@ function CreatureAlert.Event(event)
 end
 
 function CreatureAlert.alert()
-  g_sounds.playMusic('alert.ogg', 0)
+  alertSoundChannel:enqueue('alert.ogg', 0)
 end
 
 function CreatureAlert.stopAlert()
-  g_sounds.stopMusic(0)
+  alertSoundChannel.stop()
 end

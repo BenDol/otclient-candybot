@@ -72,7 +72,6 @@ function AutoHaste.execute(player, tries)
       listener:setConnection(connection)
     end
   else
-    -- tried too many times
     -- player is out of mana need to reconnect to onManaChange
     listener:setConnection({function()
       connect(LocalPlayer, { onManaChange = AutoHaste.check })
