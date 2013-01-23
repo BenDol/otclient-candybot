@@ -8,7 +8,7 @@ BotPanel < Panel
   UIWidget
     id: botIcon
     size: 16 16
-    icon-source: icon.png
+    icon-source: icon
     anchors.left: parent.left
     anchors.top: parent.top
     !tooltip: tr('Disabled')

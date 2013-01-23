@@ -26,8 +26,8 @@ LogLabel < UILabel
   text-wrap: true
   text-auto-resize: true
 
-BotTabBar < TabBar
-BotTabBarPanel < TabBarPanel
+BotTabBar < MoveableTabBar
+BotTabBarPanel < MoveableTabBarPanel
 
   ScrollablePanel
     id: tabBuffer
@@ -46,7 +46,7 @@ BotTabBarPanel < TabBarPanel
     step: 14
     pixels-scroll: true
 
-BotTabBarButton < TabBarButton
+BotTabBarButton < MoveableTabBarButton
   height: 25
   padding: 18
 
@@ -74,7 +74,7 @@ MainWindow
     anchors.left: parent.left
     anchors.right: parent.right
     height: 330
-    image-source: /images/contentpanel.png
+    image-source: /images/ui/panel_content
     image-color: #ffffff99
     padding-left: 9
     padding-top: 6

@@ -10,7 +10,7 @@ local Panel = {
 function BotModule.getPanel() return Panel end
 
 function BotModule.init(window)
-  g_ui.importStyle('bot.otui')
+  g_ui.importStyle('bot')
   Panel = g_ui.createWidget('BotPanel', window)
 
   Panel.BotEnabled = Panel:getChildById('BotEnabled')

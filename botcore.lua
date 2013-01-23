@@ -51,7 +51,7 @@ function UIBotCore.init()
   botWindow = g_ui.displayUI('botcore.otui')
   botWindow:setVisible(false)
 
-  botButton = TopMenu.addRightGameToggleButton('botButton', 'Bot (Ctrl+Shift+B)', 'botcore.png', UIBotCore.toggle)
+  botButton = modules.client_topmenu.addRightGameToggleButton('botButton', 'Bot (Ctrl+Shift+B)', 'botcore', UIBotCore.toggle)
   botButton:setOn(false)
 
   -- bind keys
