@@ -1,7 +1,7 @@
 BotModule = {}
 
--- load module logic
-dofiles('logic')
+-- load module events
+dofiles('events')
 
 local Panel = {
   BotEnabled

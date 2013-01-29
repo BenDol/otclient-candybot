@@ -1,5 +1,8 @@
 HuntingModule = {}
 
+-- load module events
+dofiles('events')
+
 local Panel = {
   ItemToReplace,
   SelectReplaceItem

@@ -41,7 +41,7 @@ function Helper.startChooseItem(releaseCallback)
   connect(mouseGrabberWidget, { onMouseRelease = releaseCallback })
   
   mouseGrabberWidget:grabMouse()
-  g_mouse.setTargetCursor()
+  g_mouse.pushCursor('target')
 
   UIBotCore.hide()
 end

@@ -1,7 +1,7 @@
 AfkModule = {}
 
--- load module logic
-dofiles('logic')
+-- load module events
+dofiles('events')
 
 local Panel = {
   ItemToReplace,
@@ -68,7 +68,7 @@ function AfkModule.startChooseReplaceItem()
   connect(mouseGrabberWidget, { onMouseRelease = AfkModule.onChooseReplaceItemMouseRelease })
   
   mouseGrabberWidget:grabMouse()
-  g_mouse.setTargetCursor()
+  g_mouse.pushCursor('target')
 
   UIBotCore.hide()
 end
@@ -103,7 +103,7 @@ function AfkModule.onChooseReplaceItemMouseRelease(self, mousePosition, mouseBut
     UIBotCore.show()
   end
 
-  g_mouse.restoreCursor()
+  g_mouse.popCursor()
   self:ungrabMouse()
   self:destroy()
 end
@@ -111,7 +111,6 @@ end
 function AfkModule.toggleAlertList()
   if g_game.isOnline() then
     AlertList:toggle()
-    --AlertList:focus()
   end
 end
 

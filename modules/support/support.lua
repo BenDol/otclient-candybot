@@ -1,7 +1,7 @@
 SupportModule = {}
 
--- load module logic
-dofiles('logic')
+-- load module events
+dofiles('events')
 
 local Panel = {
   CurrentHealthItem,
@@ -72,7 +72,7 @@ function SupportModule.onChooseHealthItem(self, mousePosition, mouseButton)
     UIBotCore.show()
   end
 
-  g_mouse.restoreCursor()
+  g_mouse.popCursor()
   self:ungrabMouse()
   self:destroy()
 end
@@ -105,7 +105,7 @@ function SupportModule.onChooseManaItem(self, mousePosition, mouseButton)
     UIBotCore.show()
   end
 
-  g_mouse.restoreCursor()
+  g_mouse.popCursor()
   self:ungrabMouse()
   self:destroy()
 end
