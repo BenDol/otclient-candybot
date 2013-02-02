@@ -103,7 +103,7 @@ Panel
   BotOptionCheckBox
     id: RuneMakeOpenContainer
     !text: tr('Check Open Containers')
-    !tooltip: tr('Check if there is a blank rune in an open container\nin order to avoid saying the spell words repetitively\nwithout the magic item.')
+    !tooltip: tr('Check if there is a blank rune in an open container\nin order to avoid saying the spell words repetitively\nwithout the magic item. (Will always check on Cipsoft Tibia)')
     anchors.left: parent.left
     anchors.top: prev.top
     width: 180

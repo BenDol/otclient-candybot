@@ -42,15 +42,17 @@ table.merge(AfkModule, {
   creatureAlertEvent = 1,
   antiKickEvent = 2,
   autoFishingEvent = 3,
-  runeMakeEvent = 4,
-  autoReplaceWeaponEvent = 5,
-  magicTrainEvent = 6
+  autoEatEvent = 4,
+  runeMakeEvent = 5,
+  autoReplaceWeaponEvent = 6,
+  magicTrainEvent = 7
 })
 
 AfkModule.events = {
   [AfkModule.creatureAlertEvent] = {option = "CreatureAlert", callback = AfkModule.CreatureAlert.Event},
   [AfkModule.antiKickEvent] = {option = "AntiKick", callback = AfkModule.AntiKick.Event},
   [AfkModule.autoFishingEvent] = {option = "AutoFishing", callback = AfkModule.AutoFishing.Event},
+  [AfkModule.autoEatEvent] = {option = "AutoEat", callback = AfkModule.AutoEat.Event},
   [AfkModule.runeMakeEvent] = {option = "RuneMake", callback = AfkModule.RuneMake.Event},
   [AfkModule.autoReplaceWeaponEvent] = {option = "AutoReplaceWeapon", callback = AfkModule.AutoReplaceHands.Event},
   [AfkModule.magicTrainEvent] = {option = "MagicTrain", callback = AfkModule.MagicTrain.Event}
@@ -59,11 +61,11 @@ AfkModule.events = {
 --[[ Listeners ]]
 
 table.merge(AfkModule, {
-  autoEatListener = 1
+  --
 })
 
 AfkModule.listeners = {
-  [AfkModule.autoEatListener] = {option = "AutoEat", connect = AfkModule.AutoEat.ConnectListener, disconnect = AfkModule.AutoEat.DisconnectListener},
+  --
 }
 
 -- [[ Functions ]]

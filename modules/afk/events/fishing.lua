@@ -15,25 +15,15 @@ function AutoFishing.Event(event)
 
     if allowFishing then
       local tiles = player:getTileArray()
-      local waterTiles = {}
-      local j = 1
-
-      for i = 1, 165 do
-        if not table.empty(tiles) and tiles[i] and tiles[i]:getThing() then
-          if table.contains(Fishing['Tiles'], tiles[i]:getThing():getId()) then
-            table.insert(waterTiles, j, tiles[i])
-            j = j + 1
-          end
-        end
-      end
+      local waterTiles = Helper.getItemFromTiles(tiles, Fishing['Tiles'])
 
       if #waterTiles > 0 then
         rdm = math.random(1, #waterTiles)
-        g_game.useInventoryItemWith(Fishing['Fishing Rod'], waterTiles[rdm]:getThing())
+        Helper.safeUseInventoryItemWith(Fishing['Fishing Rod'], waterTiles[rdm]:getThing())
       else
         BotLogger.warning("No water tiles found for fishing.")
       end
     end
   end
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(500, 3000))
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(500, 3000))
 end

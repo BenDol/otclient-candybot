@@ -26,5 +26,5 @@ function AutoTarget.Event(event)
       if attackTarget then g_game.attack(attackTarget) end
     end
   end
-  EventHandler.rescheduleEvent(HuntingModule.getModuleId(), event, math.random(500, 3000))
+  EventHandler.rescheduleEvent(HuntingModule.getModuleId(), event, Helper.safeDelay(500, 3000))
 end

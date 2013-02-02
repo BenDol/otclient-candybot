@@ -26,5 +26,5 @@ function MagicTrain.Event(event)
     end
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(1500, 3000))
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(2000, 3000))
 end

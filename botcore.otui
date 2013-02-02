@@ -52,7 +52,7 @@ BotTabBarButton < MoveableTabBarButton
 
 MainWindow
   id: botWindow
-  !text: tr('BotCore')
+  !text: tr('CandyBot')
   size: 355 535
   
   @onEnter: UIBotCore.hide()
@@ -124,7 +124,7 @@ MainWindow
 
   Button
     id: hideButton
-    text: Hide
+    !text: tr('Hide')
     width: 64
     height: 15
     anchors.right: parent.right
@@ -132,3 +132,15 @@ MainWindow
     margin-right: -6
     margin-bottom: -5
     @onClick: UIBotCore.hide()
+
+  Label
+    id: versionInfo
+    !text: tr('')
+    anchors.left: parent.left
+    anchors.bottom: parent.bottom
+    margin-bottom: -5
+    color: #ffffff44
+    text-auto-resize: true
+
+    $hover:
+      color: #ffffffff

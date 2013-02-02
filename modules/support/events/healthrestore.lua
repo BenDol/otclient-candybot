@@ -48,10 +48,9 @@ function AutoHeal.onHealthChange(player, health, maxHealth, oldHealth, restoreTy
     local delay = Helper.getItemUseDelay()
 
     if player:getHealthPercent() < healthValue then
-      addEvent(function() g_game.useInventoryItemWith(potion, player) end)
+      addEvent(function() Helper.safeUseInventoryItemWith(potion, player) end)
     end
 
-    -- check if another heal is required
     nextHeal[RestoreType.item] = scheduleEvent(function()
       local player = g_game.getLocalPlayer()
       if not player then return end

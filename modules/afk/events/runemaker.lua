@@ -10,24 +10,34 @@ function RuneMake.Event(event)
     if BotModule.isPrecisionMode() then
       local spell = Spells.getSpellByWords(words)
 
-      if spell and player:getSoul() < spell.soul then
-        BotLogger.warning("Not enough soul points("..spell.soul..") to make this rune.")
+      if spell then
+        if player:getSoul() < spell.soul then
+          BotLogger.warning("Not enough soul points("..spell.soul..") to make this rune.")
+          reschedule = true
+        elseif player:getMana() < spell.mana then
+          BotLogger.warning("Not enough mana("..spell.mana..") to make this rune.")
+          reschedule = true
+        end
 
-        EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(3000, 7000))
-        return false
+        if reschedule then
+          EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(3000, 9000))
+          return false
+        end
       end
     end
-    
-    if not AfkModule.getPanel():getChildById('RuneMakeOpenContainer'):isChecked() then
-      g_game.talk(words)
-      EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(6000, 15000))
+    local talkDelay = Helper.safeDelay(150, 600)
+
+    local checkContainer = AfkModule.getPanel():getChildById('RuneMakeOpenContainer'):isChecked()
+    if not checkContainer and not g_game.isOfficialTibia() then
+      scheduleEvent(function() g_game.talk(words) end, talkDelay)
+      EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(8000, 15000))
     end
 
     local blankRune = player:getItem(Runes.blank) -- blank rune item
     if blankRune ~= nil then
-      g_game.talk(words)
+      scheduleEvent(function() g_game.talk(words) end, talkDelay)
     end
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(3000, 7000))
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(3000, 9000))
 end

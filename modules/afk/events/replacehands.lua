@@ -26,11 +26,10 @@ function AutoReplaceHands.Event(event)
       return
     end
 
-
     if item ~= nil and player:getInventoryItem(hand) == nil then
       g_game.move(item, handPos, item:getCount())
     end
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(400, 800))
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(500, 1500))
 end

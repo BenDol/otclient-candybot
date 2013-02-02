@@ -120,7 +120,6 @@ function UIBotCore.offline()
   UIBotCore.hide()
 
   g_keyboard.unbindKeyDown('Ctrl+Shift+B')
-  -- do not remove autoReconnectEvent since it must be running even on offline state
 end
 
 function UIBotCore.toggle()

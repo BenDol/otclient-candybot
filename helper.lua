@@ -1,5 +1,34 @@
 Helper = {}
 
+function Helper.safeDelay(min, max)
+  if g_game.isOfficialTibia() then
+    return math.random(min, max)
+  end
+  return min
+end
+
+function Helper.safeUseInventoryItem(itemId)
+  if g_game.isOfficialTibia() then
+    local player = g_game.getLocalPlayer()
+    if player:getItemsCount(itemId) < 1 then
+      return false
+    end
+  end
+  g_game.useInventoryItem(itemId)
+  return true
+end
+
+function Helper.safeUseInventoryItemWith(itemId, thing)
+  if g_game.isOfficialTibia() then
+    local player = g_game.getLocalPlayer()
+    if player:getItemsCount(itemId) < 1 then
+      return false
+    end
+  end
+  g_game.useInventoryItemWith(itemId, thing)
+  return true
+end
+
 function Helper.hasEnoughMana(player, words)
   local spell = Spells.getSpellByWords(words)
   if spell then
@@ -21,13 +50,17 @@ function Helper.getSpellDelay(words)
       delay = spell.exhaustion + (ping / 3)
     end
   end
-  return delay
+  return Helper.safeDelay(delay, delay + 200)
 end
 
 function Helper.getItemUseDelay()
   local ping = g_game.getPing()
-  if ping < 1 then ping = 150 end
-  return ping + 200
+  if ping < 1 then
+    ping = 150
+  end
+  local delay = ping + 200
+
+  return Helper.safeDelay(delay, delay + 200)
 end
 
 function Helper.startChooseItem(releaseCallback)
@@ -48,6 +81,18 @@ end
 
 function Helper.getActiveRingId(itemid)
   return Rings[itemid] or 0
+end
+
+function Helper.getItemFromTiles(tiles, itemId)
+  local items = {}
+  for i = 1, 165 do
+    if not table.empty(tiles) and tiles[i] and tiles[i]:getThing() then
+      if table.contains(itemId, tiles[i]:getThing():getId()) then
+        table.insert(items, tiles[i])
+      end
+    end
+  end
+  return items
 end
 
 --[[function getTargetsInArea(pos, radius, aggressiveness) --this function will be deprecated completely in the near future, do not use

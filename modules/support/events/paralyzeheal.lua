@@ -30,7 +30,7 @@ function AutoParalyzeHeal.execute(player, tries)
 
   local delay = 0
   if g_game.isOnline() then
-    delay = math.random(50, 150)
+    delay = Helper.safeDelay(50, 350)
     if BotModule.isPrecisionMode() then
       if Helper.hasEnoughMana(player, words) then
         scheduleEvent(function() g_game.talk(words) end, delay)

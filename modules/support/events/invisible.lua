@@ -30,7 +30,7 @@ function AutoInvisible.execute(player, tries)
 
   local delay = 0
   if g_game.isOnline() then
-    delay = math.random(200, 300)
+    delay = Helper.safeDelay(200, 600)
     if BotModule.isPrecisionMode() then
       if Helper.hasEnoughMana(player, words) then
         scheduleEvent(function() g_game.talk(words) end, delay)

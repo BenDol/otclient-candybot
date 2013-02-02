@@ -24,10 +24,9 @@ function AutoMana.onManaChange(player, mana, maxMana, oldMana, restoreType, trie
     local delay = Helper.getItemUseDelay()
 
     if player:getManaPercent() < manaValue then
-      addEvent(function() g_game.useInventoryItemWith(potion, player) end)
+      addEvent(function() Helper.safeUseInventoryItemWith(potion, player) end)
     end
 
-    -- check if another mana is required
     nextMana = scheduleEvent(function()
       local player = g_game.getLocalPlayer()
       if not player then return end

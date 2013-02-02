@@ -11,8 +11,8 @@ function AntiKick.Event(event)
     end
 
     addEvent(function() g_game.turn(direction) end)
-    scheduleEvent(function() g_game.turn(oldDir) end, math.random(700, 3000))
+    scheduleEvent(function() g_game.turn(oldDir) end, Helper.safeDelay(700, 3000))
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, math.random(180000, 300000))
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(180000, 300000))
 end
