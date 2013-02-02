@@ -11,7 +11,10 @@ Licensed under MIT, see LICENSE for more information.
 
 ##Showcase
 ![Screenshot](https://dl.dropbox.com/u/49948294/otclient/candybot_support.png) 
-![Screenshot](https://dl.dropbox.com/u/49948294/otclient/candybot_afk.png)
+ ![Screenshot](https://dl.dropbox.com/u/49948294/otclient/candybot_afk.png)
 
 ##Installation
 To install CandyBot all you need to do is copy the root directory `otclient-candybot` into the [otclient](https://github.com/edubart/otclient) `/mods` directory and start otclient.
+
+##Contributing
+If you are interested in contributing to OTClients CandyBot module, feel free to create pull requests. People that would like to be 'repo contributors' can be added once they have made enough satisfying contributions to this project.
