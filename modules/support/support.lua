@@ -36,8 +36,7 @@ function SupportModule.init(window)
   local ringItemBox = Panel:getChildById('RingReplaceDisplay')
   Panel.RingReplaceDisplay = ringItemBox
 
-  ringComboBox.onOptionChange = function(combobox, text)
-    print(Helper.getRingIdByName(text))
+  ringComboBox.onOptionChange = function(widget, text, data)
     ringItemBox:setItemId(Helper.getRingIdByName(text))
   end
   for k,v in pairs(Rings) do

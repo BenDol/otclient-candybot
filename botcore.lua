@@ -207,8 +207,10 @@ function UIBotCore.changeOption(key, state, loading)
 
       local style = widget:getStyle().__class
 
-      if style == 'UITextEdit' or style == 'UIComboBox' then
+      if style == 'UITextEdit' then
         widget:setText(state)
+      elseif style == 'UIComboBox' then
+        widget:setCurrentOption(state)
       elseif style == 'UICheckBox' then
         widget:setChecked(state)
       elseif style == 'UIItem' then

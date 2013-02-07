@@ -105,6 +105,7 @@ RingIds = {
 }
 
 Rings = {
+  ['Dwarven Ring'] = 3097,
   ['Time Ring'] = 3053,
   ['Energy Ring'] = 3051,
   ['Stealth Ring'] = 3049,
