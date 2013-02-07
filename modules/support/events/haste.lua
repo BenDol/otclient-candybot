@@ -30,19 +30,16 @@ function AutoHaste.execute(player, tries)
 
   local delay = 0
   if g_game.isOnline() then
-
     local hasteHealth = tonumber(SupportModule.getPanel():getChildById('HasteHealthBar'):getValue())
-    local percent = hasteHealth and true or false
     
-    if hasteHealth ~= nil then
-      if percent then
-        if player:getHealthPercent() < tonumber(hasteHealth) then
-          return
-        end
-      else
-        if player:getHealth() < hasteHealth then
-          return
-        end
+    local percent = hasteHealth and true or false
+    if percent then
+      if player:getHealthPercent() < tonumber(hasteHealth) then
+        return
+      end
+    else
+      if player:getHealth() < hasteHealth then
+        return
       end
     end
 

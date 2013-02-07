@@ -7,7 +7,9 @@ local Panel = {
   CurrentHealthItem,
   SelectHealthItem,
   CurrentManaItem,
-  SelectManaItem
+  SelectManaItem,
+  RingToReplace,
+  RingReplaceDisplay
 }
 
 function SupportModule.getPanel() return Panel end
@@ -26,8 +28,22 @@ function SupportModule.init(window)
   Panel.SelectHealthItem = Panel:getChildById('SelectHealthItem')
 
   Panel.CurrentManaItem = Panel:getChildById('CurrentManaItem')
-  Panel.SelectManaItem = Panel:getChildById('SelectManaItem')  
+  Panel.SelectManaItem = Panel:getChildById('SelectManaItem')
 
+  local ringComboBox = Panel:getChildById('RingToReplace')
+  Panel.RingToReplace = ringComboBox
+
+  local ringItemBox = Panel:getChildById('RingReplaceDisplay')
+  Panel.RingReplaceDisplay = ringItemBox
+
+  ringComboBox.onOptionChange = function(combobox, text)
+    print(Helper.getRingIdByName(text))
+    ringItemBox:setItemId(Helper.getRingIdByName(text))
+  end
+  for k,v in pairs(Rings) do
+    ringComboBox:addOption(k)
+  end
+  
   SupportModule.parentUI = window
 
   -- register module

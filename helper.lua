@@ -33,9 +33,8 @@ function Helper.hasEnoughMana(player, words)
   local spell = Spells.getSpellByWords(words)
   if spell then
     return player:getMana() >= spell.mana
-  else
-    return false
   end
+  return false
 end
 
 function Helper.getSpellDelay(words)
@@ -58,9 +57,7 @@ function Helper.getItemUseDelay()
   if ping < 1 then
     ping = 150
   end
-  local delay = ping + 200
-
-  return Helper.safeDelay(delay, delay + 200)
+  return Helper.safeDelay(ping + 200, ping + 400)
 end
 
 function Helper.startChooseItem(releaseCallback)
@@ -80,7 +77,11 @@ function Helper.startChooseItem(releaseCallback)
 end
 
 function Helper.getActiveRingId(itemid)
-  return Rings[itemid] or 0
+  return RingIds[itemid]
+end
+
+function Helper.getRingIdByName(name)
+  return Rings[name]
 end
 
 function Helper.getItemFromTiles(tiles, itemId)

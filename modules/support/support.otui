@@ -4,7 +4,7 @@ Panel
   anchors.right: parent.right
   anchors.top: parent.top
   padding-right: 10
-  height: 360
+  height: 440
 
   BotOptionCheckBox
     id: AutoHeal
@@ -241,3 +241,39 @@ Panel
     anchors.top: AutoManaShield.top
     //margin-right: 10 
     width: 125
+
+  HorizontalSeparator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 8
+
+  BotOptionCheckBox
+    id: AutoReplaceRing
+    !text: tr('Auto Replace Ring')
+    !tooltip: tr('Automatically "refill" the ring slot (container of replacing item must be open).')
+    anchors.left: parent.left
+    anchors.top: prev.bottom
+    margin-top: 10
+    width: 150
+
+  BotOptionComboBox
+    id: RingToReplace
+    anchors.left: next.right
+    anchors.verticalCenter: next.verticalCenter
+    margin-left: 5
+    width: 105
+    mouse-scroll: false
+
+  Item
+    id: RingReplaceDisplay
+    anchors.left: AutoReplaceRing.left
+    anchors.top: AutoReplaceRing.bottom
+    margin-top: 6
+    virtual: true
+
+  HorizontalSeparator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 8

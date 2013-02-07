@@ -32,17 +32,20 @@ SupportModule.options = {
   ['ParalyzeHealText'] = 'utani hur',
 
   ['AutoManaShield'] = false,
-  ['AutoInvisible'] = false
+  ['AutoInvisible'] = false,
+
+  ['AutoReplaceRing'] = false,
+  ['RingToReplace'] = ''
 }
 
 --[[ Events ]]
 
 table.merge(SupportModule, {
-  --
+  autoReplaceRingEvent = 1
 })
 
 SupportModule.events = {
-  --
+  [SupportModule.autoReplaceRingEvent] = {option = "AutoReplaceRing", callback = SupportModule.AutoReplaceRing.Event}
 }
 
 --[[ Listeners ]]

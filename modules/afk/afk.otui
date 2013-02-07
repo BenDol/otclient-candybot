@@ -121,8 +121,8 @@ Panel
     !tooltip: tr('Automatically "refill" used throwing weapons (container of replacing items must be open).')
     anchors.left: parent.left
     anchors.top: prev.top
-    width: 160
     margin-top: 10
+    width: 160
 
   BotOptionComboBox
     id: AutoReplaceWeaponSelect

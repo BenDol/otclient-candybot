@@ -43,7 +43,7 @@ BotTabBarPanel < MoveableTabBarPanel
     anchors.right: parent.right
     padding-top: -6
     padding-bottom: -6
-    step: 14
+    step: 27
     pixels-scroll: true
 
 BotTabBarButton < MoveableTabBarButton

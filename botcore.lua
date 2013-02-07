@@ -125,7 +125,6 @@ end
 function UIBotCore.toggle()
   if botWindow:isVisible() then
     UIBotCore.hide()
-    
   else
     UIBotCore.show()
     botWindow:focus()

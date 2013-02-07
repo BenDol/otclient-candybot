@@ -15,7 +15,12 @@ function AutoFishing.Event(event)
 
     if allowFishing then
       local tiles = player:getTileArray()
-      local waterTiles = Helper.getItemFromTiles(tiles, Fishing['Tiles'])
+      
+      local waterIds = Fishing['Tiles']
+      if g_game.isOfficialTibia() then
+        waterIds = Water
+      end
+      local waterTiles = Helper.getItemFromTiles(tiles, waterIds)
 
       if #waterTiles > 0 then
         rdm = math.random(1, #waterTiles)
@@ -25,5 +30,5 @@ function AutoFishing.Event(event)
       end
     end
   end
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(500, 3000))
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(2000, 5000))
 end
