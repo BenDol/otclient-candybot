@@ -17,7 +17,7 @@ function MagicTrain.Event(event)
       end
 
       if spell then
-        if g_game.getLocalPlayer():getMana() >= spell.mana then
+        if player:getMana() >= spell.mana then
           g_game.talk(spell.words)
         end
       else

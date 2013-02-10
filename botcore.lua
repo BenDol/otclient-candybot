@@ -54,13 +54,12 @@ function UIBotCore.init()
   botButton = modules.client_topmenu.addRightGameToggleButton('botButton', 'Bot (Ctrl+Shift+B)', 'botcore', UIBotCore.toggle)
   botButton:setOn(false)
 
-  -- bind keys
-  g_keyboard.bindKeyDown('Ctrl+Shift+B', UIBotCore.toggle)
-
   botTabBar = botWindow:getChildById('botTabBar')
   botTabBar:setContentWidget(botWindow:getChildById('botContent'))
   botTabBar:setTabSpacing(-1)
-  
+
+  -- bind keys
+  g_keyboard.bindKeyDown('Ctrl+Shift+B', UIBotCore.toggle)
   g_keyboard.bindKeyPress('Tab', function() botTabBar:selectNextTab() end, botWindow)
   g_keyboard.bindKeyPress('Shift+Tab', function() botTabBar:selectPrevTab() end, botWindow)
 
@@ -165,8 +164,10 @@ function UIBotCore.getParent()
 end
 
 function UIBotCore.loadOptions()
-  if UIBotCore.options[g_game.getCharacterName()] ~= nil then
-    for i, v in pairs(UIBotCore.options[g_game.getCharacterName()]) do
+  local char = g_game.getCharacterName()
+
+  if UIBotCore.options[char] ~= nil then
+    for i, v in pairs(UIBotCore.options[char]) do
       addEvent(function() UIBotCore.changeOption(i, v, true) end)
     end
   else
@@ -177,7 +178,7 @@ function UIBotCore.loadOptions()
 end
 
 function UIBotCore.changeOption(key, state, loading)
-  loading = loading or false
+  local loading = loading or false
   if state == nil then
     return
   end
@@ -220,11 +221,12 @@ function UIBotCore.changeOption(key, state, loading)
         if value then widget:setValue(value) end
       end
     end
+    local char = g_game.getCharacterName()
 
-    if UIBotCore.options[g_game.getCharacterName()] == nil then
-      UIBotCore.options[g_game.getCharacterName()] = {}
+    if UIBotCore.options[char] == nil then
+      UIBotCore.options[char] = {}
     end
 
-    UIBotCore.options[g_game.getCharacterName()][key] = state
+    UIBotCore.options[char][key] = state
   end
 end

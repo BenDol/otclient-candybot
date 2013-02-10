@@ -52,9 +52,9 @@ function AutoMana.ConnectItemListener(listener)
       player:getMaxMana(), player:getMana(), RestoreType.item))
   end
 
-  connect(LocalPlayer, { onManaChange = AutoMana.execute })
+  connect(LocalPlayer, { onManaChange = AutoMana.executeItem })
 end
 
 function AutoMana.DisconnectItemListener(listener)
-  disconnect(LocalPlayer, { onManaChange = AutoMana.execute })
+  disconnect(LocalPlayer, { onManaChange = AutoMana.executeItem })
 end

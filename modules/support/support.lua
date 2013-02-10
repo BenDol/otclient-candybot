@@ -37,6 +37,7 @@ function SupportModule.init(window)
   Panel.RingReplaceDisplay = ringItemBox
 
   ringComboBox.onOptionChange = function(widget, text, data)
+    UIBotCore.changeOption(widget:getId(), widget:getCurrentOption().text)
     ringItemBox:setItemId(Helper.getRingIdByName(text))
   end
   for k,v in pairs(Rings) do

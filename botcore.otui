@@ -16,7 +16,7 @@ BotOptionVerticalScrollBar < VerticalScrollBar
 BotOptionComboBoxPopupMenuButton < ComboBoxPopupMenuButton
 BotOptionComboBoxPopupMenu < ComboBoxPopupMenu
 BotOptionComboBox < ComboBox
-  @onOptionChange: UIBotCore.changeOption(self:getId(), self:getText())
+  @onOptionChange: UIBotCore.changeOption(self:getId(), self:getCurrentOption().text)
 
 LogLabel < UILabel
   font: verdana-11px-antialised

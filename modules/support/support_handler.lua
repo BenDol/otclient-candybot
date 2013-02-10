@@ -35,7 +35,7 @@ SupportModule.options = {
   ['AutoInvisible'] = false,
 
   ['AutoReplaceRing'] = false,
-  ['RingToReplace'] = ''
+  ['RingToReplace'] = 'Might Ring'
 }
 
 --[[ Events ]]

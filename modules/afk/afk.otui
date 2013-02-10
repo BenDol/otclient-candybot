@@ -44,7 +44,6 @@ Panel
     anchors.top: AutoEat.top
     width: 140
     mouse-scroll: false
-    &option: g_settings.get('AutoEatSelect')
     options:
       - Any
 
@@ -130,7 +129,6 @@ Panel
     anchors.top: prev.top
     width: 100
     mouse-scroll: false
-    &option: g_settings.get('AutoReplaceWeaponSelect')
     options:
       - Left Hand
       - Right Hand
