@@ -9,14 +9,20 @@ HuntingModule.dependencies = {
   "BotModule"
 }
 
+--[[ Default Options ]]
+
+HuntingModule.options = {
+  ['AutoTarget'] = false
+}
+
 --[[ Events ]]
 
 table.merge(HuntingModule, {
-  --
+  autoTarget = 1
 })
 
 HuntingModule.events = {
-  --[HuntingModule.creatureAlertEvent] = {option = "CreatureAlert", callback = HuntingModule.CreatureAlertEvent}
+  [HuntingModule.autoTarget] = {option = "AutoTarget", callback = HuntingModule.AutoTarget.Event}
 }
 
 --[[ Listeners ]]

@@ -37,6 +37,18 @@ function HuntingModule.terminate()
   Panel = nil
 end
 
--- logic
+function HuntingModule.addNewTarget()
+  HuntingModule.addToTargetList(Panel:getChildById('addTargetText'))
+end
+
+function HuntingModule.addToTargetList(textEdit)
+  if not textEdit or textEdit:getText() == '' then
+    return
+  end
+  local item = g_ui.createWidget('ListRow', Panel:getChildById('TargetList'))
+  item:setText(textEdit:getText())
+
+  textEdit:setText('')
+end
 
 return HuntingModule

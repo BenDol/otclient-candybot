@@ -51,8 +51,10 @@ function Player:getTargetsInArea(targetList)
   if g_game.isOnline() then
     creatures = g_map.getSpectators(self:getPosition(), false)
     for i, creature in ipairs(creatures) do
-      if creature ~= self and table.contains(targetList, creature:getName()) then
-        table.insert(targets, creature)
+      if creature:isMonster() then
+        if table.contains(targetList, creature:getName():lower(), true) then
+          table.insert(targets, creature)
+        end
       end
     end
   end

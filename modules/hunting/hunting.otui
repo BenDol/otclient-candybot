@@ -46,7 +46,7 @@ Panel
     anchors.left: TargetList.right
     anchors.right: parent.right
     anchors.top: parent.top
-    anchors.bottom: newTargetButton.bottom
+    anchors.bottom: addTargetText.bottom
     enabled: false
 
     Button
@@ -121,13 +121,23 @@ Panel
         minimum: 1
         maximum: 100
 
-  Button
-    id: newTargetButton
-    !text: tr('New Target')
+  TextEdit
+    id: addTargetText
     anchors.left: TargetList.left
+    anchors.right: next.left
+    anchors.top: TargetList.bottom
+    margin-top: 5
+    margin-right: 5
+
+  Button
+    id: addTargetButton
+    !text: tr('Add')
+    !tooltip: tr('Add a new target')
     anchors.right: targetScrollBar.right
     anchors.top: TargetList.bottom
     margin-top: 5
+    width: 40
+    @onClick: HuntingModule.addNewTarget()
 
   HorizontalSeparator
     anchors.left: parent.left
