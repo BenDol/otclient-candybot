@@ -6,9 +6,9 @@ local nextMana = nil
 
 function AutoMana.onManaChange(player, mana, maxMana, oldMana, restoreType, tries)
   if not tries and (oldMana - mana) < 0 then
-    return -- don't process manaing from a mana
+    return -- don't process manaing from a mana restore
   end
-  local tries = tries or 5
+  local tries = tries or 10
   local Panel = SupportModule.getPanel()
 
   if restoreType == RestoreType.item then
@@ -24,12 +24,13 @@ function AutoMana.onManaChange(player, mana, maxMana, oldMana, restoreType, trie
     local delay = Helper.getItemUseDelay()
 
     if player:getManaPercent() < manaValue then
-      addEvent(function() Helper.safeUseInventoryItemWith(potion, player) end)
+      Helper.safeUseInventoryItemWith(potion, player)
     end
 
     nextMana = scheduleEvent(function()
       local player = g_game.getLocalPlayer()
       if not player then return end
+
       mana, maxMana = player:getMana(), player:getMaxMana()
       if player:getManaPercent() < manaValue and tries > 0 then
         tries = tries - 1

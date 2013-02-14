@@ -5,8 +5,8 @@ AutoHeal = SupportModule.AutoHeal
 local nextHeal = {}
 
 function AutoHeal.onHealthChange(player, health, maxHealth, oldHealth, restoreType, tries)
-  if tries == nil and (oldHealth - health < 0) then
-    return -- don't process healing from a heal
+  if not tries and (oldHealth - health < 0) then
+    return -- don't process healing from a heal restore
   end
   local tries = tries or 10
   local Panel = SupportModule.getPanel()
@@ -17,14 +17,14 @@ function AutoHeal.onHealthChange(player, health, maxHealth, oldHealth, restoreTy
     
     local delay = 0
     if player:getHealthPercent() < healthValue then
-      addEvent(function() g_game.talk(spellText) end)
-
+      g_game.talk(spellText)
       delay = Helper.getSpellDelay(spellText)
     end
 
     nextHeal[RestoreType.cast] = scheduleEvent(function()
       local player = g_game.getLocalPlayer()
       if not player then return end
+
       health, maxHealth = player:getHealth(), player:getMaxHealth()
       if player:getHealthPercent() < healthValue and tries > 0 then
         tries = tries - 1
@@ -48,7 +48,7 @@ function AutoHeal.onHealthChange(player, health, maxHealth, oldHealth, restoreTy
     local delay = Helper.getItemUseDelay()
 
     if player:getHealthPercent() < healthValue then
-      addEvent(function() Helper.safeUseInventoryItemWith(potion, player) end)
+      Helper.safeUseInventoryItemWith(potion, player)
     end
 
     nextHeal[RestoreType.item] = scheduleEvent(function()

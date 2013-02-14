@@ -7,8 +7,8 @@ function Helper.safeDelay(min, max)
   return min
 end
 
-function Helper.safeUseInventoryItem(itemId)
-  if g_game.isOfficialTibia() then
+function Helper.safeUseInventoryItem(itemId, forceCheck)
+  if forceCheck or g_game.isOfficialTibia() then
     local player = g_game.getLocalPlayer()
     if player:getItemsCount(itemId) < 1 then
       return false
@@ -18,8 +18,8 @@ function Helper.safeUseInventoryItem(itemId)
   return true
 end
 
-function Helper.safeUseInventoryItemWith(itemId, thing)
-  if g_game.isOfficialTibia() then
+function Helper.safeUseInventoryItemWith(itemId, thing, forceCheck)
+  if forceCheck or g_game.isOfficialTibia() then
     local player = g_game.getLocalPlayer()
     if player:getItemsCount(itemId) < 1 then
       return false
