@@ -4,12 +4,18 @@ AutoMana = SupportModule.AutoMana
 
 local nextMana = nil
 
+local settings = {
+  [RestoreType.cast] = 'AutoMana', -- not implemented
+  [RestoreType.item] = 'AutoManaItem'
+}
+
 function AutoMana.onManaChange(player, mana, maxMana, oldMana, restoreType, tries)
-  if not tries and (oldMana - mana) < 0 then
-    return -- don't process manaing from a mana restore
-  end
   local tries = tries or 10
+
   local Panel = SupportModule.getPanel()
+  if not Panel:getChildById(settings[restoreType]):isChecked() then
+    return -- has since been unchecked
+  end
 
   if restoreType == RestoreType.item then
     local item = Panel:getChildById('CurrentManaItem'):getItem()
@@ -17,14 +23,12 @@ function AutoMana.onManaChange(player, mana, maxMana, oldMana, restoreType, trie
       Panel:getChildById('AutoManaItem'):setChecked(false)
       return
     end
-    local potion = item:getId()
-    local count = item:getCount()
 
     local manaValue = Panel:getChildById('ItemManaBar'):getValue()
     local delay = Helper.getItemUseDelay()
 
     if player:getManaPercent() < manaValue then
-      Helper.safeUseInventoryItemWith(potion, player)
+      Helper.safeUseInventoryItemWith(item:getId(), player)
     end
 
     nextMana = scheduleEvent(function()

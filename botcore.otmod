@@ -1,8 +1,8 @@
 Module
-  name: game_botcore
+  name: otclient_candybot
   description: Bot Addon
   author: Ben Dol (benis), Alexandre Severino (kilouco)
-  website: https://github.com/kilouco/otclient_bot
+  website: https://github.com/BeniS/otclient-candybot
 
   autoload: true
   autoload-priority: 1000

@@ -4,12 +4,18 @@ AutoHeal = SupportModule.AutoHeal
 
 local nextHeal = {}
 
+local settings = {
+  [RestoreType.cast] = 'AutoHeal',
+  [RestoreType.item] = 'AutoHealItem'
+}
+
 function AutoHeal.onHealthChange(player, health, maxHealth, oldHealth, restoreType, tries)
-  if not tries and (oldHealth - health < 0) then
-    return -- don't process healing from a heal restore
-  end
   local tries = tries or 10
+
   local Panel = SupportModule.getPanel()
+  if not Panel:getChildById(settings[restoreType]):isChecked() then
+    return -- has since been unchecked
+  end
 
   if restoreType == RestoreType.cast then
     local spellText = Panel:getChildById('HealSpellText'):getText()
@@ -41,14 +47,12 @@ function AutoHeal.onHealthChange(player, health, maxHealth, oldHealth, restoreTy
       Panel:getChildById('AutoHealthItem'):setChecked(false)
       return
     end
-    local potion = item:getId()
-    local count = item:getCount()
 
     local healthValue = Panel:getChildById('ItemHealthBar'):getValue()
     local delay = Helper.getItemUseDelay()
 
     if player:getHealthPercent() < healthValue then
-      Helper.safeUseInventoryItemWith(potion, player)
+      Helper.safeUseInventoryItemWith(item:getId(), player)
     end
 
     nextHeal[RestoreType.item] = scheduleEvent(function()
