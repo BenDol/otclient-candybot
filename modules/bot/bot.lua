@@ -46,7 +46,7 @@ function BotModule.stopItemInfo()
 end
 
 function BotModule.checkItem(widget, hovered)
-  if not UIBotCore.isEnabled() then
+  if not CandyBot.isEnabled() then
     return
   end
   

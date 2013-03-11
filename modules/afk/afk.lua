@@ -70,7 +70,7 @@ function AfkModule.startChooseReplaceItem()
   mouseGrabberWidget:grabMouse()
   g_mouse.pushCursor('target')
 
-  UIBotCore.hide()
+  CandyBot.hide()
 end
 
 function AfkModule.onChooseReplaceItemMouseRelease(self, mousePosition, mouseButton)
@@ -99,8 +99,8 @@ function AfkModule.onChooseReplaceItemMouseRelease(self, mousePosition, mouseBut
 
   if item then
     Panel.ItemToReplace:setItemId(item:getId())
-    UIBotCore.changeOption('ItemToReplace', item:getId())
-    UIBotCore.show()
+    CandyBot.changeOption('ItemToReplace', item:getId())
+    CandyBot.show()
   end
 
   g_mouse.popCursor()

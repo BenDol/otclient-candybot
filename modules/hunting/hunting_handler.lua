@@ -35,7 +35,7 @@ HuntingModule.listeners = {
   --[HuntingModule.autoEatListener] = {option = "AutoEat", connect = HuntingModule.ConnectAutoEatListener, disconnect = HuntingModule.DisconnectAutoEatListener},
 }
 
--- [[ Functions ]]
+--[[ Functions ]]
 
 function HuntingModule.stop()
   EventHandler.stopEvents(HuntingModule.getModuleId())

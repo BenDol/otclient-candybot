@@ -9,8 +9,8 @@ Module
   sandbox: true
 
   @onLoad: |
-    dofile 'botcore'
-    UIBotCore.init()
+    dofile 'candybot'
+    CandyBot.init()
 
   @onUnload: |
-    UIBotCore.terminate()
+    CandyBot.terminate()

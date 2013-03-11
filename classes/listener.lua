@@ -81,7 +81,7 @@ end
 -- methods
 
 function Listener:connect()
-  if UIBotCore.isEnabled() then
+  if CandyBot.isEnabled() then
     self.connections[ListenerConnection.connect](self.id)
     connected = true
   end

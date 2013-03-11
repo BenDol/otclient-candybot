@@ -73,7 +73,7 @@ function Helper.startChooseItem(releaseCallback)
   mouseGrabberWidget:grabMouse()
   g_mouse.pushCursor('target')
 
-  UIBotCore.hide()
+  CandyBot.hide()
 end
 
 function Helper.getActiveRingId(itemid)

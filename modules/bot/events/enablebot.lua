@@ -8,7 +8,7 @@ function Enable.Event(event)
   botIcon:setEnabled(true)
   botIcon:setTooltip("Enabled")
 
-  UIBotCore.enable(true)
+  CandyBot.enable(true)
   EventHandler.signal() -- signal events to start
   ListenerHandler.signal() -- signal listeners to start
 

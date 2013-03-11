@@ -37,7 +37,7 @@ function SupportModule.init(window)
   Panel.RingReplaceDisplay = ringItemBox
 
   ringComboBox.onOptionChange = function(widget, text, data)
-    UIBotCore.changeOption(widget:getId(), widget:getCurrentOption().text)
+    CandyBot.changeOption(widget:getId(), widget:getCurrentOption().text)
     ringItemBox:setItemId(Helper.getRingIdByName(text))
   end
   for k,v in pairs(Rings) do
@@ -84,8 +84,8 @@ function SupportModule.onChooseHealthItem(self, mousePosition, mouseButton)
 
   if item then
     Panel.CurrentHealthItem:setItemId(item:getId())
-    UIBotCore.changeOption('CurrentHealthItem', item:getId())
-    UIBotCore.show()
+    CandyBot.changeOption('CurrentHealthItem', item:getId())
+    CandyBot.show()
   end
 
   g_mouse.popCursor()
@@ -117,8 +117,8 @@ function SupportModule.onChooseManaItem(self, mousePosition, mouseButton)
 
   if item then
     Panel.CurrentManaItem:setItemId(item:getId())
-    UIBotCore.changeOption('CurrentManaItem', item:getId())
-    UIBotCore.show()
+    CandyBot.changeOption('CurrentManaItem', item:getId())
+    CandyBot.show()
   end
 
   g_mouse.popCursor()

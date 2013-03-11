@@ -8,6 +8,6 @@ function Disable.Event(event)
   botIcon:setEnabled(false)
   botIcon:setTooltip("Disabled")
 
-  UIBotCore.enable(false)
+  CandyBot.enable(false)
   BotLogger.warning("Bot disabled.")
 end

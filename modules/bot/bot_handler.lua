@@ -9,7 +9,7 @@ BotModule.dependencies = {
   --
 }
 
--- [[ Default Options ]]
+--[[ Default Options ]]
 
 BotModule.options = {
   ['BotEnabled'] = true,
@@ -34,7 +34,7 @@ BotModule.listeners = {
   --
 }
 
--- [[ Functions ]]
+--[[ Functions ]]
 
 function BotModule.stop()
   EventHandler.stopEvents(BotModule.getModuleId())

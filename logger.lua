@@ -12,7 +12,7 @@ local logBuffer
 local logWindow
 
 function BotLogger.init()
-  logWindow = UIBotCore.getUI():recursiveGetChildById('logWindow')
+  logWindow = CandyBot.getUI():recursiveGetChildById('logWindow')
   logBuffer = logWindow:getChildById('logBuffer')
 end
 

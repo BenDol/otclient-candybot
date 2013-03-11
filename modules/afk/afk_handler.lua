@@ -68,7 +68,7 @@ AfkModule.listeners = {
   --
 }
 
--- [[ Functions ]]
+--[[ Functions ]]
 
 function AfkModule.stop()
   EventHandler.stopEvents(AfkModule.getModuleId())

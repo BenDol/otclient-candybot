@@ -3,7 +3,7 @@ AlertList = extends(UIWidget)
 local alertListWindow
 
 function AlertList.init()
-  alertListWindow = g_ui.loadUI('alertlist.otui', UIBotCore.getParent())
+  alertListWindow = g_ui.loadUI('alertlist.otui', CandyBot.getParent())
 
   alertListWindow:setVisible(false)
   alertListWindow:getChildById('UseBlackList'):setChecked(true)
@@ -29,13 +29,13 @@ end
 function AlertList.show()
   if g_game.isOnline() then
     alertListWindow:show()
-    UIBotCore.getUI():setEnabled(false)
+    CandyBot.getUI():setEnabled(false)
   end
 end
 
 function AlertList.hide()
   alertListWindow:hide()
-  UIBotCore.getUI():setEnabled(true)
+  CandyBot.getUI():setEnabled(true)
 end
 
 function AlertList.addBlack()

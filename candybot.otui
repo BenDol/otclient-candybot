@@ -1,22 +1,22 @@
 BotOptionLineEdit < TextEdit
-  @onTextChange: UIBotCore.changeOption(self:getId(), self:getText())
+  @onTextChange: CandyBot.changeOption(self:getId(), self:getText())
 
 BotOptionCheckBox < CheckBox
-  @onCheckChange: UIBotCore.changeOption(self:getId(), self:isChecked())
+  @onCheckChange: CandyBot.changeOption(self:getId(), self:isChecked())
 
 BotOptionTextList < TextList
-  @onCheckChange: UIBotCore.changeOption(self:getId(), self:isChecked())
+  @onCheckChange: CandyBot.changeOption(self:getId(), self:isChecked())
 
 BotOptionHorizontalScrollBar < HorizontalScrollBar
-  @onValueChange: UIBotCore.changeOption(self:getId(), self:getValue())
+  @onValueChange: CandyBot.changeOption(self:getId(), self:getValue())
 
 BotOptionVerticalScrollBar < VerticalScrollBar
-  @onValueChange: UIBotCore.changeOption(self:getId(), self:getValue())
+  @onValueChange: CandyBot.changeOption(self:getId(), self:getValue())
 
 BotOptionComboBoxPopupMenuButton < ComboBoxPopupMenuButton
 BotOptionComboBoxPopupMenu < ComboBoxPopupMenu
 BotOptionComboBox < ComboBox
-  @onOptionChange: UIBotCore.changeOption(self:getId(), self:getCurrentOption().text)
+  @onOptionChange: CandyBot.changeOption(self:getId(), self:getCurrentOption().text)
 
 LogLabel < UILabel
   font: verdana-11px-antialised
@@ -55,8 +55,8 @@ MainWindow
   !text: tr('CandyBot')
   size: 355 535
   
-  @onEnter: UIBotCore.hide()
-  @onEscape: UIBotCore.hide()
+  @onEnter: CandyBot.hide()
+  @onEscape: CandyBot.hide()
 
   &save: true
 
@@ -131,7 +131,7 @@ MainWindow
     anchors.bottom: parent.bottom
     margin-right: -6
     margin-bottom: -5
-    @onClick: UIBotCore.hide()
+    @onClick: CandyBot.hide()
 
   Label
     id: versionInfo

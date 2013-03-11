@@ -37,7 +37,7 @@ function EventHandler.registerEvent(moduleId, eventId, callback, state, bypass)
   local module = Modules.getModule(moduleId)
 
   local event = Event.new(eventId, addEvent(function()
-    if UIBotCore.isEnabled() or bypass then callback(eventId) end
+    if CandyBot.isEnabled() or bypass then callback(eventId) end
   end), callback, state)
 
   module:addEvent(eventId, event)
@@ -72,7 +72,7 @@ function EventHandler.rescheduleEvent(moduleId, eventId, ticks, bypass)
 
           local callback = event.callback
           event:setEvent(scheduleEvent(function() 
-            if UIBotCore.isEnabled() or bypass then callback(k) end
+            if CandyBot.isEnabled() or bypass then callback(k) end
           end, ticks))
 
           module:addEvent(k, event)

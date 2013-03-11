@@ -9,7 +9,7 @@ SupportModule.dependencies = {
   'BotModule'
 }
 
--- [[ Default Options ]]
+--[[ Default Options ]]
 
 SupportModule.options = {
   ['AutoHeal'] = false,
@@ -70,7 +70,7 @@ SupportModule.listeners = {
   [SupportModule.autoInvisibleListener] = {option = "AutoInvisible", connect = SupportModule.AutoInvisible.ConnectListener, disconnect = SupportModule.AutoInvisible.DisconnectListener}
 }
 
--- [[ Functions ]]
+--[[ Functions ]]
 
 function SupportModule.stop()
   EventHandler.stopEvents(SupportModule.getModuleId())

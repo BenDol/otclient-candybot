@@ -1,6 +1,6 @@
-UIBotCore = extends(UIWidget)
-UIBotCore.options = {}
-UIBotCore.defaultOptions = {}
+CandyBot = extends(UIWidget)
+CandyBot.options = {}
+CandyBot.defaultOptions = {}
 
 dofile('consts.lua')
 dofile('helper.lua')
@@ -18,7 +18,7 @@ local enabled
 local function setupDefaultOptions()
   for _, module in pairs(Modules.getOptions()) do
     for k, option in pairs(module) do
-      UIBotCore.defaultOptions[k] = option
+      CandyBot.defaultOptions[k] = option
     end
   end
 end
@@ -47,11 +47,11 @@ local function loadExtensions()
   dofiles('extensions')
 end
 
-function UIBotCore.init()
-  botWindow = g_ui.displayUI('botcore.otui')
+function CandyBot.init()
+  botWindow = g_ui.displayUI('candybot.otui')
   botWindow:setVisible(false)
 
-  botButton = modules.client_topmenu.addRightGameToggleButton('botButton', 'Bot (Ctrl+Shift+B)', 'botcore', UIBotCore.toggle)
+  botButton = modules.client_topmenu.addRightGameToggleButton('botButton', 'Bot (Ctrl+Shift+B)', 'candybot', CandyBot.toggle)
   botButton:setOn(false)
 
   botTabBar = botWindow:getChildById('botTabBar')
@@ -59,7 +59,7 @@ function UIBotCore.init()
   botTabBar:setTabSpacing(-1)
 
   -- bind keys
-  g_keyboard.bindKeyDown('Ctrl+Shift+B', UIBotCore.toggle)
+  g_keyboard.bindKeyDown('Ctrl+Shift+B', CandyBot.toggle)
   g_keyboard.bindKeyPress('Tab', function() botTabBar:selectNextTab() end, botWindow)
   g_keyboard.bindKeyPress('Shift+Tab', function() botTabBar:selectPrevTab() end, botWindow)
 
@@ -74,27 +74,27 @@ function UIBotCore.init()
 
   -- hook functions
   connect(g_game, { 
-    onGameStart = UIBotCore.online,
-    onGameEnd = UIBotCore.offline
+    onGameStart = CandyBot.online,
+    onGameEnd = CandyBot.offline
   })
 
   -- get bot settings
-  UIBotCore.options = g_settings.getNode('Bot') or {}
+  CandyBot.options = g_settings.getNode('Bot') or {}
   
   if g_game.isOnline() then
-    UIBotCore.online()
+    CandyBot.online()
   end
 end
 
-function UIBotCore.terminate()
-  UIBotCore.hide()
+function CandyBot.terminate()
+  CandyBot.hide()
   disconnect(g_game, {
-    onGameStart = UIBotCore.online,
-    onGameEnd = UIBotCore.offline
+    onGameStart = CandyBot.online,
+    onGameEnd = CandyBot.offline
   })
 
   if g_game.isOnline() then
-    UIBotCore.offline()
+    CandyBot.offline()
   end
 
   Modules.terminate()
@@ -104,87 +104,87 @@ function UIBotCore.terminate()
     botButton = nil
   end
 
-  g_settings.setNode('Bot', UIBotCore.options)
+  g_settings.setNode('Bot', CandyBot.options)
 
   botWindow:destroy()
 end
 
-function UIBotCore.online()
-  addEvent(UIBotCore.loadOptions)
+function CandyBot.online()
+  addEvent(CandyBot.loadOptions)
 end
 
-function UIBotCore.offline()
+function CandyBot.offline()
   Modules.stop()
 
-  UIBotCore.hide()
+  CandyBot.hide()
 
   g_keyboard.unbindKeyDown('Ctrl+Shift+B')
 end
 
-function UIBotCore.toggle()
+function CandyBot.toggle()
   if botWindow:isVisible() then
-    UIBotCore.hide()
+    CandyBot.hide()
   else
-    UIBotCore.show()
+    CandyBot.show()
     botWindow:focus()
   end
 end
 
-function UIBotCore.show()
+function CandyBot.show()
   if g_game.isOnline() then
     botWindow:show()
     botButton:setOn(true)
   end
 end
 
-function UIBotCore.hide()
+function CandyBot.hide()
   botWindow:hide()
   botButton:setOn(false)
 end
 
-function UIBotCore.enable(state)
+function CandyBot.enable(state)
   enabled = state
   if not state then Modules.stop() end
 end
 
-function UIBotCore.isEnabled()
+function CandyBot.isEnabled()
   return enabled
 end
 
-function UIBotCore.getIcon()
+function CandyBot.getIcon()
   return botIcon
 end
 
-function UIBotCore.getUI()
+function CandyBot.getUI()
   return botWindow
 end
 
-function UIBotCore.getParent()
+function CandyBot.getParent()
   return botWindow:getParent() -- main window
 end
 
-function UIBotCore.loadOptions()
+function CandyBot.loadOptions()
   local char = g_game.getCharacterName()
 
-  if UIBotCore.options[char] ~= nil then
-    for i, v in pairs(UIBotCore.options[char]) do
-      addEvent(function() UIBotCore.changeOption(i, v, true) end)
+  if CandyBot.options[char] ~= nil then
+    for i, v in pairs(CandyBot.options[char]) do
+      addEvent(function() CandyBot.changeOption(i, v, true) end)
     end
   else
-    for i, v in pairs(UIBotCore.defaultOptions) do
-      addEvent(function() UIBotCore.changeOption(i, v, true) end)
+    for i, v in pairs(CandyBot.defaultOptions) do
+      addEvent(function() CandyBot.changeOption(i, v, true) end)
     end
   end
 end
 
-function UIBotCore.changeOption(key, state, loading)
+function CandyBot.changeOption(key, state, loading)
   local loading = loading or false
   if state == nil then
     return
   end
   
-  if UIBotCore.defaultOptions[key] == nil then
-    UIBotCore.options[key] = nil
+  if CandyBot.defaultOptions[key] == nil then
+    CandyBot.options[key] = nil
     return
   end
 
@@ -223,10 +223,10 @@ function UIBotCore.changeOption(key, state, loading)
     end
     local char = g_game.getCharacterName()
 
-    if UIBotCore.options[char] == nil then
-      UIBotCore.options[char] = {}
+    if CandyBot.options[char] == nil then
+      CandyBot.options[char] = {}
     end
 
-    UIBotCore.options[char][key] = state
+    CandyBot.options[char][key] = state
   end
 end
