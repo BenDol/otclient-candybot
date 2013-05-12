@@ -15,9 +15,9 @@ local Panel = {
 function SupportModule.getPanel() return Panel end
 function SupportModule.setPanel(panel) Panel = panel end
 
-function SupportModule.init(window)
+function SupportModule.init()
   -- create tab
-  local botTabBar = window:getChildById('botTabBar')
+  local botTabBar = CandyBot.window:getChildById('botTabBar')
   local tab = botTabBar:addTab(tr('Support'))
 
   local tabPanel = botTabBar:getTabPanel(tab)
@@ -44,7 +44,7 @@ function SupportModule.init(window)
     ringComboBox:addOption(k)
   end
   
-  SupportModule.parentUI = window
+  SupportModule.parentUI = CandyBot.window
 
   -- register module
   Modules.registerModule(SupportModule)

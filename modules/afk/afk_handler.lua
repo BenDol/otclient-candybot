@@ -74,3 +74,6 @@ function AfkModule.stop()
   EventHandler.stopEvents(AfkModule.getModuleId())
   ListenerHandler.stopListeners(AfkModule.getModuleId())
 end
+
+-- start module
+AfkModule.init()

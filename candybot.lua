@@ -1,4 +1,5 @@
 CandyBot = extends(UIWidget)
+CandyBot.window = nil
 CandyBot.options = {}
 CandyBot.defaultOptions = {}
 
@@ -9,7 +10,6 @@ dofile('logger.lua')
 dofile('classes/target.lua')
 dofile('classes/attack.lua')
 
-local botWindow
 local botButton
 local botTabBar
 
@@ -27,19 +27,7 @@ local function initModules()
   dofile('modules.lua')
   Modules.init()
 
-  dofile('modules/bot/bot_handler.lua')
-  BotModule.init(botWindow)
-
-  dofile('modules/support/support_handler.lua')
-  SupportModule.init(botWindow)
-
-  dofile('modules/afk/afk_handler.lua')
-  AfkModule.init(botWindow)
-
-  dofile('modules/hunting/hunting_handler.lua')
-  HuntingModule.init(botWindow)
-
-  Modules.checkDependencies()
+  -- setup the default options
   setupDefaultOptions()
 end
 
@@ -48,20 +36,21 @@ local function loadExtensions()
 end
 
 function CandyBot.init()
-  botWindow = g_ui.displayUI('candybot.otui')
-  botWindow:setVisible(false)
+  CandyBot.window = g_ui.displayUI('candybot.otui')
+  CandyBot.window:setVisible(false)
 
-  botButton = modules.client_topmenu.addRightGameToggleButton('botButton', 'Bot (Ctrl+Shift+B)', 'candybot', CandyBot.toggle)
+  botButton = modules.client_topmenu.addRightGameToggleButton(
+    'botButton', 'Bot (Ctrl+Shift+B)', 'candybot', CandyBot.toggle)
   botButton:setOn(false)
 
-  botTabBar = botWindow:getChildById('botTabBar')
-  botTabBar:setContentWidget(botWindow:getChildById('botContent'))
+  botTabBar = CandyBot.window:getChildById('botTabBar')
+  botTabBar:setContentWidget(CandyBot.window:getChildById('botContent'))
   botTabBar:setTabSpacing(-1)
 
   -- bind keys
   g_keyboard.bindKeyDown('Ctrl+Shift+B', CandyBot.toggle)
-  g_keyboard.bindKeyPress('Tab', function() botTabBar:selectNextTab() end, botWindow)
-  g_keyboard.bindKeyPress('Shift+Tab', function() botTabBar:selectPrevTab() end, botWindow)
+  g_keyboard.bindKeyPress('Tab', function() botTabBar:selectNextTab() end, CandyBot.window)
+  g_keyboard.bindKeyPress('Shift+Tab', function() botTabBar:selectPrevTab() end, CandyBot.window)
 
   -- load extensions
   loadExtensions()
@@ -106,7 +95,7 @@ function CandyBot.terminate()
 
   g_settings.setNode('Bot', CandyBot.options)
 
-  botWindow:destroy()
+  CandyBot.window:destroy()
 end
 
 function CandyBot.online()
@@ -122,23 +111,23 @@ function CandyBot.offline()
 end
 
 function CandyBot.toggle()
-  if botWindow:isVisible() then
+  if CandyBot.window:isVisible() then
     CandyBot.hide()
   else
     CandyBot.show()
-    botWindow:focus()
+    CandyBot.window:focus()
   end
 end
 
 function CandyBot.show()
   if g_game.isOnline() then
-    botWindow:show()
+    CandyBot.window:show()
     botButton:setOn(true)
   end
 end
 
 function CandyBot.hide()
-  botWindow:hide()
+  CandyBot.window:hide()
   botButton:setOn(false)
 end
 
@@ -156,11 +145,11 @@ function CandyBot.getIcon()
 end
 
 function CandyBot.getUI()
-  return botWindow
+  return CandyBot.window
 end
 
 function CandyBot.getParent()
-  return botWindow:getParent() -- main window
+  return CandyBot.window:getParent() -- main window
 end
 
 function CandyBot.loadOptions()
@@ -191,7 +180,7 @@ function CandyBot.changeOption(key, state, loading)
   if g_game.isOnline() then
     Modules.notifyChange(key, state)
 
-    local panel = botWindow
+    local panel = CandyBot.window
 
     if loading then
 

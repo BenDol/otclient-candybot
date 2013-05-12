@@ -41,3 +41,6 @@ function HuntingModule.stop()
   EventHandler.stopEvents(HuntingModule.getModuleId())
   ListenerHandler.stopListeners(HuntingModule.getModuleId())
 end
+
+-- start module
+HuntingModule.init()

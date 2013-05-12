@@ -14,6 +14,12 @@ function Modules.init()
   -- initiate the modules listener handler
   dofile('listeners.lua')
   ListenerHandler.init()
+
+  -- initiate modules
+  dofiles('modules', '_handler.lua', true)
+
+  -- check all the module dependencies
+  Modules.checkDependencies()
 end
 
 function Modules.terminate()
@@ -102,7 +108,7 @@ function Modules.checkDependencies()
       list[k] = Modules.getMissingDependancies(k)
       if not table.empty(list) then
         for i, dependency in pairs(list[k]) do
-          g_logger.error("[BotCore] "..k.." missing dependency module: "..dependency)
+          g_logger.error("[Modules] "..k.." missing dependency module: "..dependency)
         end
       end
     end

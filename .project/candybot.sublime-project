@@ -2,7 +2,7 @@
 	"folders":
 	[
 		{
-			"path": "/home/ben/OTClient/otclient/mods/otclient-candybot",
+			"path": "..",
 			"folder_exclude_patterns": [".*", "*.*~"],
 			"file_exclude_patterns": [".*", "*.*~"]
 		}

@@ -40,3 +40,6 @@ function BotModule.stop()
   EventHandler.stopEvents(BotModule.getModuleId())
   ListenerHandler.stopListeners(BotModule.getModuleId())
 end
+
+-- start module
+BotModule.init()

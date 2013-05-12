@@ -11,9 +11,9 @@ local Panel = {
 function HuntingModule.getPanel() return Panel end
 function HuntingModule.setPanel(panel) Panel = panel end
 
-function HuntingModule.init(window)
+function HuntingModule.init()
   -- create tab
-  local botTabBar = window:getChildById('botTabBar')
+  local botTabBar = CandyBot.window:getChildById('botTabBar')
   local tab = botTabBar:addTab(tr('Hunting'))
 
   local tabPanel = botTabBar:getTabPanel(tab)
@@ -23,7 +23,7 @@ function HuntingModule.init(window)
   --Panel.ItemToReplace = Panel:getChildById('ItemToReplace')
   --Panel.SelectReplaceItem = Panel:getChildById('SelectReplaceItem')
 
-  HuntingModule.parentUI = window
+  HuntingModule.parentUI = CandyBot.window
 
   -- register module
   Modules.registerModule(HuntingModule)

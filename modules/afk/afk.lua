@@ -13,7 +13,7 @@ local alertListWindow
 function AfkModule.getPanel() return Panel end
 function AfkModule.setPanel(panel) Panel = panel end
 
-function AfkModule.init(window)
+function AfkModule.init()
   g_sounds.preload('alert.ogg')
 
   dofile('alertlist.lua')
@@ -21,7 +21,7 @@ function AfkModule.init(window)
   alertListWindow = AlertList.getPanel()
 
   -- create tab
-  local botTabBar = window:getChildById('botTabBar')
+  local botTabBar = CandyBot.window:getChildById('botTabBar')
   local tab = botTabBar:addTab(tr('AFK'))
 
   local tabPanel = botTabBar:getTabPanel(tab)
@@ -36,7 +36,7 @@ function AfkModule.init(window)
     autoEatSelect:addOption(name)
   end
 
-  AfkModule.parentUI = window
+  AfkModule.parentUI = CandyBot.window
 
   -- register module
   Modules.registerModule(AfkModule)

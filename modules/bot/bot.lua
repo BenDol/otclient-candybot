@@ -9,13 +9,13 @@ local Panel = {
 
 function BotModule.getPanel() return Panel end
 
-function BotModule.init(window)
+function BotModule.init()
   g_ui.importStyle('bot')
-  Panel = g_ui.createWidget('BotPanel', window)
+  Panel = g_ui.createWidget('BotPanel', CandyBot.window)
 
   Panel.BotEnabled = Panel:getChildById('BotEnabled')
 
-  BotModule.parentUI = window
+  BotModule.parentUI = CandyBot.window
 
   BotModule.startItemInfo()
 
