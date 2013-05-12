@@ -77,5 +77,5 @@ function SupportModule.stop()
   ListenerHandler.stopListeners(SupportModule.getModuleId())
 end
 
--- start module
+-- Start Module
 SupportModule.init()

@@ -1,7 +1,7 @@
 --[[
   @Authors: Ben Dol (BeniS)
   @Details: Module class for ecapsulating module 
-            specific variables.
+            specific variables and methods.
 ]]
 
 Module = {}

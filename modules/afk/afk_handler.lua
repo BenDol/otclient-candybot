@@ -81,5 +81,5 @@ function AfkModule.stop()
   ListenerHandler.stopListeners(AfkModule.getModuleId())
 end
 
--- start module
+-- Start Module
 AfkModule.init()

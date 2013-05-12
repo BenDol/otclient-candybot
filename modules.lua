@@ -21,7 +21,7 @@ function Modules.init()
   ListenerHandler.init()
 
   -- initiate modules
-  dofiles('modules', '_handler.lua', true)
+  dofiles('modules', true, '_handler.lua')
 
   -- check all the module dependencies
   Modules.checkDependencies()
@@ -38,7 +38,7 @@ end
 
 function Modules.getModule(moduleId)
   if not Modules.isModuleRegistered(moduleId) then
-    error("You have not registered any module with id: "..moduleId)
+    error("You have not registered any module with id "..moduleId)
     return false
   end
   return modules[moduleId]
@@ -113,7 +113,7 @@ function Modules.checkDependencies()
       list[k] = Modules.getMissingDependancies(k)
       if not table.empty(list) then
         for i, dependency in pairs(list[k]) do
-          g_logger.error("[Modules] "..k.." missing dependency module: "..dependency)
+          g_logger.error("[Modules] "..k.." missing module dependency: "..dependency)
         end
       end
     end
