@@ -1,4 +1,8 @@
---[[ Target Setting Class ]]
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Target setting class that represents a 
+            target logic setting.
+]]
 
 TargetSetting = {}
 TargetSetting.__index = TargetSetting

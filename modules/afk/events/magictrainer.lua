@@ -1,4 +1,8 @@
--- Magic Train Logic
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Magic train event logic
+]]
+
 AfkModule.MagicTrain = {}
 MagicTrain = AfkModule.MagicTrain
 

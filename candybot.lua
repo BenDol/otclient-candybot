@@ -1,3 +1,9 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Otclient module entry point. This handles
+            main bot controls and functionality.
+]]
+
 CandyBot = extends(UIWidget)
 CandyBot.window = nil
 CandyBot.options = {}

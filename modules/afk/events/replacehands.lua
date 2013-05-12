@@ -1,4 +1,8 @@
--- Auto Replace Hands Logic
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Auto replace hands event logic
+]]
+
 AfkModule.AutoReplaceHands = {}
 AutoReplaceHands = AfkModule.AutoReplaceHands
 

@@ -1,3 +1,8 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Listener class for listening events logic.
+]]
+
 Listener = {}
 Listener.__index = Listener
 

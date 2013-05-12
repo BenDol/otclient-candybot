@@ -1,4 +1,8 @@
--- Anti Kick Logic
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Anti kick event logic.
+]]
+
 AfkModule.AntiKick = {}
 AntiKick = AfkModule.AntiKick
 

@@ -1,3 +1,8 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Event handler for module functionality.
+]]
+
 dofile('classes/event.lua')
 
 EventHandler = {}

@@ -1,3 +1,8 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Constant variable declartions.
+]]
+
 RestoreType = {
   cast = 1,
   item = 2

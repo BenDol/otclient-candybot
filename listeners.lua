@@ -1,3 +1,8 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Listener handler for module listeners.
+]]
+
 dofile('classes/listener.lua')
 
 ListenerHandler = {}

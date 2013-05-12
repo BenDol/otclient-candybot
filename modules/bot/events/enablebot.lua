@@ -1,4 +1,8 @@
--- Enable Bot Logic
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Enable bot event logic
+]]
+
 BotModule.Enable = {}
 Enable = BotModule.Enable
 

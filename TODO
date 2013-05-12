@@ -1,11 +1,11 @@
 General:
-- Add more food to the food array
+- [x] Add more food to the food array
 - Add a dock feature to minimize the main body of the bot
 - [?] Make the BotOptionScrollBar's non-mouse-scrollable
-- Make Listeners more robust on how they can change connections
+- [x] Make Listeners more robust on how they can change connections
 - Add mode settings (general mode, hunting mode, afk mode, pvp mode)
-- Hook into the spell cast cooldown to get the spell delay time
-- Test healing delays
+- [x] Hook into the spell cast cooldown to get the spell delay time
+- [x] Test healing delays
 - Add timers for spells, mwalls, etc
 - Add auto reconnector
 

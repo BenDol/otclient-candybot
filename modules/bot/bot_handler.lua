@@ -1,3 +1,9 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Bot bot module handler for module registration
+            and control.
+]]
+
 dofile('bot.lua')
 
 -- required by the event handler

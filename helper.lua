@@ -1,3 +1,8 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Helper methods for global use.
+]]
+
 Helper = {}
 
 function Helper.safeDelay(min, max)

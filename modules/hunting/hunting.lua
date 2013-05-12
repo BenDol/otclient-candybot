@@ -1,3 +1,8 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Hunting bot module logic and main body.
+]]
+
 HuntingModule = {}
 
 -- load module events

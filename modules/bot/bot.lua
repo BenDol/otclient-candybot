@@ -1,3 +1,8 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Bot bot module logic and main body.
+]]
+
 BotModule = {}
 
 -- load module events

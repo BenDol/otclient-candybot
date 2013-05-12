@@ -1,3 +1,9 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Afk bot module handler for module registration
+            and control.
+]]
+
 dofile('afk.lua')
 
 -- required by the event handler

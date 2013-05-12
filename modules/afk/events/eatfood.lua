@@ -1,4 +1,8 @@
--- Auto Eat Food Logic
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Auto eat food event logic
+]]
+
 AfkModule.AutoEat = {}
 AutoEat = AfkModule.AutoEat
 

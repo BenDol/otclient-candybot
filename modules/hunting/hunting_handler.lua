@@ -1,3 +1,9 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Hunting bot module handler for module registration
+            and control.
+]]
+
 dofile('hunting.lua')
 
 -- required by the event handler

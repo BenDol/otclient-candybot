@@ -1,3 +1,9 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Module class for ecapsulating module 
+            specific variables.
+]]
+
 Module = {}
 Module.__index = Module
 

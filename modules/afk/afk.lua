@@ -1,3 +1,8 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Afk bot module logic methods and main body.
+]]
+
 AfkModule = {}
 
 -- load module events

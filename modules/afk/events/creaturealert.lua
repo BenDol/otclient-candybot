@@ -1,4 +1,8 @@
--- Creature Alert Logic
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Creature alert event logic
+]]
+
 AfkModule.CreatureAlert = {}
 CreatureAlert = AfkModule.CreatureAlert
 

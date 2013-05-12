@@ -1,4 +1,8 @@
--- Disable Bot Logic
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Disable bot event logic
+]]
+
 BotModule.Disable = {}
 Disable = BotModule.Disable
 

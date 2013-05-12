@@ -1,4 +1,8 @@
--- Auto Fishing Logic
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Auto fishing event logic
+]]
+
 AfkModule.AutoFishing = {}
 AutoFishing = AfkModule.AutoFishing
 

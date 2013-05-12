@@ -1,3 +1,9 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Logger methods for displaying messages
+            to the user in the logging window.
+]]
+
 BotLogger = {}
 
 BotLogTypes = {

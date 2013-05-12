@@ -1,3 +1,8 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Event class for event logic/callback.
+]]
+
 Event = {}
 Event.__index = Event
 

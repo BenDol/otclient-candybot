@@ -1,4 +1,8 @@
--- Auto Targeting Logic
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Auto targeting event logic
+]]
+
 HuntingModule.AutoTarget = {}
 AutoTarget = HuntingModule.AutoTarget
 

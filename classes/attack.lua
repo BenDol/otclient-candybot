@@ -1,3 +1,8 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Attack class for auto attack logic.
+]]
+
 Attack = {}
 Attack.__index = Attack
 

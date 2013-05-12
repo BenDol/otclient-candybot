@@ -1,3 +1,8 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Module handler for managing registered modules.
+]]
+
 dofile('classes/module.lua')
 
 Modules = {}

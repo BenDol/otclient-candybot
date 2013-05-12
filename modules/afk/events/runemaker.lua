@@ -1,4 +1,8 @@
--- Auto Rune Maker Logic
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Auto rune maker event logic
+]]
+
 AfkModule.RuneMake = {}
 RuneMake = AfkModule.RuneMake
 

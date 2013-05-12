@@ -1,3 +1,8 @@
+--[[
+  @Authors: Ben Dol (BeniS)
+  @Details: Alert list that is used within the Afk module.
+]]
+
 AlertList = extends(UIWidget)
 
 local alertListWindow
