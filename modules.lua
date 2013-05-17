@@ -38,7 +38,7 @@ end
 
 function Modules.getModule(moduleId)
   if not Modules.isModuleRegistered(moduleId) then
-    error("You have not registered any module with id "..moduleId)
+    error("You have not registered any module with id: "..moduleId)
     return false
   end
   return modules[moduleId]

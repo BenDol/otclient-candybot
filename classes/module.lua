@@ -10,7 +10,9 @@ Module.__index = Module
 Module.__class = "Module"
 
 Module.new = function(id, handler, events, listeners)
-  local handler, events, listeners = handler or {}, events or {}, listeners or {}
+  local handler, events, listeners = handler or {}, 
+    events or {}, listeners or {}
+    
   mod = {
     id = "",
     handler = {},
@@ -127,8 +129,11 @@ end
 -- methods
 
 function Module:notify(key, state)
-  EventHandler.response(self.handler.getModuleId(), self.handler.events, key, state)
-  ListenerHandler.response(self.handler.getModuleId(), self.handler.listeners, key, state)
+  EventHandler.response(self.handler.getModuleId(), 
+    self.handler.events, key, state)
+
+  ListenerHandler.response(self.handler.getModuleId(), 
+    self.handler.listeners, key, state)
 
   if self.handler.onNotify then
     self.handler.onNotify(key, state)
@@ -137,10 +142,12 @@ end
 
 function Module:registration()
   for event, data in pairs(self.handler.events) do
-    EventHandler.registerEvent(self.handler.getModuleId(), event, data.callback, false)
+    EventHandler.registerEvent(self.handler.getModuleId(), 
+      event, data.callback, false)
   end
   for listener, data in pairs(self.handler.listeners) do
-    ListenerHandler.registerListener(self.handler.getModuleId(), listener, {data.connect, data.disconnect}, false)
+    ListenerHandler.registerListener(self.handler.getModuleId(), 
+      listener, {data.connect, data.disconnect}, false)
   end
 
   if self.handler.onRegistration then

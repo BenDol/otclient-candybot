@@ -40,7 +40,8 @@ function AutoParalyzeHeal.execute(player, tries)
     end
   end
 
-  local listener = ListenerHandler.getListener(SupportModule.getModuleId(), SupportModule.autoParalyzeHealListener)
+  local listener = ListenerHandler.getListener(SupportModule.getModuleId(), 
+    SupportModule.autoParalyzeHealListener)
 
   -- try again to make sure it was executed
   if tries > 0 then

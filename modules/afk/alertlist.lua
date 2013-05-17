@@ -89,7 +89,6 @@ function AlertList.checkBlack(checked)
     if alertListWindow:getChildById('UseWhiteList'):isChecked() == false then
       alertListWindow:getChildById('UseBlackList'):setChecked(true)
     end
-    
     return
   end
 
@@ -101,15 +100,19 @@ function AlertList.checkWhite(checked)
     if alertListWindow:getChildById('UseBlackList'):isChecked() == false then
       alertListWindow:getChildById('UseWhiteList'):setChecked(true)
     end
-    
     return
   end
 
   alertListWindow:getChildById('UseBlackList'):setChecked(false)
 end
 
-function AlertList.getBlackList() return alertListWindow:getChildById('BlackList') end
-function AlertList.getWhiteList() return alertListWindow:getChildById('WhiteList') end
+function AlertList.getBlackList()
+  return alertListWindow:getChildById('BlackList')
+end
+
+function AlertList.getWhiteList()
+  return alertListWindow:getChildById('WhiteList')
+end
 
 -- Black = true; White = false
 function AlertList.getBlackOrWhite()

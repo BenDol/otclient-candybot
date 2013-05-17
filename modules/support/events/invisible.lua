@@ -40,7 +40,8 @@ function AutoInvisible.execute(player, tries)
     end
   end
 
-  local listener = ListenerHandler.getListener(SupportModule.getModuleId(), SupportModule.autoInvisibleListener)
+  local listener = ListenerHandler.getListener(SupportModule.getModuleId(), 
+    SupportModule.autoInvisibleListener)
 
   -- try again to make sure it was executed
   if tries > 0 then

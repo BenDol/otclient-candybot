@@ -36,9 +36,7 @@ end
 
 function BotLogger.print(type, msg)
   local trace = debug.getinfo(debug.getinfo(3, "f").func)
-
   local path = BotLogger.trimPath(trace.short_src:explode("/"))
-  local msg = --[["[BotLogger - "..path.." "..trace.linedefined.."]: " .. ]]msg
 
   if type == BotLogTypes.warning then
     --g_logger.warning(msg)

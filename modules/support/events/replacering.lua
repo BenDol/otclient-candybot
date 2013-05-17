@@ -5,7 +5,8 @@ AutoReplaceRing = SupportModule.AutoReplaceRing
 function AutoReplaceRing.Event(event)
   if g_game.isOnline() then
     local player = g_game.getLocalPlayer()
-    local selectedItem = SupportModule.getPanel():getChildById('RingReplaceDisplay'):getItem():getId()
+    local selectedItem = SupportModule.getPanel():getChildById(
+      'RingReplaceDisplay'):getItem():getId()
 
     local item = player:getItem(selectedItem)
     local slot = InventorySlotFinger
@@ -21,5 +22,6 @@ function AutoReplaceRing.Event(event)
     end
   end
 
-  EventHandler.rescheduleEvent(SupportModule.getModuleId(), event, Helper.safeDelay(500, 1500))
+  EventHandler.rescheduleEvent(SupportModule.getModuleId(), 
+    event, Helper.safeDelay(500, 1500))
 end

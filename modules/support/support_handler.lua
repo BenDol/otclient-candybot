@@ -38,17 +38,20 @@ SupportModule.options = {
   ['RingToReplace'] = 'Might Ring'
 }
 
---[[ Events ]]
+--[[ Register Events ]]
 
 table.merge(SupportModule, {
   autoReplaceRingEvent = 1
 })
 
 SupportModule.events = {
-  [SupportModule.autoReplaceRingEvent] = {option = "AutoReplaceRing", callback = SupportModule.AutoReplaceRing.Event}
+  [SupportModule.autoReplaceRingEvent] = {
+    option = "AutoReplaceRing", 
+    callback = SupportModule.AutoReplaceRing.Event
+  }
 }
 
---[[ Listeners ]]
+--[[ Register Listeners ]]
 
 table.merge(SupportModule, {
   autoHealListener = 1,
@@ -61,13 +64,41 @@ table.merge(SupportModule, {
 })
 
 SupportModule.listeners = {
-  [SupportModule.autoHealListener] = {option = "AutoHeal", connect = SupportModule.AutoHeal.ConnectCastListener, disconnect = SupportModule.AutoHeal.DisconnectCastListener},
-  [SupportModule.itemAutoHealListener] = {option = "AutoHealthItem", connect = SupportModule.AutoHeal.ConnectItemListener, disconnect = SupportModule.AutoHeal.DisconnectItemListener},
-  [SupportModule.itemAutoManaListener] = {option = "AutoManaItem", connect = SupportModule.AutoMana.ConnectItemListener, disconnect = SupportModule.AutoMana.DisconnectItemListener},
-  [SupportModule.autoHasteListener] = {option = "AutoHaste", connect = SupportModule.AutoHaste.ConnectListener, disconnect = SupportModule.AutoHaste.DisconnectListener},
-  [SupportModule.autoParalyzeHealListener] = {option = "AutoParalyzeHeal", connect = SupportModule.AutoParalyzeHeal.ConnectListener, disconnect = SupportModule.AutoParalyzeHeal.DisconnectListener},
-  [SupportModule.autoManaShieldListener] = {option = "AutoManaShield", connect = SupportModule.AutoManaShield.ConnectListener, disconnect = SupportModule.AutoManaShield.DisconnectListener},
-  [SupportModule.autoInvisibleListener] = {option = "AutoInvisible", connect = SupportModule.AutoInvisible.ConnectListener, disconnect = SupportModule.AutoInvisible.DisconnectListener}
+  [SupportModule.autoHealListener] = {
+    option = "AutoHeal", 
+    connect = SupportModule.AutoHeal.ConnectCastListener, 
+    disconnect = SupportModule.AutoHeal.DisconnectCastListener
+  },
+  [SupportModule.itemAutoHealListener] = {
+    option = "AutoHealthItem", 
+    connect = SupportModule.AutoHeal.ConnectItemListener, 
+    disconnect = SupportModule.AutoHeal.DisconnectItemListener
+  },
+  [SupportModule.itemAutoManaListener] = {
+    option = "AutoManaItem", 
+    connect = SupportModule.AutoMana.ConnectItemListener, 
+    disconnect = SupportModule.AutoMana.DisconnectItemListener
+  },
+  [SupportModule.autoHasteListener] = {
+    option = "AutoHaste", 
+    connect = SupportModule.AutoHaste.ConnectListener, 
+    disconnect = SupportModule.AutoHaste.DisconnectListener
+  },
+  [SupportModule.autoParalyzeHealListener] = {
+    option = "AutoParalyzeHeal", 
+    connect = SupportModule.AutoParalyzeHeal.ConnectListener, 
+    disconnect = SupportModule.AutoParalyzeHeal.DisconnectListener
+  },
+  [SupportModule.autoManaShieldListener] = {
+    option = "AutoManaShield", 
+    connect = SupportModule.AutoManaShield.ConnectListener, 
+    disconnect = SupportModule.AutoManaShield.DisconnectListener
+  },
+  [SupportModule.autoInvisibleListener] = {
+    option = "AutoInvisible", 
+    connect = SupportModule.AutoInvisible.ConnectListener, 
+    disconnect = SupportModule.AutoInvisible.DisconnectListener
+  }
 }
 
 --[[ Functions ]]

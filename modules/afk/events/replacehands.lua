@@ -31,5 +31,6 @@ function AutoReplaceHands.Event(event)
     end
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(500, 1500))
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), 
+    event, Helper.safeDelay(500, 1500))
 end

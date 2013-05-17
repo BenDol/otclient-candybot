@@ -4,7 +4,8 @@
 ]]
 
 function Player:getMoney()
-  return self:getItemsCount(3031) + (self:getItemsCount(3035) * 100) + (self:getItemsCount(3043) * 10000)
+  return self:getItemsCount(3031) + (self:getItemsCount(3035) 
+    * 100) + (self:getItemsCount(3043) * 10000)
 end
 
 function Player:getFlaskItems()

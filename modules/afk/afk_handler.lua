@@ -42,7 +42,7 @@ AfkModule.options = {
   ['AntiKick'] = false
 }
 
---[[ Events ]]
+--[[ Register Events ]]
 
 table.merge(AfkModule, {
   creatureAlertEvent = 1,
@@ -55,16 +55,37 @@ table.merge(AfkModule, {
 })
 
 AfkModule.events = {
-  [AfkModule.creatureAlertEvent] = {option = "CreatureAlert", callback = AfkModule.CreatureAlert.Event},
-  [AfkModule.antiKickEvent] = {option = "AntiKick", callback = AfkModule.AntiKick.Event},
-  [AfkModule.autoFishingEvent] = {option = "AutoFishing", callback = AfkModule.AutoFishing.Event},
-  [AfkModule.autoEatEvent] = {option = "AutoEat", callback = AfkModule.AutoEat.Event},
-  [AfkModule.runeMakeEvent] = {option = "RuneMake", callback = AfkModule.RuneMake.Event},
-  [AfkModule.autoReplaceWeaponEvent] = {option = "AutoReplaceWeapon", callback = AfkModule.AutoReplaceHands.Event},
-  [AfkModule.magicTrainEvent] = {option = "MagicTrain", callback = AfkModule.MagicTrain.Event}
+  [AfkModule.creatureAlertEvent] = {
+    option = "CreatureAlert", 
+    callback = AfkModule.CreatureAlert.Event
+  },
+  [AfkModule.antiKickEvent] = {
+    option = "AntiKick", 
+    callback = AfkModule.AntiKick.Event
+  },
+  [AfkModule.autoFishingEvent] = {
+    option = "AutoFishing", 
+    callback = AfkModule.AutoFishing.Event
+  },
+  [AfkModule.autoEatEvent] = {
+    option = "AutoEat", 
+    callback = AfkModule.AutoEat.Event
+  },
+  [AfkModule.runeMakeEvent] = {
+    option = "RuneMake", 
+    callback = AfkModule.RuneMake.Event
+  },
+  [AfkModule.autoReplaceWeaponEvent] = {
+    option = "AutoReplaceWeapon", 
+    callback = AfkModule.AutoReplaceHands.Event
+  },
+  [AfkModule.magicTrainEvent] = {
+    option = "MagicTrain", 
+    callback = AfkModule.MagicTrain.Event
+  }
 }
 
---[[ Listeners ]]
+--[[ Register Listeners ]]
 
 table.merge(AfkModule, {
   --

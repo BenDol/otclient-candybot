@@ -29,7 +29,7 @@ local function setupDefaultOptions()
   end
 end
 
-local function initModules()
+local function loadModules()
   dofile('modules.lua')
   Modules.init()
 
@@ -61,8 +61,8 @@ function CandyBot.init()
   -- load extensions
   loadExtensions()
 
-  -- init modules
-  initModules()
+  -- load modules
+  loadModules()
 
   -- init bot logger
   BotLogger.init()

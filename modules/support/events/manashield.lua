@@ -40,7 +40,8 @@ function AutoManaShield.execute(player, tries)
     end
   end
 
-  local listener = ListenerHandler.getListener(SupportModule.getModuleId(), SupportModule.autoManaShieldListener)
+  local listener = ListenerHandler.getListener(SupportModule.getModuleId(), 
+    SupportModule.autoManaShieldListener)
 
   -- try again to make sure it was executed
   if tries > 0 then

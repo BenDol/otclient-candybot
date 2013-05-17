@@ -140,7 +140,8 @@ function ListenerHandler.response(moduleId, listeners, key, state)
 
       local register = not ListenerHandler.isListenerRegistered(moduleId, listener)
       if register then
-        ListenerHandler.registerListener(moduleId, listener, {data.connect, data.disconnect}, state)
+        ListenerHandler.registerListener(moduleId, listener, 
+          {data.connect, data.disconnect}, state)
       end
 
       ListenerHandler.disconnectListener(moduleId, listener, state)

@@ -27,12 +27,13 @@ function AutoFishing.Event(event)
       local waterTiles = Helper.getItemFromTiles(tiles, waterIds)
 
       if #waterTiles > 0 then
-        rdm = math.random(1, #waterTiles)
-        Helper.safeUseInventoryItemWith(Fishing['Fishing Rod'], waterTiles[rdm]:getThing())
+        Helper.safeUseInventoryItemWith(Fishing['Fishing Rod'], 
+          waterTiles[math.random(1, #waterTiles)]:getThing())
       else
         BotLogger.warning("No water tiles found for fishing.")
       end
     end
   end
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(2000, 5000))
+  EventHandler.rescheduleEvent(AfkModule.getModuleId(), 
+    event, Helper.safeDelay(2000, 5000))
 end

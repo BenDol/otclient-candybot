@@ -21,24 +21,27 @@ HuntingModule.options = {
   ['AutoTarget'] = false
 }
 
---[[ Events ]]
+--[[ Register Events ]]
 
 table.merge(HuntingModule, {
   autoTarget = 1
 })
 
 HuntingModule.events = {
-  [HuntingModule.autoTarget] = {option = "AutoTarget", callback = HuntingModule.AutoTarget.Event}
+  [HuntingModule.autoTarget] = {
+    option = "AutoTarget", 
+    callback = HuntingModule.AutoTarget.Event
+  }
 }
 
---[[ Listeners ]]
+--[[ Register Listeners ]]
 
 table.merge(HuntingModule, {
   --
 })
 
 HuntingModule.listeners = {
-  --[HuntingModule.autoEatListener] = {option = "AutoEat", connect = HuntingModule.ConnectAutoEatListener, disconnect = HuntingModule.DisconnectAutoEatListener},
+  --
 }
 
 --[[ Functions ]]

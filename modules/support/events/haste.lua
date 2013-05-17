@@ -30,7 +30,8 @@ function AutoHaste.execute(player, tries)
 
   local delay = 0
   if g_game.isOnline() then
-    local hasteHealth = tonumber(SupportModule.getPanel():getChildById('HasteHealthBar'):getValue())
+    local hasteHealth = tonumber(SupportModule.getPanel():
+      getChildById('HasteHealthBar'):getValue())
     
     local percent = hasteHealth and true or false
     if percent then
@@ -53,7 +54,8 @@ function AutoHaste.execute(player, tries)
     end
   end
 
-  local listener = ListenerHandler.getListener(SupportModule.getModuleId(), SupportModule.autoHasteListener)
+  local listener = ListenerHandler.getListener(SupportModule.getModuleId(), 
+    SupportModule.autoHasteListener)
 
   -- try again to make sure it was executed
   if tries > 0 then
