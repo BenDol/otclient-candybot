@@ -1,5 +1,5 @@
 Panel
-  id: huntingPanel
+  id: HuntingPanel
   anchors.left: parent.left
   anchors.right: parent.right
   anchors.top: parent.top
@@ -7,7 +7,7 @@ Panel
   height: 540
 
   BotOptionCheckBox
-    id: AutoTarget
+    id: AutoTargetCheck
     width: 90
     !text: tr('Auto Target')
     !tooltip: tr('Automatically target creatures in the target list.')
@@ -17,24 +17,24 @@ Panel
   //Label
     //id: targetListLabel
     //!text: tr('Target List')
-    //anchors.top: AutoTarget.bottom
+    //anchors.top: AutoTargetCheck.bottom
     //anchors.left: parent.left
     //margin-top: 5
 
   TextList
     id: TargetList
-    anchors.top: AutoTarget.bottom
-    anchors.left: AutoTarget.left
+    anchors.top: AutoTargetCheck.bottom
+    anchors.left: AutoTargetCheck.left
     margin-bottom: 5
     margin-top: 5
     padding: 1
     focusable: false
-    vertical-scrollbar: targetScrollBar
+    vertical-scrollbar: TargetScrollBar
     width: 150
     height: 180
 
   VerticalScrollBar
-    id: targetScrollBar
+    id: TargetScrollBar
     anchors.top: TargetList.top
     anchors.bottom: TargetList.bottom
     anchors.right: TargetList.right
@@ -42,15 +42,15 @@ Panel
     pixels-scroll: true
 
   Panel
-    id: settingPanel
+    id: SettingPanel
     anchors.left: TargetList.right
     anchors.right: parent.right
     anchors.top: parent.top
-    anchors.bottom: addTargetText.bottom
+    anchors.bottom: AddTargetText.bottom
     enabled: false
 
     Button
-      id: prevSettingButton
+      id: PrevSettingButton
       !text: tr('<')
       anchors.left: parent.left
       anchors.top: parent.top
@@ -59,33 +59,33 @@ Panel
       height: 15
 
     Button
-      id: newSettingButton
+      id: NewSettingButton
       !text: tr('New Setting')
-      anchors.right: nextSettingButton.left
-      anchors.left: prevSettingButton.right
-      anchors.top: prevSettingButton.top
+      anchors.right: NextSettingButton.left
+      anchors.left: PrevSettingButton.right
+      anchors.top: PrevSettingButton.top
       margin-left: 8
       margin-right: 8
       width: 91
       height: 15
 
     Button
-      id: nextSettingButton
+      id: NextSettingButton
       !text: tr('>')
       anchors.right: parent.right
-      anchors.top: prevSettingButton.top
+      anchors.top: PrevSettingButton.top
       width: 15
       height: 15
 
     Panel
-      anchors.top: prevSettingButton.bottom
+      anchors.top: PrevSettingButton.bottom
       anchors.bottom: parent.bottom
       anchors.left: parent.left
       anchors.right: parent.right
       //border-width: 1
 
       Label
-        id: targetSettingLabel
+        id: TargetSettingLabel
         !text: tr('Setting:')
         anchors.top: parent.top
         anchors.left: parent.left
@@ -93,36 +93,117 @@ Panel
         margin-top: 5
 
       Label
-        id: targetSettingNumber
-        !text: tr('1/1')
-        anchors.top: targetSettingLabel.top
-        anchors.left: targetSettingLabel.right
+        id: TargetSettingNumber
+        !text: tr('#1 of 1')
+        anchors.top: TargetSettingLabel.top
+        anchors.left: TargetSettingLabel.right
         margin-left: 5
 
       Label
-        id: settingHpRangeLabel
-        !text: tr('Health Range')
-        !tooltip: tr('The minimum health percent required to target.')
-        anchors.top: targetSettingLabel.bottom
-        anchors.left: targetSettingLabel.left
+        id: SettingNameLabel
+        !text: tr('Name')
+        !tooltip: tr('The name of the creature to target')
+        anchors.top: TargetSettingLabel.bottom
+        anchors.left: TargetSettingLabel.left
         margin-top: 5
         margin-left: 5
 
-      HorizontalScrollBar
-        id: healthRangeScrollBar
-        width: 120
-        anchors.left: settingHpRangeLabel.left
+      TextEdit
+        id: SettingNameTextBox
+        anchors.top: prev.bottom
+        anchors.left: prev.left
         anchors.right: parent.right
-        anchors.top: settingHpRangeLabel.bottom
+        margin-top: 3
+
+      Label
+        id: SettingHpRangeLabel
+        text: Health Range
+        !tooltip: tr('The minimum health percent required to target.')
+        anchors.top: prev.bottom
+        anchors.left: prev.left
+        margin-top: 5
+
+      TextEdit
+        id: SettingHpRange1
+        anchors.top: prev.bottom
+        anchors.left: prev.left
+        width: 40
+        margin-top: 3
+
+      Label
+        !text: tr('to')
+        anchors.top: prev.top
+        anchors.left: prev.right
+        width: 20
+        margin-left: 7
+        margin-right: 3
+        margin-top: 3
+
+      TextEdit
+        id: SettingHpRange2
+        anchors.top: SettingHpRange1.top
+        anchors.left: prev.right
+        width: 40
+
+      Label
+        text: %
+        anchors.top: prev.top
+        anchors.left: prev.right
+        width: 20
+        margin-left: 7
+        margin-right: 3
+        margin-top: 3
+
+      Label
+        id: SettingStanceLabel
+        !text: tr('Stance')
+        !tooltip: tr('The stance desired for this target.')
+        anchors.top: SettingHpRange1.bottom
+        anchors.left: SettingHpRange1.left
         margin-top: 6
-        mouse-scroll: false
-        show-value: true
-        symbol: %
-        minimum: 1
-        maximum: 100
+
+      ComboBox
+        id: SettingStanceList
+        anchors.left: prev.left
+        anchors.right: parent.right
+        anchors.top: prev.bottom
+        margin-top: 3
+
+      Label
+        id: SettingModeLabel
+        !text: tr('Attack Mode')
+        !tooltip: tr('The attack mode desired for this target.')
+        anchors.top: prev.bottom
+        anchors.left: prev.left
+        margin-top: 6
+
+      ComboBox
+        id: SettingModeList
+        anchors.left: prev.left
+        anchors.right: parent.right
+        anchors.top: prev.bottom
+        margin-top: 3
+
+      CheckBox
+        id: SettingLoot
+        !text: tr('Loot')
+        !tooltip: tr('Play a sound alert when a creature appears.')
+        width: 50
+        anchors.left: prev.left
+        anchors.top: prev.bottom
+        margin-top: 6
+
+      CheckBox
+        id: SettingAlarm
+        !text: tr('Alarm')
+        !tooltip: tr('Play a sound alert when a creature appears.')
+        anchors.left: prev.right
+        anchors.right: parent.right
+        anchors.top: prev.top
+        margin-left: 5
 
   TextEdit
-    id: addTargetText
+    id: AddTargetText
     anchors.left: TargetList.left
     anchors.right: next.left
     anchors.top: TargetList.bottom
@@ -130,10 +211,10 @@ Panel
     margin-right: 5
 
   Button
-    id: addTargetButton
+    id: AddTargetButton
     !text: tr('Add')
     !tooltip: tr('Add a new target')
-    anchors.right: targetScrollBar.right
+    anchors.right: TargetScrollBar.right
     anchors.top: TargetList.bottom
     margin-top: 5
     width: 40
@@ -144,3 +225,37 @@ Panel
     anchors.right: parent.right
     anchors.top: prev.bottom
     margin-top: 10
+
+  Panel
+    id: SaveLoadPanel
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    anchors.bottom: parent.bottom
+
+    Label
+      text: Save & Load Settings:
+      anchors.left: parent.left
+      anchors.top: parent.top
+      margin-top: 4
+      width: 130
+
+    TextList
+      id: LoadSettingList
+      anchors.top: prev.bottom
+      anchors.left: prev.left
+      margin-bottom: 5
+      margin-top: 5
+      padding: 1
+      focusable: false
+      vertical-scrollbar: LoadSettingScrollBar
+      width: 150
+      height: 130
+
+    VerticalScrollBar
+      id: LoadSettingScrollBar
+      anchors.top: LoadSettingList.top
+      anchors.bottom: LoadSettingList.bottom
+      anchors.right: LoadSettingList.right
+      step: 14
+      pixels-scroll: true

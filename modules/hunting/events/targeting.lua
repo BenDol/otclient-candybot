@@ -19,22 +19,18 @@ function AutoTarget.Event(event)
     return
   end
 
-  local Panel = HuntingModule.getPanel()
+  local Elements = HuntingModule.getElements()
 
   local targetList = {}
-  for k,v in pairs(Panel:getChildById('TargetList'):getChildren()) do
+  for k,v in pairs(Elements.TargetList:getChildren()) do
     table.insert(targetList, v:getText())
   end
 
-  if g_game.isOnline() then
-    local player = g_game.getLocalPlayer()
+  local player = g_game.getLocalPlayer()
+  local targets = player:getTargetsInArea(targetList, true)
 
-    local targets = player:getTargetsInArea(targetList)
-
-    if not table.empty(targets) then
-      local attackTarget = targets[1]
-      if attackTarget then g_game.attack(attackTarget) end
-    end
+  for k,target in pairs(targets) do
+    if target then g_game.attack(target) end
   end
   EventHandler.rescheduleEvent(HuntingModule.getModuleId(), 
     event, Helper.safeDelay(800, 3000))

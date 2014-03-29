@@ -16,57 +16,6 @@ function Player:getFlaskItems()
   return count
 end
 
-function Player:getPercentHealth(percent)
-  if percent > 100 then
-    return self:getMaxHealth()
-  end
-  return (self:getMaxHealth()/100)*percent
-end
-
-function Player:getManaPercent()
-  return (self:getMana()/self:getMaxMana())*100
-end
-
-function Player:getPercentMana(percent)
-  if percent > 100 then
-    return self:getMaxMana()
-  end
-  return (self:getMaxMana()/100)*percent
-end
-
-function Player:getTileArray()
-  local tiles = {}
-
-  local firstTile = self:getPosition()
-  firstTile.x = firstTile.x - 7
-  firstTile.y = firstTile.y - 5
-
-  for i = 1, 165 do
-    local position = self:getPosition()
-    position.x = firstTile.x + (i % 15)
-    position.y = math.floor(firstTile.y + (i / 14))
-
-    tiles[i] = g_map.getTile(position)
-  end
-
-  return tiles
-end
-
-function Player:getTargetsInArea(targetList)
-  local targets = {}
-  if g_game.isOnline() then
-    creatures = g_map.getSpectators(self:getPosition(), false)
-    for i, creature in ipairs(creatures) do
-      if creature:isMonster() then
-        if table.contains(targetList, creature:getName():lower(), true) then
-          table.insert(targets, creature)
-        end
-      end
-    end
-  end
-  return targets
-end
-
 --[[
 function Player:ShopSellAllItems(item)
     return self:ShopSellItem(item, self:ShopGetItemSaleCount(item))
