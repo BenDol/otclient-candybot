@@ -110,7 +110,7 @@ function Modules.checkDependencies()
   local list = {}
   for k, module in pairs(modules) do
     if module then
-      list[k] = Modules.getMissingDependancies(k)
+      list[k] = Modules.getMissingDependencies(k)
       if not table.empty(list) then
         for i, dependency in pairs(list[k]) do
           g_logger.error("[Modules] "..k.." missing module dependency: "..dependency)
@@ -121,7 +121,7 @@ function Modules.checkDependencies()
   return list
 end
 
-function Modules.getMissingDependancies(moduleId)
+function Modules.getMissingDependencies(moduleId)
   local module = Modules.getModule(moduleId)
   if module then
     local dependencies = module:getDependancies()

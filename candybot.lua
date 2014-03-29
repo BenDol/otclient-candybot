@@ -189,7 +189,6 @@ function CandyBot.changeOption(key, state, loading)
     local panel = CandyBot.window
 
     if loading then
-
       for k, p in pairs(Modules.getPanels()) do
         if p:getChildById(key) ~= nil then
           panel = p
