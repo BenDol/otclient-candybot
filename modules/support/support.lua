@@ -63,7 +63,8 @@ function SupportModule.onChooseHealthItem(self, mousePosition, mouseButton)
   local item = nil
   
   if mouseButton == MouseLeftButton then
-    local clickedWidget = modules.game_interface.getRootPanel():recursiveGetChildByPos(mousePosition, false)
+    local clickedWidget = modules.game_interface.getRootPanel()
+      :recursiveGetChildByPos(mousePosition, false)
   
     if clickedWidget then
       if clickedWidget:getClassName() == 'UIMap' then
@@ -96,7 +97,8 @@ end
 function SupportModule.onChooseManaItem(self, mousePosition, mouseButton)
   local item = nil
   if mouseButton == MouseLeftButton then
-    local clickedWidget = modules.game_interface.getRootPanel():recursiveGetChildByPos(mousePosition, false)
+    local clickedWidget = modules.game_interface.getRootPanel()
+      :recursiveGetChildByPos(mousePosition, false)
   
     if clickedWidget then
       if clickedWidget:getClassName() == 'UIMap' then

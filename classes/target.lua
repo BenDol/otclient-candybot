@@ -56,19 +56,16 @@ Target.__index = Target
 
 Target.__class = "Target"
 
-Target.new = function(creature, priority, settings, loot, alarm)
+Target.new = function(name, priority, settings, loot, alarm)
   target = {
-    creature = nil,
+    name = "",
     priority = 0,
     settings = {},
     loot = true,
     alarm = false
   }
 
-  if not creature or type(creature) ~= 'userdata' then
-    error('invalid creature provided.')
-  end
-  target.creature = creature
+  target.name = name
   target.priority = priority
   target.settings = settings
   target.loot = loot
@@ -80,12 +77,12 @@ end
 
 -- gets/sets
 
-function Target:getCreature()
-  return self.creature
+function Target:getName()
+  return self.name
 end
 
-function Target:setCreature(creature)
-  self.creature = creature
+function Target:setName(name)
+  self.name = name
 end
 
 function Target:getPriority()

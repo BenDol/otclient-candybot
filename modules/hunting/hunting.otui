@@ -4,10 +4,10 @@ Panel
   anchors.right: parent.right
   anchors.top: parent.top
   padding-right: 8
-  height: 540
+  height: 500
 
   BotOptionCheckBox
-    id: AutoTargetCheck
+    id: AutoTarget
     width: 90
     !text: tr('Auto Target')
     !tooltip: tr('Automatically target creatures in the target list.')
@@ -17,14 +17,14 @@ Panel
   //Label
     //id: targetListLabel
     //!text: tr('Target List')
-    //anchors.top: AutoTargetCheck.bottom
+    //anchors.top: AutoTarget.bottom
     //anchors.left: parent.left
     //margin-top: 5
 
   TextList
     id: TargetList
-    anchors.top: AutoTargetCheck.bottom
-    anchors.left: AutoTargetCheck.left
+    anchors.top: AutoTarget.bottom
+    anchors.left: AutoTarget.left
     margin-bottom: 5
     margin-top: 5
     padding: 1
@@ -218,7 +218,12 @@ Panel
     anchors.top: TargetList.bottom
     margin-top: 5
     width: 40
-    @onClick: HuntingModule.addNewTarget()
+    @onClick: | 
+      local parent = self:getParent()
+      local textEdit = parent:getChildById("AddTargetText")
+      if HuntingModule.addNewTarget(textEdit:getText()) then
+        textEdit:setText('')
+      end
 
   HorizontalSeparator
     anchors.left: parent.left
@@ -234,7 +239,7 @@ Panel
     anchors.bottom: parent.bottom
 
     Label
-      text: Save & Load Settings:
+      text: Save & Load:
       anchors.left: parent.left
       anchors.top: parent.top
       margin-top: 4
@@ -250,7 +255,7 @@ Panel
       focusable: false
       vertical-scrollbar: LoadSettingScrollBar
       width: 150
-      height: 130
+      height: 80
 
     VerticalScrollBar
       id: LoadSettingScrollBar
@@ -259,3 +264,40 @@ Panel
       anchors.right: LoadSettingList.right
       step: 14
       pixels-scroll: true
+
+    Button
+      id: LoadButton
+      !text: tr('Load Targets')
+      anchors.top: LoadSettingList.bottom
+      anchors.left: LoadSettingList.left
+      anchors.right: LoadSettingList.right
+      margin-top: 3
+      enabled: false
+
+    Label
+      id: NewLabel
+      !text: tr('Name:')
+      anchors.top: LoadSettingList.top
+      anchors.left: LoadSettingList.right
+      width: 35 
+      margin-top: 2
+      margin-left: 6
+
+    TextEdit
+      id: SaveNameEdit
+      anchors.top: LoadSettingList.top
+      anchors.left: prev.right
+      anchors.right: parent.right
+      margin-left: 6
+
+    Button
+      id: SaveButton
+      !text: tr('Save Targets')
+      anchors.top: prev.bottom
+      anchors.left: NewLabel.left
+      anchors.right: parent.right
+      margin-top: 8
+      @onClick: |
+        local parent = self:getParent()
+        local file = parent:getChildById('SaveNameEdit'):getText()
+        HuntingModule.saveTargets(file)

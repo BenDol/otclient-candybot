@@ -40,6 +40,14 @@ function Creature:getTileArray()
 end
 
 function Creature:getTargetsInArea(targetList, pathableOnly)
+  --[[
+  TODO: Add flag operations for:
+    * Closest creature
+    * Furthest creature
+    * Least health creature
+    * Most health creature
+    * -Reserved-
+  ]]
   local targets = {}
   if g_game.isOnline() then
     creatures = g_map.getSpectators(self:getPosition(), false)

@@ -19,7 +19,8 @@ dofile('classes/attack.lua')
 local botButton
 local botTabBar
 
-local enabled
+local enabled = false
+local writeDir = "candybot"
 
 local function setupDefaultOptions()
   for _, module in pairs(Modules.getOptions()) do
@@ -57,6 +58,11 @@ function CandyBot.init()
   g_keyboard.bindKeyDown('Ctrl+Shift+B', CandyBot.toggle)
   g_keyboard.bindKeyPress('Tab', function() botTabBar:selectNextTab() end, CandyBot.window)
   g_keyboard.bindKeyPress('Shift+Tab', function() botTabBar:selectPrevTab() end, CandyBot.window)
+
+  -- setup resources
+  if not g_resources.directoryExists(writeDir) then
+    g_resources.makeDir(writeDir)
+  end
 
   -- load extensions
   loadExtensions()
@@ -156,6 +162,10 @@ end
 
 function CandyBot.getParent()
   return CandyBot.window:getParent() -- main window
+end
+
+function CandyBot.getWriteDir()
+  return writeDir
 end
 
 function CandyBot.loadOptions()

@@ -9,36 +9,16 @@ HuntingModule = {}
 dofiles('events')
 
 local Panel = {}
+local Elements = {}
 
-local Elements = {
-  HuntingPanel,
-  AutoTargetCheck,
-  TargetList,
-  TargetScrollBar,
-  SettingPanel,
-  PrevSettingButton,
-  NewSettingButton,
-  NextSettingButton,
-  TargetSettingLabel,
-  TargetSettingNumber,
-  SettingNameLabel,
-  SettingNameTextBox,
-  SettingHpRangeLabel,
-  SettingHpRange1,
-  SettingHpRange2,
-  SettingStanceLabel,
-  SettingStanceList,
-  SettingModeLabel,
-  SettingModeList,
-  SettingLoot,
-  SettingAlarm,
-  AddTargetText,
-  AddTargetButton
-}
+local targets = {}
+local targetsDir = CandyBot.getWriteDir().."/targets"
+
+local saveOverWindow
+local loadWindow
 
 function HuntingModule.getPanel() return Panel end
 function HuntingModule.setPanel(panel) Panel = panel end
-
 function HuntingModule.getElements() return Elements end
 
 function HuntingModule.init()
@@ -51,49 +31,7 @@ function HuntingModule.init()
   Panel = g_ui.loadUI('hunting.otui', tabBuffer)
 
   HuntingModule.loadElements(Panel)
-  HuntingModule.setup()
-
-  HuntingModule.parentUI = CandyBot.window
-
-  -- register module
-  Modules.registerModule(HuntingModule)
-end
-
-function HuntingModule.terminate()
-  --CreatureList.terminate()
-  HuntingModule.stop()
-
-  Panel:destroy()
-  Panel = nil
-end
-
-function HuntingModule.loadElements(panel)
-  Elements.HuntingPanel = panel:getChildById('HuntingPanel')
-  Elements.AutoTargetCheck = panel:getChildById('AutoTargetCheck')
-  Elements.TargetList = panel:getChildById('TargetList')
-  Elements.TargetScrollBar = panel:getChildById('TargetScrollBar')
-  Elements.SettingPanel = panel:getChildById('SettingPanel')
-  Elements.PrevSettingButton = panel:getChildById('PrevSettingButton')
-  Elements.NewSettingButton = panel:getChildById('NewSettingButton')
-  Elements.NextSettingButton = panel:getChildById('NextSettingButton')
-  Elements.TargetSettingLabel = panel:getChildById('TargetSettingLabel')
-  Elements.TargetSettingNumber = panel:getChildById('TargetSettingNumber')
-  Elements.SettingNameLabel = panel:getChildById('SettingNameLabel')
-  Elements.SettingNameTextBox = panel:getChildById('SettingNameTextBox')
-  Elements.SettingHpRangeLabel = panel:getChildById('SettingHpRangeLabel')
-  Elements.SettingHpRange1 = panel:getChildById('SettingHpRange1')
-  Elements.SettingHpRange2 = panel:getChildById('SettingHpRange2')
-  Elements.SettingStanceLabel = panel:getChildById('SettingStanceLabel')
-  Elements.SettingStanceList = panel:getChildById('SettingStanceList')
-  Elements.SettingModeLabel = panel:getChildById('SettingModeLabel')
-  Elements.SettingModeList = panel:getChildById('SettingModeList')
-  Elements.SettingLoot = panel:getChildById('SettingLoot')
-  Elements.SettingAlarm = panel:getChildById('SettingAlarm')
-  Elements.AddTargetText = panel:getChildById('AddTargetText')
-  Elements.AddTargetButton = panel:getChildById('AddTargetButton')
-end
-
-function HuntingModule.setup()
+  
   connect(Elements.TargetList, {
     onChildFocusChange = function(self, focusedChild)
       if focusedChild == nil then return end
@@ -108,24 +46,165 @@ function HuntingModule.setup()
   g_keyboard.bindKeyPress('Down', function() 
       Elements.TargetList:focusNextChild(KeyboardFocusReason) 
     end, Elements.HuntingPanel)
+
+  HuntingModule.parentUI = CandyBot.window
+
+  -- setup resources
+  if not g_resources.directoryExists(targetsDir) then
+    g_resources.makeDir(targetsDir)
+  end
+
+  -- register module
+  Modules.registerModule(HuntingModule)
 end
 
-function HuntingModule.addNewTarget()
-  HuntingModule.addToTargetList(Elements.AddTargetText)
+function HuntingModule.terminate()
+  HuntingModule.stop()
+
+  Panel:destroy()
+  Panel = nil
+
+  g_keyboard.unbindKeyPress('Up', Elements.HuntingPanel)
+  g_keyboard.unbindKeyPress('Down', Elements.HuntingPanel)
+
+  for k,_ in pairs(Elements) do
+    Elements[k] = nil
+  end
 end
 
-function HuntingModule.addToTargetList(textEdit)
-  if not textEdit or textEdit:getText() == '' then
+function HuntingModule.loadElements(panel)
+  Elements = {
+    HuntingPanel = panel:getChildById('HuntingPanel'),
+    AutoTarget = panel:getChildById('AutoTarget'),
+    TargetList = panel:getChildById('TargetList'),
+    TargetScrollBar = panel:getChildById('TargetScrollBar'),
+    SettingPanel = panel:getChildById('SettingPanel'),
+    PrevSettingButton = panel:getChildById('PrevSettingButton'),
+    NewSettingButton = panel:getChildById('NewSettingButton'),
+    NextSettingButton = panel:getChildById('NextSettingButton'),
+    TargetSettingLabel = panel:getChildById('TargetSettingLabel'),
+    TargetSettingNumber = panel:getChildById('TargetSettingNumber'),
+    SettingNameLabel = panel:getChildById('SettingNameLabel'),
+    SettingNameTextBox = panel:getChildById('SettingNameTextBox'),
+    SettingHpRangeLabel = panel:getChildById('SettingHpRangeLabel'),
+    SettingHpRange1 = panel:getChildById('SettingHpRange1'),
+    SettingHpRange2 = panel:getChildById('SettingHpRange2'),
+    SettingStanceLabel = panel:getChildById('SettingStanceLabel'),
+    SettingStanceList = panel:getChildById('SettingStanceList'),
+    SettingModeLabel = panel:getChildById('SettingModeLabel'),
+    SettingModeList = panel:getChildById('SettingModeList'),
+    SettingLoot = panel:getChildById('SettingLoot'),
+    SettingAlarm = panel:getChildById('SettingAlarm'),
+    AddTargetText = panel:getChildById('AddTargetText'),
+    AddTargetButton = panel:getChildById('AddTargetButton')
+  }
+end
+
+function HuntingModule.addNewTarget(name)
+  if not HuntingModule.hasTarget(name) then
+    local target = Target.new(name, 1, {}, false, false)
+
+    HuntingModule.addToTargetList(target)
+    targets[name] = target
+    return true
+  end
+  return false
+end
+
+function HuntingModule.addToTargetList(target)
+  if target.__class ~= "Target" or target:getName() == '' then return end
+  local item = g_ui.createWidget('ListRow', Elements.TargetList)
+  item:setText(target:getName())
+end
+
+function HuntingModule.updateSettingInfo(name)
+  Elements.SettingPanel:setEnabled(true)
+
+  
+end
+
+function HuntingModule.getTarget(name)
+  local target = nil
+
+  for k,v in pairs(targets) do
+    if v:getName() == name then setting = v break end
+  end
+  return target
+end
+
+function HuntingModule.getTargets()
+  return targets
+end
+
+function HuntingModule.hasTarget(name)
+  return HuntingModule.getTarget(name) ~= nil
+end
+
+function HuntingModule.saveTargets(file)
+  local path = targetsDir.."/"..file..".otml"
+  local config = g_configs.load(path)
+  if config then
+    local msg = "Are you sure you would like to save over "..file.."?"
+
+    local yesCallback = function()
+      writeTargets(config)
+      noCallback()
+    end
+
+    local noCallback = function()
+      saveOverWindow:destroy()
+      saveOverWindow=nil
+    end
+
+    saveOverWindow = displayGeneralBox(tr('Overwite Save'), tr(msg), {
+      { text=tr('Yes'), callback = yesCallback},
+      { text=tr('No'), callback = noCallback},
+      anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
+  else
+    config = g_configs.create(path)
+    writeTargets(config)
+  end
+end
+
+function HuntingModule.loadTargets(file)
+  local path = targetsDir.."/"..file..".otml"
+  local config = g_configs.load(path)
+  if config then
+    local msg = "Would you like to load "..file.."?"
+
+    local yesCallback = function()
+      parseTargets(config)
+      noCallback()
+    end
+
+    local noCallback = function()
+      loadWindow:destroy()
+      loadWindow=nil
+    end
+
+    loadWindow = displayGeneralBox(tr('Load Targets'), tr(msg), {
+      { text=tr('Yes'), callback = yesCallback},
+      { text=tr('No'), callback = noCallback},
+      anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
+  end
+end
+
+-- local functions
+
+local function writeTargets(config)
+  if not config then
     return
   end
-  local item = g_ui.createWidget('ListRow', Elements.TargetList)
-  item:setText(textEdit:getText())
 
-  textEdit:setText('')
+  --
 end
 
-function HuntingModule.updateSettingInfo(target)
-  Elements.SettingPanel:setEnabled(true)
+local function parseTargets(config)
+  local _targets = {}
+
+  --
+
+  return _targets
 end
 
 return HuntingModule
