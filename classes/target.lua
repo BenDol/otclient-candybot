@@ -9,14 +9,16 @@ TargetSetting.__index = TargetSetting
 
 TargetSetting.__class = "TargetSetting"
 
-TargetSetting.new = function(movement, attack, range, equip)
+TargetSetting.new = function(movement, stance, attack, range, equip)
   setting = {
     movement = 0,
+    stance = "",
     attack = nil,
-    range = {0, 100},
+    range = {100, 0},
     equip = {}
   }
   setting.movement = movement
+  setting.stance = stance
   setting.attack = attack
   setting.range = range
   setting.equip = equip
@@ -33,12 +35,28 @@ function TargetSetting:setMovement(movement)
   self.movement = movement
 end
 
+function TargetSetting:getStance()
+  return self.stance
+end
+
+function TargetSetting:setStance(stance)
+  self.stance = stance
+end
+
 function TargetSetting:getAttack()
   return self.attack
 end
 
 function TargetSetting:setAttack(attack)
   self.attack = attack
+end
+
+function TargetSetting:getRange()
+  return self.range
+end
+
+function TargetSetting:setRange(range)
+  self.range = range
 end
 
 function TargetSetting:getEquip()
@@ -82,7 +100,12 @@ function Target:getName()
 end
 
 function Target:setName(name)
-  self.name = name
+  local oldName = self.name
+  if name ~= oldName then
+    self.name = name
+
+    signalcall(self.onNameChange, self, name, oldName)
+  end
 end
 
 function Target:getPriority()
@@ -90,15 +113,37 @@ function Target:getPriority()
 end
 
 function Target:setPriority(priority)
-  self.priority = priority
+  local oldPriority = self.priority
+  if priority ~= oldPriority then
+    self.priority = priority
+
+    signalcall(self.onPriorityChange, self, priority, oldPriority)
+  end
 end
 
 function Target:getSettings()
   return self.settings
 end
 
+function Target:getSetting(index)
+  return self.settings[index]
+end
+
 function Target:setSettings(settings)
-  self.settings = settings
+  local oldSettings = self.settings
+  if settings ~= oldSettings then
+    self.settings = settings
+
+    signalcall(self.onSettingsChange, self, settings, oldSettings)
+  end
+end
+
+function Target:addSetting(setting)
+  if not table.contains(self.settings, setting) then
+    table.insert(self.settings, setting)
+
+    signalcall(self.onAddSetting, self, setting)
+  end
 end
 
 function Target:getLoot()
@@ -106,7 +151,12 @@ function Target:getLoot()
 end
 
 function Target:setLoot(loot)
-  self.loot = loot
+  local oldLoot = self.loot
+  if loot ~= oldLoot then
+    self.loot = loot
+
+    signalcall(self.onLootChange, self, loot, oldLoot)
+  end
 end
 
 function Target:getAlarm()
@@ -114,8 +164,12 @@ function Target:getAlarm()
 end
 
 function Target:setAlarm(alarm)
-  self.alarm = alarm
+  local oldAlarm = self.alarm
+  if alarm ~= oldAlarm then
+    self.alarm = alarm
+
+    signalcall(self.onSettingsChange, self, alarm, oldAlarm)
+  end
 end
 
 -- methods
-

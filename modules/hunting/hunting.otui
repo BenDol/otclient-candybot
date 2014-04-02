@@ -14,13 +14,6 @@ Panel
     anchors.left: parent.left
     anchors.top: parent.top
 
-  //Label
-    //id: targetListLabel
-    //!text: tr('Target List')
-    //anchors.top: AutoTarget.bottom
-    //anchors.left: parent.left
-    //margin-top: 5
-
   TextList
     id: TargetList
     anchors.top: AutoTarget.bottom
@@ -30,24 +23,25 @@ Panel
     padding: 1
     focusable: false
     vertical-scrollbar: TargetScrollBar
-    width: 150
+    width: 140
     height: 180
+    auto-focus: first
 
   VerticalScrollBar
     id: TargetScrollBar
     anchors.top: TargetList.top
     anchors.bottom: TargetList.bottom
-    anchors.right: TargetList.right
+    anchors.left: TargetList.right
     step: 14
     pixels-scroll: true
 
   Panel
     id: SettingPanel
-    anchors.left: TargetList.right
+    anchors.left: TargetScrollBar.right
     anchors.right: parent.right
     anchors.top: parent.top
     anchors.bottom: AddTargetText.bottom
-    enabled: false
+    enabled: true
 
     Button
       id: PrevSettingButton
@@ -109,7 +103,7 @@ Panel
         margin-left: 5
 
       TextEdit
-        id: SettingNameTextBox
+        id: SettingNameEdit
         anchors.top: prev.bottom
         anchors.left: prev.left
         anchors.right: parent.right
@@ -246,7 +240,7 @@ Panel
       width: 130
 
     TextList
-      id: LoadSettingList
+      id: LoadList
       anchors.top: prev.bottom
       anchors.left: prev.left
       margin-bottom: 5
@@ -259,33 +253,33 @@ Panel
 
     VerticalScrollBar
       id: LoadSettingScrollBar
-      anchors.top: LoadSettingList.top
-      anchors.bottom: LoadSettingList.bottom
-      anchors.right: LoadSettingList.right
+      anchors.top: LoadList.top
+      anchors.bottom: LoadList.bottom
+      anchors.right: LoadList.right
       step: 14
       pixels-scroll: true
 
     Button
       id: LoadButton
       !text: tr('Load Targets')
-      anchors.top: LoadSettingList.bottom
-      anchors.left: LoadSettingList.left
-      anchors.right: LoadSettingList.right
+      anchors.top: LoadList.bottom
+      anchors.left: LoadList.left
+      anchors.right: LoadList.right
       margin-top: 3
       enabled: false
 
     Label
       id: NewLabel
       !text: tr('Name:')
-      anchors.top: LoadSettingList.top
-      anchors.left: LoadSettingList.right
+      anchors.top: LoadList.top
+      anchors.left: LoadList.right
       width: 35 
       margin-top: 2
       margin-left: 6
 
     TextEdit
       id: SaveNameEdit
-      anchors.top: LoadSettingList.top
+      anchors.top: LoadList.top
       anchors.left: prev.right
       anchors.right: parent.right
       margin-left: 6

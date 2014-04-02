@@ -18,6 +18,45 @@ BotOptionComboBoxPopupMenu < ComboBoxPopupMenu
 BotOptionComboBox < ComboBox
   @onOptionChange: CandyBot.changeOption(self:getId(), self:getCurrentOption().text)
 
+ListRowComplex < UIWidget
+  height: 14
+  background-color: alpha
+  &updateOnStates: |
+    function(self)
+      local children = self:getChildren()
+      for i=1,#children do
+        children[i]:setOn(self:isFocused())
+      end
+    end
+  @onFocusChange: self:updateOnStates()
+  @onSetup: self:updateOnStates()
+
+  $focus:
+    background-color: #ffffff22
+
+  Label
+    id: details
+    color: #aaaaaa
+    anchors.top: parent.top
+    anchors.left: parent.left
+    font: verdana-11px-monochrome
+    text-auto-resize: true
+    background-color: alpha
+    text-offset: 2 0
+
+    $on:
+      color: #ffffff
+
+  Button
+    id: remove
+    text: x
+    width: 12
+    height: 12
+    anchors.top: parent.top
+    anchors.right: parent.right
+    margin-right: 4
+    margin-top: 1
+
 LogLabel < UILabel
   font: verdana-11px-antialised
   height: 14
