@@ -100,9 +100,11 @@ end
 function HuntingModule.bindHandlers()
   connect(UI.SettingNameEdit, {
     onTextChange = function(self, text, oldText)
-      if not selectedTarget:getId() then
+      if not selectedTarget then
         local newTarget = HuntingModule.addNewTarget(text)
-        HuntingModule.selectTarget(newTarget)
+        if newTarget then
+          HuntingModule.selectTarget(newTarget)
+        end
       else
         HuntingModule.changeTargetName(oldText, text)
       end
@@ -114,6 +116,7 @@ function HuntingModule.bindHandlers()
       if focusedChild == nil then return end
 
       selectedTarget = nil
+      print(focusedChild:getId())
       if focusedChild:getId() ~= "new" then
         selectedTarget = HuntingModule.getTarget(focusedChild:getText())
       end
@@ -187,6 +190,9 @@ function HuntingModule.addToTargetList(target)
   item:setTextAlign(AlignLeft)
   item:setId(target:getName())
 
+  local lastIndex = UI.TargetList:getChildIndex(item)
+  UI.TargetList:moveChildToIndex(UI.TargetList:getChildById("new"), lastIndex)
+
   local removeButton = item:getChildById('remove')
   connect(removeButton, {
     onClick = function(button)
@@ -223,7 +229,7 @@ end
 
 function HuntingModule.updateSettingInfo()
   if selectedTarget then
-    UI.SettingNameEdit:setText(selectedTarget:getName(), false)
+    UI.SettingNameEdit:setText(selectedTarget:getName(), true)
     UI.SettingLoot:setChecked(selectedTarget:getLoot())
     UI.SettingAlarm:setChecked(selectedTarget:getAlarm())
 
