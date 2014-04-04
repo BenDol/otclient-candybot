@@ -11,7 +11,6 @@ dofiles('events')
 local Panel = {}
 local UI = {}
 
-local targets = {}
 local targetsDir = CandyBot.getWriteDir().."/targets"
 local selectedTarget
 
@@ -100,6 +99,7 @@ end
 function HuntingModule.bindHandlers()
   connect(UI.SettingNameEdit, {
     onTextChange = function(self, text, oldText)
+      print(toboolean(selectedTarget))
       if not selectedTarget then
         local newTarget = HuntingModule.addNewTarget(text)
         if newTarget then
@@ -146,17 +146,17 @@ function HuntingModule.selectTarget(target)
     target = HuntingModule.getTarget(target)
   end
 
-  local item = UI.TargetList:getChildById(target:getName())
+  local item = HuntingModule.getTargetListItem(target)
   if item then
     UI.TargetList:focusChild(item)
   end
 end
 
-function HuntingModule.getTargetListItem(name)
+function HuntingModule.getTargetListItem(target)
   for _,child in pairs(UI.TargetList:getChildren()) do
-    if child:getText() == name then return child end
+    local t = child.target
+    if t and t == target then return child end
   end
-  return nil
 end
 
 function HuntingModule.addNewTarget(name)
@@ -168,16 +168,14 @@ function HuntingModule.addNewTarget(name)
 
     connect(target, {
       onNameChange = function(target, name, oldName)
-        local item = HuntingModule.getTargetListItem(oldName)
+        local item = HuntingModule.getTargetListItem(target)
         if item then 
           item:setText(name)
-          item:setId(name)
         end
       end
     })
 
     HuntingModule.addToTargetList(target)
-    targets[name] = target
     return target
   end
   return nil
@@ -188,7 +186,8 @@ function HuntingModule.addToTargetList(target)
   local item = g_ui.createWidget('ListRowComplex', UI.TargetList)
   item:setText(target:getName())
   item:setTextAlign(AlignLeft)
-  item:setId(target:getName())
+  item:setId(#UI.TargetList:getChildren()+1)
+  item.target = target
 
   local lastIndex = UI.TargetList:getChildIndex(item)
   UI.TargetList:moveChildToIndex(UI.TargetList:getChildById("new"), lastIndex)
@@ -222,8 +221,11 @@ function HuntingModule.addToTargetList(target)
 end
 
 function HuntingModule.removeTarget(name)
-  if table.contains(targets, name) then
-    targets[name] = nil
+  for _,child in pairs(UI.TargetList:getChildren()) do
+    local t = child.target
+    if t and t:getName() == name then 
+      UI.TargetList:removeChild(child)
+    end
   end
 end
 
@@ -250,15 +252,18 @@ function HuntingModule.updateSettingInfo()
 end
 
 function HuntingModule.getTarget(name)
-  local target = nil
-
-  for k,v in pairs(targets) do
-    if v:getName() == name then target = v break end
+  for _,child in pairs(UI.TargetList:getChildren()) do
+    local t = child.target
+    if t and t:getName() == name then return t end
   end
-  return target
 end
 
 function HuntingModule.getTargets()
+  local targets = {}
+  for _,child in pairs(UI.TargetList:getChildren()) do
+    local t = child.target
+    if t then table.insert(targets, t) end
+  end
   return targets
 end
 
@@ -334,11 +339,11 @@ function writeTargets(config)
 end
 
 function parseTargets(config)
-  local _targets = {}
+  local targets = {}
 
   --
 
-  return _targets
+  return targets
 end
 
 return HuntingModule
