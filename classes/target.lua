@@ -9,19 +9,23 @@ TargetSetting.__index = TargetSetting
 
 TargetSetting.__class = "TargetSetting"
 
-TargetSetting.new = function(movement, stance, attack, range, equip)
+TargetSetting.new = function(movement, stance, attack, range, equip, target)
   setting = {
     movement = 0,
     stance = "",
     attack = nil,
     range = {100, 0},
-    equip = {}
+    equip = {},
+    target = nil,
+    index = 0
   }
   setting.movement = movement
   setting.stance = stance
   setting.attack = attack
   setting.range = range
   setting.equip = equip
+  setting.target = target
+  setting.index = index
 
   setmetatable(setting, TargetSetting)
   return setting
@@ -32,7 +36,12 @@ function TargetSetting:getMovement()
 end
 
 function TargetSetting:setMovement(movement)
-  self.movement = movement
+  local oldMovement = self.movement
+  if movement ~= oldMovement then
+    self.movement = movement
+
+    signalcall(self.onMovementChange, self, movement, oldMovement)
+  end
 end
 
 function TargetSetting:getStance()
@@ -40,7 +49,12 @@ function TargetSetting:getStance()
 end
 
 function TargetSetting:setStance(stance)
-  self.stance = stance
+  local oldStance = self.stance
+  if stance ~= oldStance then
+    self.stance = stance
+
+    signalcall(self.onStanceChange, self, stance, oldStance)
+  end
 end
 
 function TargetSetting:getAttack()
@@ -48,15 +62,38 @@ function TargetSetting:getAttack()
 end
 
 function TargetSetting:setAttack(attack)
-  self.attack = attack
+  local oldAttack = self.attack
+  if attack ~= oldAttack then
+    self.attack = attack
+
+    signalcall(self.onAttackChange, self, attack, oldAttack)
+  end
 end
 
 function TargetSetting:getRange()
   return self.range
 end
 
-function TargetSetting:setRange(range)
-  self.range = range
+function TargetSetting:setRange(range, index)
+  if not index then
+    local oldRange = self.range
+    if oldRange ~= range then
+      self.range = range
+
+      signalcall(self.onRangeChange, self, range, oldRange)
+    end
+  else
+    if index > 0 and index < 3 then
+      local oldRange = self.range[index]
+      if oldRange ~= range then
+        self.range[index] = range
+
+        signalcall(self.onRangeChange, self, range, oldRange, index)
+      end
+    else
+      perror("Invalid index provided: " .. index)
+    end
+  end
 end
 
 function TargetSetting:getEquip()
@@ -64,7 +101,38 @@ function TargetSetting:getEquip()
 end
 
 function TargetSetting:setEquip(equip)
-  self.equip = equip
+  local oldEquip = self.equip
+  if equip ~= oldEquip then
+    self.equip = equip
+
+    signalcall(self.onEquipChange, self, equip, oldEquip)
+  end
+end
+
+function TargetSetting:getTarget()
+  return self.target
+end
+
+function TargetSetting:setTarget(target)
+  local oldTarget = self.target
+  if target ~= oldTarget then
+    self.target = target
+    
+    signalcall(self.onTargetChange, self, target, oldTarget)
+  end
+end
+
+function TargetSetting:getIndex()
+  return self.index
+end
+
+function TargetSetting:setIndex(index)
+  local oldIndex = self.index
+  if index ~= oldIndex then
+    self.index = index
+    
+    signalcall(self.onIndexChange, self, index, oldIndex)
+  end
 end
 
 --[[ Target Class]]
@@ -133,13 +201,15 @@ function Target:setSettings(settings)
   local oldSettings = self.settings
   if settings ~= oldSettings then
     self.settings = settings
-
+    
     signalcall(self.onSettingsChange, self, settings, oldSettings)
   end
 end
 
 function Target:addSetting(setting)
   if not table.contains(self.settings, setting) then
+    setting:setTarget(self)
+    setting:setIndex(#self.settings + 1)
     table.insert(self.settings, setting)
 
     signalcall(self.onAddSetting, self, setting)
@@ -155,7 +225,7 @@ function Target:setLoot(loot)
   if loot ~= oldLoot then
     self.loot = loot
 
-    signalcall(self.onLootChange, self, loot, oldLoot)
+    signalcall(self.onLootChange, self, loot)
   end
 end
 
@@ -168,7 +238,7 @@ function Target:setAlarm(alarm)
   if alarm ~= oldAlarm then
     self.alarm = alarm
 
-    signalcall(self.onSettingsChange, self, alarm, oldAlarm)
+    signalcall(self.onAlarmChange, self, alarm)
   end
 end
 

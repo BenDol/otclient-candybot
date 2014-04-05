@@ -13,6 +13,7 @@ local UI = {}
 
 local targetsDir = CandyBot.getWriteDir().."/targets"
 local selectedTarget
+local currentSetting
 
 local saveOverWindow
 local loadWindow
@@ -99,12 +100,9 @@ end
 function HuntingModule.bindHandlers()
   connect(UI.SettingNameEdit, {
     onTextChange = function(self, text, oldText)
-      print(toboolean(selectedTarget))
       if not selectedTarget then
         local newTarget = HuntingModule.addNewTarget(text)
-        if newTarget then
-          HuntingModule.selectTarget(newTarget)
-        end
+        if newTarget then HuntingModule.selectTarget(newTarget) end
       else
         HuntingModule.changeTargetName(oldText, text)
       end
@@ -116,11 +114,12 @@ function HuntingModule.bindHandlers()
       if focusedChild == nil then return end
 
       selectedTarget = nil
-      print(focusedChild:getId())
       if focusedChild:getId() ~= "new" then
         selectedTarget = HuntingModule.getTarget(focusedChild:getText())
+        HuntingModule.setCurrentSetting(selectedTarget:getSetting(1))
+      else
+        HuntingModule.updateSettingInfo()
       end
-      HuntingModule.updateSettingInfo()
     end
   })
 
@@ -141,7 +140,6 @@ function HuntingModule.changeTargetName(oldName, newName)
 end
 
 function HuntingModule.selectTarget(target)
-  print("selectTarget")
   if type(target) == "string" then
     target = HuntingModule.getTarget(target)
   end
@@ -150,6 +148,12 @@ function HuntingModule.selectTarget(target)
   if item then
     UI.TargetList:focusChild(item)
   end
+end
+
+function HuntingModule.setCurrentSetting(setting)
+  currentSetting = setting
+
+  HuntingModule.updateSettingInfo()
 end
 
 function HuntingModule.getTargetListItem(target)
@@ -162,23 +166,99 @@ end
 function HuntingModule.addNewTarget(name)
   print("addNewTarget")
   if not HuntingModule.hasTarget(name) then
-    local target = Target.new(name, 1, {
-      TargetSetting.new(0, "", nil, {100, 0}, {})
-    }, false, false)
+    local target = Target.new(name, 1, {}, false, false)
+
+    -- Target connections
 
     connect(target, {
       onNameChange = function(target, name, oldName)
         local item = HuntingModule.getTargetListItem(target)
-        if item then 
-          item:setText(name)
-        end
+        if item then item:setText(name) end
       end
     })
+
+    connect(target, {
+      onPriorityChange = function(target, priority, oldPriority)
+        print("["..target:getName().."] Priority Changed: " .. priority)
+      end
+    })
+
+    connect(target, {
+      onAlarmChange = function(target, alarm)
+        print("["..target:getName().."] Alarm Changed: " .. tostring(alarm))
+      end
+    })
+
+    connect(target, {
+      onLootChange = function(target, loot)
+        print("["..target:getName().."] Loot Changed: " .. tostring(loot))
+      end
+    })
+
+    -- Add first setting
+    HuntingModule.addTargetSetting(target, TargetSetting.new(
+      0, "", nil, {100, 0}, {}
+    ))
 
     HuntingModule.addToTargetList(target)
     return target
   end
-  return nil
+end
+
+function HuntingModule.addTargetSetting(target, setting)
+  if target.__class ~= "Target" then return end
+  if setting.__class ~= "TargetSetting" then return end
+
+  connect(setting, {
+    onMovementChange = function(setting, movement, oldMovement)
+      local target = setting:getTarget()
+      print("["..target:getName().."] Movement Changed: " .. tostring(movement))
+    end
+  })
+
+  connect(setting, {
+    onStanceChange = function(setting, stance, oldStance)
+      local target = setting:getTarget()
+      print("["..target:getName().."] Stance Changed: " .. tostring(stance))
+    end
+  })
+
+  connect(setting, {
+    onAttackChange = function(setting, attack, oldAttack)
+      local target = setting:getTarget()
+      print("["..target:getName().."] Attack Changed: " .. tostring(attack))
+    end
+  })
+
+  connect(setting, {
+    onRangeChange = function(setting, range, oldRange, index)
+      local target = setting:getTarget()
+      print("["..target:getName().."] Range"..(index and "["..index.."]" 
+        or "").." Changed: "..tostring(range))
+    end
+  })
+
+  connect(setting, {
+    onEquipChange = function(setting, equip, oldEquip)
+      local target = setting:getTarget()
+      print("["..target:getName().."] Equip Changed: "..tostring(equip))
+    end
+  })
+
+  connect(setting, {
+    onTargetChange = function(setting, target, oldTarget)
+      print("["..target:getName().."] Target Changed: "..tostring(target:getName()))
+    end
+  })
+
+  connect(setting, {
+    onIndexChange = function(setting, index, oldIndex)
+      local target = setting:getTarget()
+      print("["..target:getName().."] Index Changed: "..tostring(index))
+    end
+  })
+
+  target.addSetting(setting)
 end
 
 function HuntingModule.addToTargetList(target)
@@ -235,10 +315,9 @@ function HuntingModule.updateSettingInfo()
     UI.SettingLoot:setChecked(selectedTarget:getLoot())
     UI.SettingAlarm:setChecked(selectedTarget:getAlarm())
 
-    local firstSetting = selectedTarget:getSetting(1)
-    if firstSetting then
-      UI.SettingHpRange1:setText(firstSetting:getRange()[1])
-      UI.SettingHpRange2:setText(firstSetting:getRange()[2])
+    if currentSetting then
+      UI.SettingHpRange1:setText(currentSetting:getRange()[1])
+      UI.SettingHpRange2:setText(currentSetting:getRange()[2])
       --[[UI.SettingStanceList:
       UI.SettingModeList:]]
     end
@@ -249,6 +328,10 @@ function HuntingModule.updateSettingInfo()
     UI.SettingLoot:setChecked(false)
     UI.SettingAlarm:setChecked(false)
   end
+end
+
+function HuntingModule.getSelectedTarget()
+  return selectedTarget
 end
 
 function HuntingModule.getTarget(name)

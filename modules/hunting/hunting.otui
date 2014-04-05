@@ -123,6 +123,11 @@ Panel
         anchors.left: prev.left
         width: 40
         margin-top: 3
+        @onTextChange: |
+          local setting = HuntingModule.getCurrentSetting()
+          if setting then
+            setting:setRange(self:getText(), 1)
+          end
 
       Label
         !text: tr('to')
@@ -138,6 +143,11 @@ Panel
         anchors.top: SettingHpRange1.top
         anchors.left: prev.right
         width: 40
+        @onTextChange: |
+          local setting = HuntingModule.getCurrentSetting()
+          if setting then
+            setting:setRange(self:getText(), 2)
+          end
 
       Label
         text: %
@@ -181,11 +191,16 @@ Panel
       CheckBox
         id: SettingLoot
         !text: tr('Loot')
-        !tooltip: tr('Play a sound alert when a creature appears.')
+        !tooltip: tr('Loot this target when it dies.')
         width: 50
         anchors.left: prev.left
         anchors.top: prev.bottom
         margin-top: 6
+        @onCheckChange: |
+          local target = HuntingModule.getSelectedTarget()
+          if target then
+            target:setLoot(self:isChecked())
+          end
 
       CheckBox
         id: SettingAlarm
@@ -195,6 +210,11 @@ Panel
         anchors.right: parent.right
         anchors.top: prev.top
         margin-left: 5
+        @onCheckChange: |
+          local target = HuntingModule.getSelectedTarget()
+          if target then
+            target:setAlarm(self:isChecked())
+          end
 
   TextEdit
     id: AddTargetText
