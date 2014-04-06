@@ -6,7 +6,7 @@ local nextHeal = {}
 
 local settings = {
   [RestoreType.cast] = 'AutoHeal',
-  [RestoreType.item] = 'AutoHealItem'
+  [RestoreType.item] = 'AutoHealthItem'
 }
 
 function AutoHeal.onHealthChange(player, health, maxHealth, oldHealth, restoreType, tries)
