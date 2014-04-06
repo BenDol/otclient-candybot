@@ -156,6 +156,10 @@ function HuntingModule.setCurrentSetting(setting)
   HuntingModule.updateSettingInfo()
 end
 
+function HuntingModule.getCurrentSetting()
+  return currentSetting
+end
+
 function HuntingModule.getTargetListItem(target)
   for _,child in pairs(UI.TargetList:getChildren()) do
     local t = child.target
@@ -212,28 +216,28 @@ function HuntingModule.addTargetSetting(target, setting)
   connect(setting, {
     onMovementChange = function(setting, movement, oldMovement)
       local target = setting:getTarget()
-      print("["..target:getName().."] Movement Changed: " .. tostring(movement))
+      print("["..target:getName().."]["..setting:getIndex().."] Movement Changed: " .. tostring(movement))
     end
   })
 
   connect(setting, {
     onStanceChange = function(setting, stance, oldStance)
       local target = setting:getTarget()
-      print("["..target:getName().."] Stance Changed: " .. tostring(stance))
+      print("["..target:getName().."]["..setting:getIndex().."] Stance Changed: " .. tostring(stance))
     end
   })
 
   connect(setting, {
     onAttackChange = function(setting, attack, oldAttack)
       local target = setting:getTarget()
-      print("["..target:getName().."] Attack Changed: " .. tostring(attack))
+      print("["..target:getName().."]["..setting:getIndex().."] Attack Changed: " .. tostring(attack))
     end
   })
 
   connect(setting, {
     onRangeChange = function(setting, range, oldRange, index)
       local target = setting:getTarget()
-      print("["..target:getName().."] Range"..(index and "["..index.."]" 
+      print("["..target:getName().."]["..setting:getIndex().."] Range"..(index and "["..index.."]" 
         or "").." Changed: "..tostring(range))
     end
   })
@@ -241,7 +245,7 @@ function HuntingModule.addTargetSetting(target, setting)
   connect(setting, {
     onEquipChange = function(setting, equip, oldEquip)
       local target = setting:getTarget()
-      print("["..target:getName().."] Equip Changed: "..tostring(equip))
+      print("["..target:getName().."]["..setting:getIndex().."] Equip Changed: "..tostring(equip))
     end
   })
 
@@ -254,11 +258,11 @@ function HuntingModule.addTargetSetting(target, setting)
   connect(setting, {
     onIndexChange = function(setting, index, oldIndex)
       local target = setting:getTarget()
-      print("["..target:getName().."] Index Changed: "..tostring(index))
+      print("["..target:getName().."]["..setting:getIndex().."] Index Changed: "..tostring(index))
     end
   })
 
-  target.addSetting(setting)
+  target:addSetting(setting)
 end
 
 function HuntingModule.addToTargetList(target)
@@ -316,15 +320,15 @@ function HuntingModule.updateSettingInfo()
     UI.SettingAlarm:setChecked(selectedTarget:getAlarm())
 
     if currentSetting then
-      UI.SettingHpRange1:setText(currentSetting:getRange()[1])
-      UI.SettingHpRange2:setText(currentSetting:getRange()[2])
+      UI.SettingHpRange1:setText(currentSetting:getRange(1), true)
+      UI.SettingHpRange2:setText(currentSetting:getRange(2), true)
       --[[UI.SettingStanceList:
       UI.SettingModeList:]]
     end
   else
-    UI.SettingNameEdit:setText("")
-    UI.SettingHpRange1:setText("100")
-    UI.SettingHpRange2:setText("0")
+    UI.SettingNameEdit:setText("", true)
+    UI.SettingHpRange1:setText("100", true)
+    UI.SettingHpRange2:setText("0", true)
     UI.SettingLoot:setChecked(false)
     UI.SettingAlarm:setChecked(false)
   end
@@ -414,14 +418,15 @@ end
 -- local functions
 
 function writeTargets(config)
-  if not config then
-    return
-  end
+  if not config then return end
 
-  --
+  local targets = HuntingModule.getTargets() or {}
+  --g_settings.setNode('Targets', targets)
 end
 
 function parseTargets(config)
+  if not config then return end
+
   local targets = {}
 
   --

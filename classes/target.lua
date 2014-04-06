@@ -70,8 +70,12 @@ function TargetSetting:setAttack(attack)
   end
 end
 
-function TargetSetting:getRange()
-  return self.range
+function TargetSetting:getRange(index)
+  local range = self.range
+  if index and self:isIndexValid(index) then
+    range = self.range[index]
+  end
+  return range
 end
 
 function TargetSetting:setRange(range, index)
@@ -83,7 +87,7 @@ function TargetSetting:setRange(range, index)
       signalcall(self.onRangeChange, self, range, oldRange)
     end
   else
-    if index > 0 and index < 3 then
+    if self:isIndexValid(index) then
       local oldRange = self.range[index]
       if oldRange ~= range then
         self.range[index] = range
@@ -135,6 +139,10 @@ function TargetSetting:setIndex(index)
   end
 end
 
+function TargetSetting:isIndexValid(index)
+  return index > 0 and index < 3
+end
+
 --[[ Target Class]]
 
 Target = {}
@@ -151,9 +159,9 @@ Target.new = function(name, priority, settings, loot, alarm)
     alarm = false
   }
 
+  target.settings = settings
   target.name = name
   target.priority = priority
-  target.settings = settings
   target.loot = loot
   target.alarm = alarm
 
@@ -189,12 +197,12 @@ function Target:setPriority(priority)
   end
 end
 
-function Target:getSettings()
-  return self.settings
-end
-
 function Target:getSetting(index)
   return self.settings[index]
+end
+
+function Target:getSettings()
+  return self.settings
 end
 
 function Target:setSettings(settings)
