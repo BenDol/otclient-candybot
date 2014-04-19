@@ -85,6 +85,11 @@ function Creature:canStandBy(creature)
 
   for k,v in pairs(neighbours) do
     local checkPos = {x = myPos.x + v.x, y = myPos.y + v.y, z = myPos.z + v.z}
+    if postostring(otherPos) == postostring(checkPos) then
+      return true
+    end
+
+    -- Check if there is a path
     local steps, result = g_map.findPath(otherPos, checkPos, 40000, 0)
     if result == PathFindResults.Ok then
         return true
