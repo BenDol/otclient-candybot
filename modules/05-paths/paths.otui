@@ -1,0 +1,15 @@
+Panel
+  id: PathsPanel
+  anchors.left: parent.left
+  anchors.right: parent.right
+  anchors.top: parent.top
+  padding-right: 8
+  height: 500
+
+  BotOptionCheckBox
+    id: ExploreCheck
+    width: 100
+    !text: tr('Auto Explore')
+    !tooltip: tr('Automatically explore the map.')
+    anchors.left: parent.left
+    anchors.top: parent.top

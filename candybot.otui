@@ -92,7 +92,7 @@ BotTabBarButton < MoveableTabBarButton
 MainWindow
   id: botWindow
   !text: tr('CandyBot')
-  size: 375 535
+  size: 372 535
   
   @onEnter: CandyBot.hide()
   @onEscape: CandyBot.hide()

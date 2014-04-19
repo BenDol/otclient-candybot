@@ -18,7 +18,7 @@ function PvpModule.setPanel(panel) Panel = panel end
 function PvpModule.init()
   -- create tab
   local botTabBar = CandyBot.window:getChildById('botTabBar')
-  local tab = botTabBar:addTab(tr('Pvp'))
+  local tab = botTabBar:addTab(tr('PvP'))
 
   local tabPanel = botTabBar:getTabPanel(tab)
   local tabBuffer = tabPanel:getChildById('tabBuffer')
