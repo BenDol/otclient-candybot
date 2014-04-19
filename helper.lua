@@ -19,6 +19,20 @@ function Helper.safeUseInventoryItem(itemId, forceCheck)
       return false
     end
   end
+
+  if g_game.getProtocolVersion() < 800 then -- Need to verify
+    local item = g_game.findPlayerItem(itemId, -1)
+    if item then
+      if item:getSubType() > 1 then
+        g_game.use(item, thing)
+      else
+        g_game.useInventoryItem(itemId, thing)
+      end
+      return true
+    end
+    return false
+  end
+
   g_game.useInventoryItem(itemId)
   return true
 end
@@ -30,6 +44,20 @@ function Helper.safeUseInventoryItemWith(itemId, thing, forceCheck)
       return false
     end
   end
+
+  if g_game.getProtocolVersion() < 800 then -- Need to verify
+    local item = g_game.findPlayerItem(itemId, -1)
+    if item then
+      if item:getSubType() > 1 then
+        g_game.useWith(item, thing)
+      else
+        g_game.useInventoryItemWith(itemId, thing)
+      end
+      return true
+    end
+    return false
+  end
+
   g_game.useInventoryItemWith(itemId, thing)
   return true
 end

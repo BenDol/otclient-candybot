@@ -56,7 +56,7 @@ function BotModule.checkItem(widget, hovered)
   end
   
   local widget = widget or g_ui.getHoveredWidget()
-  if not widget then
+  if not widget or widget:getClassName() ~= "UIItem" then
     g_tooltip.hide()
     return
   end
@@ -65,7 +65,7 @@ function BotModule.checkItem(widget, hovered)
   end
 
   local item = widget:getItem()
-  if item and hovered and g_keyboard.isKeyPressed('Insert') then
+  if item and hovered and g_keyboard.isKeyPressed("Insert") then
     BotModule.showItemInfo(item)
   else
     g_tooltip.hide()
@@ -75,6 +75,7 @@ end
 function BotModule.showItemInfo(item)
   if not item then return end
   local text = "id: " ..item:getId()
+  text = text .. "\nsubtype: " ..tostring(item:getSubType())
 
   -- stackable
   if item:isStackable() then

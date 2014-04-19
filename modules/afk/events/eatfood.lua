@@ -32,6 +32,6 @@ function AutoEat.Event(event)
     end
   else
     Helper.safeUseInventoryItem(food)
-    EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(1000, 9000))
+    EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(6000, 12000))
   end
 end
