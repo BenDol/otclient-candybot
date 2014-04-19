@@ -39,7 +39,7 @@ Panel
 
   BotOptionHorizontalScrollBar
     id: HealthBar
-    width: 120
+    width: 150
     anchors.right: parent.right
     anchors.top: HealthLabel.bottom
     margin-top: 8
@@ -89,7 +89,7 @@ Panel
 
   BotOptionHorizontalScrollBar
     id: ItemHealthBar
-    width: 120
+    width: 150
     anchors.right: ItemHealthLabel.right
     anchors.top: ItemHealthLabel.bottom
     margin-top: 8
@@ -133,7 +133,7 @@ Panel
     
   BotOptionHorizontalScrollBar
     id: ItemManaBar
-    width: 120
+    width: 150
     anchors.right: ItemHealthLabel.right
     anchors.top: ItemManaLabel.bottom
     margin-top: 8
@@ -186,7 +186,7 @@ Panel
 
   BotOptionHorizontalScrollBar
     id: HasteHealthBar
-    width: 120
+    width: 150
     anchors.right: HasteLabel.right
     anchors.top: HasteLabel.bottom
     margin-top: 8

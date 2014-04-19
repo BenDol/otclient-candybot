@@ -1,5 +1,5 @@
 Panel
-  id: HuntingPanel
+  id: TargetsPanel
   anchors.left: parent.left
   anchors.right: parent.right
   anchors.top: parent.top
@@ -124,7 +124,7 @@ Panel
         width: 40
         margin-top: 3
         @onTextChange: |
-          local setting = HuntingModule.getCurrentSetting()
+          local setting = TargetsModule.getCurrentSetting()
           if setting then
             setting:setRange(self:getText(), 1)
           end
@@ -144,7 +144,7 @@ Panel
         anchors.left: prev.right
         width: 40
         @onTextChange: |
-          local setting = HuntingModule.getCurrentSetting()
+          local setting = TargetsModule.getCurrentSetting()
           if setting then
             setting:setRange(self:getText(), 2)
           end
@@ -197,7 +197,7 @@ Panel
         anchors.top: prev.bottom
         margin-top: 6
         @onCheckChange: |
-          local target = HuntingModule.getSelectedTarget()
+          local target = TargetsModule.getSelectedTarget()
           if target then
             target:setLoot(self:isChecked())
           end
@@ -211,7 +211,7 @@ Panel
         anchors.top: prev.top
         margin-left: 5
         @onCheckChange: |
-          local target = HuntingModule.getSelectedTarget()
+          local target = TargetsModule.getSelectedTarget()
           if target then
             target:setAlarm(self:isChecked())
           end
@@ -235,7 +235,7 @@ Panel
     @onClick: | 
       local parent = self:getParent()
       local textEdit = parent:getChildById("AddTargetText")
-      if HuntingModule.addNewTarget(textEdit:getText()) then
+      if TargetsModule.addNewTarget(textEdit:getText()) then
         textEdit:setText('')
       end
 
@@ -314,4 +314,4 @@ Panel
       @onClick: |
         local parent = self:getParent()
         local file = parent:getChildById('SaveNameEdit'):getText()
-        HuntingModule.saveTargets(file)
+        TargetsModule.saveTargets(file)

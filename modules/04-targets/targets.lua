@@ -1,9 +1,9 @@
 --[[
   @Authors: Ben Dol (BeniS)
-  @Details: Hunting bot module logic and main body.
+  @Details: Targeting bot module logic and main body.
 ]]
 
-HuntingModule = {}
+TargetsModule = {}
 
 -- load module events
 dofiles('events')
@@ -19,28 +19,28 @@ local saveOverWindow
 local loadWindow
 local removeTargetWindow
 
-function HuntingModule.getPanel() return Panel end
-function HuntingModule.setPanel(panel) Panel = panel end
-function HuntingModule.getUI() return UI end
+function TargetsModule.getPanel() return Panel end
+function TargetsModule.setPanel(panel) Panel = panel end
+function TargetsModule.getUI() return UI end
 
-function HuntingModule.init()
+function TargetsModule.init()
   -- create tab
   local botTabBar = CandyBot.window:getChildById('botTabBar')
-  local tab = botTabBar:addTab(tr('Hunting'))
+  local tab = botTabBar:addTab(tr('Targets'))
 
   local tabPanel = botTabBar:getTabPanel(tab)
   local tabBuffer = tabPanel:getChildById('tabBuffer')
-  Panel = g_ui.loadUI('hunting.otui', tabBuffer)
+  Panel = g_ui.loadUI('targets.otui', tabBuffer)
 
-  HuntingModule.loadUI(Panel)
+  TargetsModule.loadUI(Panel)
 
   local newItem = g_ui.createWidget('ListRow', UI.TargetList)
   newItem:setText("<New Monster>")
   newItem:setId("new")
   
-  HuntingModule.bindHandlers()
+  TargetsModule.bindHandlers()
 
-  HuntingModule.parentUI = CandyBot.window
+  TargetsModule.parentUI = CandyBot.window
 
   -- setup resources
   if not g_resources.directoryExists(targetsDir) then
@@ -48,26 +48,26 @@ function HuntingModule.init()
   end
 
   -- register module
-  Modules.registerModule(HuntingModule)
+  Modules.registerModule(TargetsModule)
 end
 
-function HuntingModule.terminate()
-  HuntingModule.stop()
+function TargetsModule.terminate()
+  TargetsModule.stop()
 
   Panel:destroy()
   Panel = nil
 
-  g_keyboard.unbindKeyPress('Up', UI.HuntingPanel)
-  g_keyboard.unbindKeyPress('Down', UI.HuntingPanel)
+  g_keyboard.unbindKeyPress('Up', UI.TargetsPanel)
+  g_keyboard.unbindKeyPress('Down', UI.TargetsPanel)
 
   for k,_ in pairs(UI) do
     UI[k] = nil
   end
 end
 
-function HuntingModule.loadUI(panel)
+function TargetsModule.loadUI(panel)
   UI = {
-    HuntingPanel = panel:recursiveGetChildById('HuntingPanel'),
+    TargetsPanel = panel:recursiveGetChildById('TargetsPanel'),
     AutoTarget = panel:recursiveGetChildById('AutoTarget'),
     TargetList = panel:recursiveGetChildById('TargetList'),
     TargetScrollBar = panel:recursiveGetChildById('TargetScrollBar'),
@@ -97,14 +97,14 @@ function HuntingModule.loadUI(panel)
   }
 end
 
-function HuntingModule.bindHandlers()
+function TargetsModule.bindHandlers()
   connect(UI.SettingNameEdit, {
     onTextChange = function(self, text, oldText)
       if not selectedTarget then
-        local newTarget = HuntingModule.addNewTarget(text)
-        if newTarget then HuntingModule.selectTarget(newTarget) end
+        local newTarget = TargetsModule.addNewTarget(text)
+        if newTarget then TargetsModule.selectTarget(newTarget) end
       else
-        HuntingModule.changeTargetName(oldText, text)
+        TargetsModule.changeTargetName(oldText, text)
       end
     end
   })
@@ -115,68 +115,68 @@ function HuntingModule.bindHandlers()
 
       selectedTarget = nil
       if focusedChild:getId() ~= "new" then
-        selectedTarget = HuntingModule.getTarget(focusedChild:getText())
-        HuntingModule.setCurrentSetting(selectedTarget:getSetting(1))
+        selectedTarget = TargetsModule.getTarget(focusedChild:getText())
+        TargetsModule.setCurrentSetting(selectedTarget:getSetting(1))
       else
-        HuntingModule.updateSettingInfo()
+        TargetsModule.updateSettingInfo()
       end
     end
   })
 
   g_keyboard.bindKeyPress('Up', function() 
       UI.TargetList:focusPreviousChild(KeyboardFocusReason) 
-    end, UI.HuntingPanel)
+    end, UI.TargetsPanel)
 
   g_keyboard.bindKeyPress('Down', function() 
       UI.TargetList:focusNextChild(KeyboardFocusReason) 
-    end, UI.HuntingPanel)
+    end, UI.TargetsPanel)
 end
 
-function HuntingModule.changeTargetName(oldName, newName)
-  local target = HuntingModule.getTarget(oldName)
+function TargetsModule.changeTargetName(oldName, newName)
+  local target = TargetsModule.getTarget(oldName)
   if target then
     target:setName(newName)
   end
 end
 
-function HuntingModule.selectTarget(target)
+function TargetsModule.selectTarget(target)
   if type(target) == "string" then
-    target = HuntingModule.getTarget(target)
+    target = TargetsModule.getTarget(target)
   end
 
-  local item = HuntingModule.getTargetListItem(target)
+  local item = TargetsModule.getTargetListItem(target)
   if item then
     UI.TargetList:focusChild(item)
   end
 end
 
-function HuntingModule.setCurrentSetting(setting)
+function TargetsModule.setCurrentSetting(setting)
   currentSetting = setting
 
-  HuntingModule.updateSettingInfo()
+  TargetsModule.updateSettingInfo()
 end
 
-function HuntingModule.getCurrentSetting()
+function TargetsModule.getCurrentSetting()
   return currentSetting
 end
 
-function HuntingModule.getTargetListItem(target)
+function TargetsModule.getTargetListItem(target)
   for _,child in pairs(UI.TargetList:getChildren()) do
     local t = child.target
     if t and t == target then return child end
   end
 end
 
-function HuntingModule.addNewTarget(name)
+function TargetsModule.addNewTarget(name)
   print("addNewTarget")
-  if not HuntingModule.hasTarget(name) then
+  if not TargetsModule.hasTarget(name) then
     local target = Target.new(name, 1, {}, false, false)
 
     -- Target connections
 
     connect(target, {
       onNameChange = function(target, name, oldName)
-        local item = HuntingModule.getTargetListItem(target)
+        local item = TargetsModule.getTargetListItem(target)
         if item then item:setText(name) end
       end
     })
@@ -200,16 +200,16 @@ function HuntingModule.addNewTarget(name)
     })
 
     -- Add first setting
-    HuntingModule.addTargetSetting(target, TargetSetting.new(
+    TargetsModule.addTargetSetting(target, TargetSetting.new(
       0, "", nil, {100, 0}, {}
     ))
 
-    HuntingModule.addToTargetList(target)
+    TargetsModule.addToTargetList(target)
     return target
   end
 end
 
-function HuntingModule.addTargetSetting(target, setting)
+function TargetsModule.addTargetSetting(target, setting)
   if target.__class ~= "Target" then return end
   if setting.__class ~= "TargetSetting" then return end
 
@@ -265,7 +265,7 @@ function HuntingModule.addTargetSetting(target, setting)
   target:addSetting(setting)
 end
 
-function HuntingModule.addToTargetList(target)
+function TargetsModule.addToTargetList(target)
   if target.__class ~= "Target" or target:getName() == '' then return end
   local item = g_ui.createWidget('ListRowComplex', UI.TargetList)
   item:setText(target:getName())
@@ -286,7 +286,7 @@ function HuntingModule.addToTargetList(target)
 
       local yesCallback = function()
         row:destroy()
-        HuntingModule.removeTarget(targetName)
+        TargetsModule.removeTarget(targetName)
         removeTargetWindow:destroy()
         removeTargetWindow=nil
       end
@@ -304,7 +304,7 @@ function HuntingModule.addToTargetList(target)
   })
 end
 
-function HuntingModule.removeTarget(name)
+function TargetsModule.removeTarget(name)
   for _,child in pairs(UI.TargetList:getChildren()) do
     local t = child.target
     if t and t:getName() == name then 
@@ -313,7 +313,7 @@ function HuntingModule.removeTarget(name)
   end
 end
 
-function HuntingModule.updateSettingInfo()
+function TargetsModule.updateSettingInfo()
   if selectedTarget then
     UI.SettingNameEdit:setText(selectedTarget:getName(), true)
     UI.SettingLoot:setChecked(selectedTarget:getLoot())
@@ -334,18 +334,18 @@ function HuntingModule.updateSettingInfo()
   end
 end
 
-function HuntingModule.getSelectedTarget()
+function TargetsModule.getSelectedTarget()
   return selectedTarget
 end
 
-function HuntingModule.getTarget(name)
+function TargetsModule.getTarget(name)
   for _,child in pairs(UI.TargetList:getChildren()) do
     local t = child.target
     if t and t:getName() == name then return t end
   end
 end
 
-function HuntingModule.getTargets()
+function TargetsModule.getTargets()
   local targets = {}
   for _,child in pairs(UI.TargetList:getChildren()) do
     local t = child.target
@@ -354,11 +354,11 @@ function HuntingModule.getTargets()
   return targets
 end
 
-function HuntingModule.hasTarget(name)
-  return HuntingModule.getTarget(name) ~= nil
+function TargetsModule.hasTarget(name)
+  return TargetsModule.getTarget(name) ~= nil
 end
 
-function HuntingModule.saveTargets(file)
+function TargetsModule.saveTargets(file)
   local path = targetsDir.."/"..file..".otml"
   local config = g_configs.load(path)
   if config then
@@ -390,7 +390,7 @@ function HuntingModule.saveTargets(file)
   end
 end
 
-function HuntingModule.loadTargets(file)
+function TargetsModule.loadTargets(file)
   local path = targetsDir.."/"..file..".otml"
   local config = g_configs.load(path)
   if config and not loadWindow then
@@ -420,7 +420,7 @@ end
 function writeTargets(config)
   if not config then return end
 
-  local targets = HuntingModule.getTargets() or {}
+  local targets = TargetsModule.getTargets() or {}
   --g_settings.setNode('Targets', targets)
 end
 
@@ -434,4 +434,4 @@ function parseTargets(config)
   return targets
 end
 
-return HuntingModule
+return TargetsModule

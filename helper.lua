@@ -128,9 +128,3 @@ function Helper.getItemFromTiles(tiles, itemId)
   end
   return items
 end
-
---[[function getTargetsInArea(pos, radius, aggressiveness) --this function will be deprecated completely in the near future, do not use
-    local n = #Self.GetTargets(radius)
-    local safe = Self.isAreaPvPSafe(radius+2, true, true) or aggressiveness == 4
-    return safe and n or 0
-end]]
