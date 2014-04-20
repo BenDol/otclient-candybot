@@ -3,6 +3,13 @@
   @Details: Auto explorer event logic
 ]]
 
+[[
+  TODO: Make this an event rather than a listener and have 
+        it doing auto walks, I can catch auto walk fails.
+        Then I can create pathing based on the successful 
+        steps and have it avoid back tracking.
+]]
+
 PathsModule.AutoExplore = {}
 AutoExplore = PathsModule.AutoExplore
 
@@ -86,8 +93,6 @@ function AutoExplore.chooseNextStep(direction)
     end
   end
 
-  print("Passed the error checks")
-
   -- Attempt to follow the line
   if AutoExplore.tryWalk(player, direction) then
     print("Following the line")
@@ -112,10 +117,7 @@ function AutoExplore.chooseNextStep(direction)
 end
 
 function AutoExplore.tryWalk(player, direction)
-  local pos = player:getPosition()
-  local v = AutoExplore.neighbours[direction]
-  local newTile = g_map.getTile({x = pos.x + v.x, 
-    y = pos.y + v.y, z = pos.z + v.z})
+  local newTile = AutoExplore.getTileInDir(player, direction)
 
   if AutoExplore.isWalkable(newTile) then
     local effect = Effect.create() effect:setId(12)
@@ -141,13 +143,21 @@ function AutoExplore.isWalkable(tile)
   return false
 end
 
+function AutoExplore.getTileInDir(player, direction)
+  local pos = player:getPosition()
+  local v = AutoExplore.neighbours[direction]
+
+  return g_map.getTile({x = pos.x + v.x, y = pos.y 
+    + v.y, z = pos.z + v.z})
+end
+
 function AutoExplore.ConnectListener(listener)
   connect(g_game, { onWalk = AutoExplore.chooseNextStep })
 
   -- Start the listener
   if g_game.isOnline() then
     local player = g_game.getLocalPlayer()
-    AutoExplore.chooseNextStep(North)
+    AutoExplore.tryWalk(player, North) 
   end
 end
 
