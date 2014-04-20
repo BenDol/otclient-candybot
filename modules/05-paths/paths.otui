@@ -7,7 +7,7 @@ Panel
   height: 500
 
   BotOptionCheckBox
-    id: ExploreCheck
+    id: AutoExplore
     width: 100
     !text: tr('Auto Explore')
     !tooltip: tr('Automatically explore the map.')

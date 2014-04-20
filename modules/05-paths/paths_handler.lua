@@ -18,7 +18,7 @@ PathsModule.dependencies = {
 --[[ Default Options ]]
 
 PathsModule.options = {
-  --['AutoTarget'] = false
+  ['AutoExplore'] = false
 }
 
 --[[ Register Events ]]
@@ -37,11 +37,15 @@ PathsModule.events = {
 --[[ Register Listeners ]]
 
 table.merge(PathsModule, {
-  --
+  autoExplore = 1
 })
 
 PathsModule.listeners = {
-  --
+  [PathsModule.autoExplore] = {
+    option = "AutoExplore", 
+    connect = PathsModule.AutoExplore.ConnectListener, 
+    disconnect = PathsModule.AutoExplore.DisconnectListener
+  }
 }
 
 --[[ Functions ]]

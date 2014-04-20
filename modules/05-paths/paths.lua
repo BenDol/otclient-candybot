@@ -52,7 +52,7 @@ end
 
 function PathsModule.loadUI(panel)
   UI = {
-    --
+    AutoExplore = panel:recursiveGetChildById('AutoExplore')
   }
 end
 
