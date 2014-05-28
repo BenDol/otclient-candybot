@@ -456,7 +456,7 @@ h1.title {
 }
 
 .wrapper {
-  width: 760px;
+  width: 675px;
   margin: 0 auto;
 }
 
@@ -566,10 +566,10 @@ p.tagline {
   position: fixed;
   top: 0;
   left: 50%;
-  width: 758px;
-  margin-left: -379px;
+  width: 693px;
+  margin-left: -352px;
   background: #222;
-  /*border: 5px solid #444;*/
+  border: 5px solid #444;
   color: #fff;
   opacity: 0;
   visibility: hidden;
@@ -578,9 +578,8 @@ p.tagline {
 }
 
 .current-section p {
-  padding: 0px 27px;
-  margin: 7px 0;
-  font-size: 20px;
+  padding: 5px 27px;
+  font-size: 24px;
   font-weight: bold;
 }
 
