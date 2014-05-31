@@ -16,11 +16,13 @@ AutoExplore = PathsModule.AutoExplore
 AutoExplore.prevPositions = {}
 AutoExplore.dirStack = {}
 AutoExplore.lastDir = North
+AutoExplore.checkEvent = nil
+AutoExplore.checkTicks = 2000
 
-function AutoExplore.checkPathing(dirs, override)
+function AutoExplore.checkPathing(dirs, override, blockChange)
   print("AutoExplore.checkPathing")
   -- Check if we can perform game actions
-  if not g_game.canPerformGameAction() then
+  if not g_game.canPerformGameAction() or g_game.isAttacking() then
     print("return 1")
     return false
   end
@@ -28,26 +30,24 @@ function AutoExplore.checkPathing(dirs, override)
   local player = g_game.getLocalPlayer()
 
   -- When auto walking we must break out
-  if player:isServerWalking() then
+  if player:isAutoWalking() or player:isServerWalking() then
     print("return 2")
     return false
   end
 
   -- Make sure we are in sync with the walk reschedule
-  --[[if not player:canWalk() then
+  if not player:canWalk() then
     print("return 3")
     return false
-  end]]
+  end
 
   local tile = AutoExplore.getBestWalkableTile(player, AutoExplore.lastDir, override)
   if tile then
     print("player:autoWalk: " .. postostring(tile:getPosition()))
-    if not player:autoWalk(tile:getPosition()) then
-      print("not player:autoWalk(tile:getPosition())")
-      AutoExplore.checkPathing()
-    end
-  else
+    player:autoWalk(tile:getPosition())
+  elseif not blockChange then
     AutoExplore.changeDirection(PathFindResults.NoWay)
+    return false
   end
   return true
 end
@@ -57,22 +57,23 @@ function AutoExplore.changeDirection(lastWalkResult, tries)
   local tries = tries or 0
   local newDir = math.random(North, NorthWest)
 
-  --[[local cachedDirs = {}
-  local stackSize = #AutoExplore.dirStack < 3 and #AutoExplore.dirStack or 3
-  for i = 1,stackSize do
-    table.insert(cachedDirs, AutoExplore.dirStack[#AutoExplore.dirStack-stackSize])
+  local cachedDirs = {}
+  local stackSize = #AutoExplore.dirStack < 2 and #AutoExplore.dirStack or 2
+  for i = 0,stackSize do
+    table.insert(cachedDirs, AutoExplore.dirStack[#AutoExplore.dirStack-i])
   end
+  
+  print(table.tostring(cachedDirs))
 
-  print(table.tostring(cachedDirs))]]
-
-  if (newDir == AutoExplore.lastDir --[[or table.contains(cachedDirs, newDir)]]) and tries < 7 then
+  -- Cannot change if the same or if the dir was used recently
+  if (newDir == AutoExplore.lastDir or table.contains(cachedDirs, newDir)) and tries < 7 then
     print("recursive change")
     AutoExplore.changeDirection(lastWalkResult, tries + 1)
   else
     print("new dir: " .. newDir)
     table.insert(AutoExplore.dirStack, AutoExplore.lastDir)
     AutoExplore.lastDir = newDir
-    AutoExplore.checkPathing(nil, tries > 6)
+    AutoExplore.checkPathing(nil, tries > 6, true)
   end
 end
 
@@ -84,9 +85,7 @@ function AutoExplore.getBestWalkableTile(player, direction, override)
   -- Process tiles for correct direction
   for _,t in pairs(g_map.getTiles(player:getPosition().z)) do
       local tilePos = t:getPosition()
-      local force = (override and t:isWalkable() and not t:isHouseTile())
-      if force then print("force") end
-      if force or getDirectionFromPos(pos, tilePos) == direction then
+      if override or (getDirectionFromPos(pos, tilePos) == direction and t:isWalkable() and not t:isHouseTile()) then
         -- Get the furthest away tile
         if not tile or tilePos.x > pos.x or tilePos.y > pos.y then
           tile = t
@@ -97,17 +96,32 @@ function AutoExplore.getBestWalkableTile(player, direction, override)
   return tile
 end
 
+function startCheckEvent()
+  stopCheckEvent()
+
+  AutoExplore.checkEvent = cycleEvent(function()
+      AutoExplore.checkPathing(direction)
+    end, AutoExplore.checkTicks)
+end
+
+function stopCheckEvent()
+  if AutoExplore.checkEvent then
+    AutoExplore.checkEvent:cancel()
+    AutoExplore.checkEvent = nil
+  end
+end
+
 function AutoExplore.ConnectListener(listener)
-  connect(g_game, { onAutoWalk = AutoExplore.checkPathing })
   connect(LocalPlayer, { onAutoWalkFail = AutoExplore.changeDirection })
 
   -- Start the listener
   if g_game.isOnline() then
-    AutoExplore.checkPathing() 
+    startCheckEvent()
   end
 end
 
 function AutoExplore.DisconnectListener(listener)
-  disconnect(g_game, { onAutoWalk = AutoExplore.checkPathing })
   disconnect(LocalPlayer, { onAutoWalkFail = AutoExplore.changeDirection })
+
+  stopCheckEvent()
 end
