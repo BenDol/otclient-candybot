@@ -3,7 +3,7 @@
   @Details: Auto explorer event logic
 ]]
 
-[[
+--[[
   TODO: Make this an event rather than a listener and have 
         it doing auto walks, I can catch auto walk fails.
         Then I can create pathing based on the successful 
@@ -13,154 +13,101 @@
 PathsModule.AutoExplore = {}
 AutoExplore = PathsModule.AutoExplore
 
-AutoExplore.prevTiles = {}
-AutoExplore.checkEvent = nil
+AutoExplore.prevPositions = {}
+AutoExplore.dirStack = {}
+AutoExplore.lastDir = North
 
-AutoExplore.neighbours = {
-  [NorthWest] = {x = -1, y = -1, z = 0},
-  [SouthWest] = {x = -1, y = 1, z = 0},
-  [SouthEast] = {x = 1, y = 1, z = 0},
-  [NorthEast] = {x = 1, y = -1, z = 0},
-  [North] = {x = 0, y = -1, z = 0},
-  [South] = {x = 0, y = 1, z = 0},
-  [East] = {x = 1, y = 0, z = 0},
-  [West] = {x = -1, y = 0, z = 0}
-}
-
-function AutoExplore.hasWalkedTile(tile)
-  for _,v in pairs(AutoExplore.prevTiles) do
-    if v and postostring(v:getPosition()) == postostring(tile:getPosition()) then
-      return true
-    end
-  end
-  return false
-end
-
-function AutoExplore.getLastTile(player)
-  local lastDir = g_game.getLastWalkDir()
-  if lastDir then
-   local pos = player:getPosition()
-   local v = AutoExplore.neighbours[lastDir]
-
-   return g_map.getTile({x = pos.x + v.x, y = pos.y + v.y, z = pos.z + v.z})
-  end
-end
-
-function AutoExplore.chooseNextStep(direction)
-  print("")
-  print("chooseNextStep: " .. direction)
-  local player = g_game.getLocalPlayer()
-  local pos = player:getPosition()
-
+function AutoExplore.checkPathing(dirs, override)
+  print("AutoExplore.checkPathing")
   -- Check if we can perform game actions
   if not g_game.canPerformGameAction() then
-    scheduleEvent(function()
-        AutoExplore.chooseNextStep(direction)
-      end, 1000 + player:getStepTicksLeft())
-
-    print("[1] failed reschedule")
+    print("return 1")
     return false
   end
 
-  -- When auto walking we must reschedule
-  if player:isAutoWalking() or player:isServerWalking() then
-    scheduleEvent(function()
-        AutoExplore.chooseNextStep(direction)
-      end, 1000)
+  local player = g_game.getLocalPlayer()
 
-    print("[2] failed reschedule")
+  -- When auto walking we must break out
+  if player:isServerWalking() then
+    print("return 2")
     return false
   end
 
   -- Make sure we are in sync with the walk reschedule
-  if not player:canWalk() then
-    local lastDir = g_game.getLastWalkDir()
+  --[[if not player:canWalk() then
+    print("return 3")
+    return false
+  end]]
 
-    if lastDir ~= direction then
-      local ticks = player:getStepTicksLeft()
-      if ticks < 1 then ticks = 1 end
-
-      if AutoExplore.checkEvent then
-        AutoExplore.checkEvent:cancel()
-        AutoExplore.checkEvent = nil
-      end
-      AutoExplore.checkEvent = scheduleEvent(function()
-          AutoExplore.chooseNextStep(direction)
-        end, ticks)
-
-      print("[3] failed reschedule")
-      return false
-    end
-  end
-
-  -- Attempt to follow the line
-  if AutoExplore.tryWalk(player, direction) then
-    print("Following the line")
-    return true -- success
-  end
-
-  print("Choosing a new line")
-  -- Find a new direction to follow
-  for k,v in pairs(AutoExplore.neighbours) do
-    if AutoExplore.tryWalk(player, k) then
-      print("Found new line: " .. k)
-      return true -- success
-    end
-  end
-
-  print("Failed to do anything")
-  scheduleEvent(function()
-      AutoExplore.chooseNextStep(direction)
-    end, 1000)
-
-  return false
-end
-
-function AutoExplore.tryWalk(player, direction)
-  local newTile = AutoExplore.getTileInDir(player, direction)
-
-  if AutoExplore.isWalkable(newTile) then
-    local effect = Effect.create() effect:setId(12)
-    g_map.addThing(effect, newTile:getPosition())
-
-    if g_game.walk(direction) then
-      local lastTile = AutoExplore.getLastTile(player)
-      if lastTile then
-        table.insert(AutoExplore.prevTiles, lastTile)
-      end
-      return true
+  local tile = AutoExplore.getBestWalkableTile(player, AutoExplore.lastDir, override)
+  if tile then
+    print("player:autoWalk: " .. postostring(tile:getPosition()))
+    if not player:autoWalk(tile:getPosition()) then
+      print("not player:autoWalk(tile:getPosition())")
+      AutoExplore.checkPathing()
     end
   else
-    -- Later can check walk to another floor (e.g: when above 3 parcels) 
+    AutoExplore.changeDirection(PathFindResults.NoWay)
   end
-  return false
+  return true
 end
 
-function AutoExplore.isWalkable(tile)
-  if tile then
-    return tile:isWalkable()
+function AutoExplore.changeDirection(lastWalkResult, tries)
+  print("AutoExplore.changeDirection")
+  local tries = tries or 0
+  local newDir = math.random(North, NorthWest)
+
+  --[[local cachedDirs = {}
+  local stackSize = #AutoExplore.dirStack < 3 and #AutoExplore.dirStack or 3
+  for i = 1,stackSize do
+    table.insert(cachedDirs, AutoExplore.dirStack[#AutoExplore.dirStack-stackSize])
   end
-  return false
+
+  print(table.tostring(cachedDirs))]]
+
+  if (newDir == AutoExplore.lastDir --[[or table.contains(cachedDirs, newDir)]]) and tries < 7 then
+    print("recursive change")
+    AutoExplore.changeDirection(lastWalkResult, tries + 1)
+  else
+    print("new dir: " .. newDir)
+    table.insert(AutoExplore.dirStack, AutoExplore.lastDir)
+    AutoExplore.lastDir = newDir
+    AutoExplore.checkPathing(nil, tries > 6)
+  end
 end
 
-function AutoExplore.getTileInDir(player, direction)
+function AutoExplore.getBestWalkableTile(player, direction, override)
+  print("AutoExplore.getBestWalkableTile")
+  local tile = nil
   local pos = player:getPosition()
-  local v = AutoExplore.neighbours[direction]
 
-  return g_map.getTile({x = pos.x + v.x, y = pos.y 
-    + v.y, z = pos.z + v.z})
+  -- Process tiles for correct direction
+  for _,t in pairs(g_map.getTiles(player:getPosition().z)) do
+      local tilePos = t:getPosition()
+      local force = (override and t:isWalkable() and not t:isHouseTile())
+      if force then print("force") end
+      if force or getDirectionFromPos(pos, tilePos) == direction then
+        -- Get the furthest away tile
+        if not tile or tilePos.x > pos.x or tilePos.y > pos.y then
+          tile = t
+        end
+      end
+  end
+  print("found best tile: " .. (tile and postostring(tile:getPosition()) or "null"))
+  return tile
 end
 
 function AutoExplore.ConnectListener(listener)
-  connect(g_game, { onWalk = AutoExplore.chooseNextStep })
+  connect(g_game, { onAutoWalk = AutoExplore.checkPathing })
+  connect(LocalPlayer, { onAutoWalkFail = AutoExplore.changeDirection })
 
   -- Start the listener
   if g_game.isOnline() then
-    local player = g_game.getLocalPlayer()
-    AutoExplore.tryWalk(player, North) 
+    AutoExplore.checkPathing() 
   end
 end
 
 function AutoExplore.DisconnectListener(listener)
-  disconnect(g_game, { onWalk = AutoExplore.chooseNextStep })
+  disconnect(g_game, { onAutoWalk = AutoExplore.checkPathing })
+  disconnect(LocalPlayer, { onAutoWalkFail = AutoExplore.changeDirection })
 end
