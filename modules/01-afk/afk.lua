@@ -55,10 +55,12 @@ function AfkModule.terminate()
   Panel = nil
 end
 
+--@UsedExternally
 function AfkModule.onModuleStop()
   AfkModule.CreatureAlert.stopAlert()
 end
 
+--@UsedExternally
 function AfkModule.onStopEvent(event)
   if event == AfkModule.creatureAlertEvent then
     AfkModule.CreatureAlert.stopAlert()

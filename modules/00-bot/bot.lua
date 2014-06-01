@@ -95,6 +95,7 @@ function BotModule.showItemInfo(item)
   g_tooltip.display(text)
 end
 
+--@UsedExternally
 function BotModule.isPrecisionMode()
   return Panel:getChildById('BotPrecisionMode'):isChecked()
 end
