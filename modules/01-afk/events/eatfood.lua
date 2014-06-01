@@ -28,8 +28,8 @@ function AutoEat.Event(event)
   if g_game.getFeature(GamePlayerRegenerationTime) then
     if player:getRegenerationTime() < 600 then
       Helper.safeUseInventoryItem(food)
-      EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(1000, 7000))
     end
+    EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(2000, 7000))
   else
     Helper.safeUseInventoryItem(food)
     EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(6000, 12000))

@@ -84,8 +84,8 @@ function AfkModule.onChooseReplaceItemMouseRelease(self, mousePosition, mouseBut
   local item = nil
   
   if mouseButton == MouseLeftButton then
-  
-    local clickedWidget = modules.game_interface.getRootPanel():recursiveGetChildByPos(mousePosition, false)
+    local clickedWidget = modules.game_interface.getRootPanel()
+      :recursiveGetChildByPos(mousePosition, false)
   
     if clickedWidget then
       if clickedWidget:getClassName() == 'UIMap' then
@@ -97,7 +97,6 @@ function AfkModule.onChooseReplaceItemMouseRelease(self, mousePosition, mouseBut
             item = thing:asItem()
           end
         end
-        
       elseif clickedWidget:getClassName() == 'UIItem' and not clickedWidget:isVirtual() then
         item = clickedWidget:getItem()
       end

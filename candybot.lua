@@ -15,6 +15,8 @@ dofile('logger.lua')
 
 dofile('classes/target.lua')
 dofile('classes/attack.lua')
+dofile('classes/queue.lua')
+dofile('classes/lootevent.lua')
 
 local botButton
 local botTabBar

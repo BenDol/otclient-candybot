@@ -9,20 +9,20 @@ Attack.__index = Attack
 Attack.__class = "Attack"
 
 Attack.new = function(type, words, item, ticks)
-  Attack = {
+  atk = {
     type = nil,
     words = '',
     item = 0,
     ticks = 100
   }
 
-  Attack.type = type
-  Attack.words = words
-  Attack.item = item
-  Attack.ticks = ticks
+  atk.type = type
+  atk.words = words
+  atk.item = item
+  atk.ticks = ticks
 
-  setmetatable(Attack, Attack)
-  return Attack
+  setmetatable(atk, Attack)
+  return atk
 end
 
 -- gets/sets

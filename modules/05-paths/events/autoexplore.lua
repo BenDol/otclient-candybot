@@ -25,11 +25,17 @@ AutoExplore.prevPositions = {}
 AutoExplore.dirStack = {}
 AutoExplore.lastDir = North
 AutoExplore.checkEvent = nil
-AutoExplore.checkTicks = 2000
+AutoExplore.checkTicks = 2000 -- millis
 AutoExplore.idleTime = 15 -- seconds
 
 function AutoExplore.checkPathing(dirs, override, dontChange)
   print("AutoExplore.checkPathing")
+  -- Check if we are performing other bot tasks
+  if AutoTarget.isLooting() then
+    print("return 0")
+    return false
+  end
+
   -- Check if we can perform game actions
   if not g_game.canPerformGameAction() or g_game.isAttacking() then
     print("return 1")
@@ -58,15 +64,23 @@ function AutoExplore.checkPathing(dirs, override, dontChange)
   end
 
   -- Make sure we are in sync with the walk reschedule
-  --[[if not player:canWalk() then
+  if not player:canWalk() then
     print("return 2")
     return false
-  end]]
+  end
 
-  -- When auto walking we must break out
+  -- When auto walking and not idling we must break out
   if (player:isAutoWalking() or player:isServerWalking()) and not idle then
     print("return 3")
     return false
+  end
+
+  -- We are stuck going in this direction
+  if idle and not dontChange then
+    if currentTime - AutoExplore.lastPos.time >= AutoExplore.idleTime * 3 then
+      AutoExplore.changeDirection(PathFindResults.NoWay)
+      return false
+    end
   end
 
   local tile = AutoExplore.getBestWalkableTile(player, AutoExplore.lastDir, override)
@@ -103,7 +117,7 @@ function AutoExplore.changeDirection(lastWalkResult, tries)
     print("recursive change")
     AutoExplore.changeDirection(lastWalkResult, tries + 1)
   else
-    print("new dir: " .. newDir)
+    print("new dir: " .. dirtostring(newDir))
     table.insert(AutoExplore.dirStack, AutoExplore.lastDir)
     AutoExplore.lastDir = newDir
     AutoExplore.checkPathing(nil, tries > 6, true)
@@ -121,7 +135,8 @@ function AutoExplore.getBestWalkableTile(player, direction, override)
 
   -- Process tiles for correct direction
   local tiles = g_map.getTiles(pos.z)
-  for _,t in pairs(tiles) do
+  for i = 1,#tiles do
+    local t = tiles[i]
     local tilePos = t:getPosition()
 
     -- Get the furthest away tile
@@ -138,8 +153,10 @@ function AutoExplore.getBestWalkableTile(player, direction, override)
     end
   end
   print("processed: " .. tostring(tileCount) .. " tiles")
+  print(tostring(houseTileCount).. " are house tiles")
   -- If there are too many house tiles change direction
   if (houseTileCount / tileCount) * 100 >= 40 then
+    print("too many house tiles change direction")
     tile = nil
   end
   print("found best tile: " .. (tile and postostring(tile:getPosition()) or "null"))
@@ -150,7 +167,9 @@ function startCheckEvent()
   stopCheckEvent()
 
   AutoExplore.checkEvent = cycleEvent(function()
-      AutoExplore.checkPathing(direction)
+      if not AutoTarget.isLooting() then
+        AutoExplore.checkPathing(direction)
+      end
     end, AutoExplore.checkTicks)
 end
 
@@ -176,6 +195,8 @@ function AutoExplore.DisconnectListener(listener)
   disconnect(LocalPlayer, { onAutoWalkFail = AutoExplore.changeDirection })
 
   stopCheckEvent()
+
+  AutoExplore.dirStack = {}
 
   if g_game.isOnline() then
     g_game.cancelAttackAndFollow()

@@ -124,14 +124,14 @@ function EventHandler.response(moduleId, events, key, state)
   if type(state) == 'string' then
     state = (state ~= "")
   end
-
+  
   for event, data in pairs(events) do
     if key == data.option then
       local optionState = data.state or OptionState.on
       local bypass = (data.bypass or optionState == OptionState.off) or false
-
+      
       EventHandler.stopEvent(moduleId, event) -- stop event
-
+      
       EventHandler.unregisterEvent(moduleId, event, false)
       if optionState == OptionState.on then
         if state then
@@ -142,7 +142,7 @@ function EventHandler.response(moduleId, events, key, state)
           EventHandler.registerEvent(moduleId, event, data.callback, state, bypass)
         end
       end
-
+      
       --[[ 
         We are accounting for multiple event registries
         that are checking for different OptionStates
