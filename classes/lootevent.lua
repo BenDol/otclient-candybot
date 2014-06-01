@@ -86,8 +86,7 @@ function LootEvent:start()
     end
     -- Connect looting hook
     self.hook = function(container, prevContainer)
-      print(container:getItem())
-      print(corpse)
+      print("self.hook called")
       self:stopOpenCheck()
       self:loot(container, prevContainer)
     end
@@ -95,15 +94,27 @@ function LootEvent:start()
 
     -- Run to corpse for looting
     local player = g_game.getLocalPlayer()
-    player:autoWalk(self.position)
+    local attempting = false
+    local openFunc = function()
+      print("openFunc called")
+      if Position.isInRange(self.position, player:getPosition(), 7, 7) then
+        if not attempting then
+          print("try open corpse")
+          g_game.cancelAttackAndFollow()
+          g_game.open(corpse)
+        end
+        if not attempting then
+          attempting = true
+          scheduleEvent(function() attempting = false end, 3000)
+        end
+      elseif not player:isAutoWalking() and not player:isServerWalking() then
+        print("try walk to corpse")
+        player:autoWalk(self.position)
+      end
+    end
 
     self:stopOpenCheck()
-    self.openCheck = cycleEvent(function()
-      if Position.isInRange(self.position, player:getPosition(), 10, 10, 10, 10) then
-        player:stopAutoWalk()
-        g_game.open(corpse)
-      end
-    end, 1000)
+    self.openCheck = cycleEvent(openFunc, 1000)
   end
 end
 
@@ -133,7 +144,8 @@ function LootEvent:finished()
   print("LootEvent:finished")
   local done = function(event)
     event:setLooted(true)
-    disconnect(Container, { onOpen = self.hook })
+    event:stopOpenCheck()
+    disconnect(Container, { onOpen = event.hook })
     local callback = event:getCallback()
     if callback then
       callback()

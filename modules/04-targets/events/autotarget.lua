@@ -121,6 +121,7 @@ function AutoTarget.stopLooting()
   AutoTarget.looting = false
 
   -- Clean up loot data?
+  AutoTarget.lootQueue = {}
 end
 
 function AutoTarget.Event(event)
