@@ -177,15 +177,5 @@ function LootEvent:finished()
 end
 
 function LootEvent:addDebugBeacon(pos)
-  local effect = Effect.create() effect:setId(12)
-  local list = {}
-  for i=1,5 do 
-    table.insert(list, function(continue)
-      scheduleEvent(function()
-        g_map.addThing(effect, pos)
-        continue()
-      end, 2000)
-    end)
-  end
-  queue(list)
+  
 end

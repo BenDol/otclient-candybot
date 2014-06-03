@@ -50,7 +50,8 @@ function TargetsModule.init()
   -- register module
   Modules.registerModule(TargetsModule)
 
-  -- TODO: Flush event data
+  -- Event inits
+  AutoTarget.init()
 end
 
 function TargetsModule.terminate()
@@ -65,6 +66,9 @@ function TargetsModule.terminate()
   for k,_ in pairs(UI) do
     UI[k] = nil
   end
+
+  -- Event terminates
+  AutoTarget.terminate()
 end
 
 function TargetsModule.loadUI(panel)
@@ -207,6 +211,8 @@ function TargetsModule.addNewTarget(name)
     ))
 
     TargetsModule.addToTargetList(target)
+
+    signalcall(TargetsModule.onAddTarget, target)
     return target
   end
 end

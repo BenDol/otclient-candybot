@@ -14,6 +14,18 @@ AutoTarget.looting = false
 
 -- Methods
 
+function AutoTarget.init()
+  connect(Creature, { onAppear = AutoTarget.addCreature })
+  connect(Creature, { onDisappear = AutoTarget.removeCreature })
+  connect(TargetsModule, { onAddTarget = AutoTarget.scan })
+end
+
+function AutoTarget.terminate()
+  disconnect(Creature, { onAppear = AutoTarget.addCreature })
+  disconnect(Creature, { onDisappear = AutoTarget.removeCreature })
+  disconnect(TargetsModule, { onAddTarget = AutoTarget.scan })
+end
+
 function AutoTarget.getCreatureData()
   return AutoTarget.creatureData
 end
@@ -52,10 +64,11 @@ function AutoTarget.isAlreadyStored(creature)
 end
 
 function AutoTarget.addCreature(creature)
+  -- Avoid adding new targets when attacking
   if creature then
     --connect(creature, { onHealthPercentChange = AutoTarget.onTargetHealthChange })
-    connect(creature, { onDisappear = AutoTarget.removeCreature })
     connect(creature, { onDeath = AutoTarget.onTargetDeath })
+
     AutoTarget.creatureData[creature:getId()] = creature
   end
 end
@@ -63,7 +76,6 @@ end
 function AutoTarget.removeCreature(creature)
   if creature then
     --disconnect(creature, { onHealthPercentChange = AutoTarget.onTargetHealthChange })
-    disconnect(creature, { onDisappear = AutoTarget.removeCreature })
     disconnect(creature, { onDeath = AutoTarget.onTargetDeath })
 
     AutoTarget.creatureData[creature:getId()] = nil
@@ -75,10 +87,12 @@ function AutoTarget.onTargetHealthChange(creature)
 end
 
 function AutoTarget.onTargetDeath(creature)
-  AutoTarget.lootQueue[creature:getId()] = {
-    position = creature:getPosition(),
-    looted = false
-  }
+  if AutoTarget.canLoot(creature) then
+    AutoTarget.lootQueue[creature:getId()] = {
+      position = creature:getPosition(),
+      looted = false
+    }
+  end
 end
 
 function AutoTarget.removeLoot(creature)
@@ -124,6 +138,18 @@ function AutoTarget.stopLooting()
   AutoTarget.lootQueue = {}
 end
 
+function AutoTarget.isValidTarget(creature)
+  return TargetsModule.hasTarget(creature:getName())
+end
+
+function AutoTarget.canLoot(creature)
+  local target = TargetsModule.getTarget(creature:getName())
+  if target then
+    return target:getLoot()
+  end
+  return false
+end
+
 function AutoTarget.Event(event)
   -- Cannot continue if still attacking or looting
   if g_game.isAttacking() or AutoTarget.looting then
@@ -132,12 +158,11 @@ function AutoTarget.Event(event)
     return
   end
 
-  -- Scan the area to update creature data
-  AutoTarget.scan()
-
   -- Find a valid target to attack
   for id,target in pairs(AutoTarget.creatureData) do
-    if target then g_game.attack(target) break end
+    if target and AutoTarget.isValidTarget(target) then 
+      g_game.attack(target) break 
+    end
   end
 
   -- Try loot if not attacking still
@@ -147,5 +172,5 @@ function AutoTarget.Event(event)
 
   -- Keep the event live
   EventHandler.rescheduleEvent(TargetsModule.getModuleId(), 
-    event, Helper.safeDelay(800, 3000))
+    event, Helper.safeDelay(600, 1400))
 end
