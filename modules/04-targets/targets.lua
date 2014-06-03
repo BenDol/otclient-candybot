@@ -49,6 +49,8 @@ function TargetsModule.init()
 
   -- register module
   Modules.registerModule(TargetsModule)
+
+  -- TODO: Flush event data
 end
 
 function TargetsModule.terminate()

@@ -13,10 +13,7 @@ dofile('consts.lua')
 dofile('helper.lua')
 dofile('logger.lua')
 
-dofile('classes/target.lua')
-dofile('classes/attack.lua')
-dofile('classes/queue.lua')
-dofile('classes/lootevent.lua')
+dofiles('classes')
 
 local botButton
 local botTabBar

@@ -9,18 +9,19 @@ LootEvent.__index = LootEvent
 LootEvent.__class = "LootEvent"
 LootEvent.Hook = nil
 
-LootEvent.new = function(creatureId, position, callback)
+LootEvent.new = function(id, position, callback)
   lootEv = {
+    id = nil,
     callback = nil,
-    creatureId = nil,
     position = {},
     looted = false,
     hook = nil,
-    openCheck = nil
+    openCheck = nil,
+    attempting = false
   }
 
+  lootEv.id = id -- used for creature id
   lootEv.callback = callback
-  lootEv.creatureId = creatureId
   lootEv.position = position
 
   setmetatable(lootEv, LootEvent)
@@ -30,6 +31,16 @@ end
 -- gets/sets
 
 --@RequiredBy:Queue
+function LootEvent:getId()
+  return self.id
+end
+
+--@RequiredBy:Queue
+function LootEvent:setId(id)
+  self.id = id
+end
+
+--@RequiredBy:Queue
 function LootEvent:getCallback()
   return self.callback
 end
@@ -37,14 +48,6 @@ end
 --@RequiredBy:Queue
 function LootEvent:setCallback(callback)
   self.callback = callback
-end
-
-function LootEvent:getCreatureId()
-  return self.creatureId
-end
-
-function LootEvent:setCreatureId(creatureId)
-  self.creatureId = creatureId
 end
 
 function LootEvent:getPosition()
@@ -68,17 +71,8 @@ end
 --@RequiredBy:Queue
 function LootEvent:start()
   print("LootEvent:start")
-  -- Find the corpse
-  local tile = g_map.getTile(self.position)
-  local corpse = nil
-  if tile then
-    local topThing = tile:getTopThing()
-    if topThing and topThing:isContainer() --[[and topThing:isLyingCorpse()]] then
-      corpse = topThing
-    end
-  end
-
-  if corpse then
+  -- Ensure there is a corpse
+  if self:findCorpse() then
     print("corpse exists at "..postostring(self.position))
     -- Disconnect existing looting hook
     if self.hook and type(self.hook) == "function" then
@@ -94,21 +88,22 @@ function LootEvent:start()
 
     -- Run to corpse for looting
     local player = g_game.getLocalPlayer()
-    local attempting = false
     local openFunc = function()
       print("openFunc called")
-      if Position.isInRange(self.position, player:getPosition(), 7, 7) then
-        if not attempting then
+      if Position.isInRange(self.position, player:getPosition(), 6, 6) then
+        if not self.attempting then
           print("try open corpse")
           g_game.cancelAttackAndFollow()
-          g_game.open(corpse)
-        end
-        if not attempting then
-          attempting = true
-          scheduleEvent(function() attempting = false end, 3000)
+          g_game.open(self:findCorpse())
+
+          self:addDebugBeacon(self.position)
+
+          self.attempting = true
+          scheduleEvent(function() self.attempting = false end, 3000)
         end
       elseif not player:isAutoWalking() and not player:isServerWalking() then
         print("try walk to corpse")
+        self:addDebugBeacon(self.position)
         player:autoWalk(self.position)
       end
     end
@@ -116,6 +111,18 @@ function LootEvent:start()
     self:stopOpenCheck()
     self.openCheck = cycleEvent(openFunc, 1000)
   end
+end
+
+function LootEvent:findCorpse()
+  local tile = g_map.getTile(self.position)
+  local corpse = nil
+  if tile then
+    local topThing = tile:getTopThing()
+    if topThing and topThing:isContainer() --[[and topThing:isLyingCorpse()]] then
+      corpse = topThing
+    end
+  end
+  return corpse
 end
 
 function LootEvent:stopOpenCheck()
@@ -127,29 +134,58 @@ end
 
 function LootEvent:loot(container, prevContainer)
   print("LootEvent:loot")
+  local containerItem = container:getContainerItem()
+  local corpseItem = self:findCorpse()
+  print(tostring(containerItem:getId()) .. " | " .. tostring(corpseItem:getId()))
+  if containerItem:getId() ~= corpseItem:getId() then
+    print(tostring(containerItem:getId()) .. " ~= " .. tostring(corpseItem:getId()))
+    return false
+  end
   local player = g_game.getLocalPlayer()
   local pos = player:getPosition()
 
   local delay = 0
+  local queue = Queue.new(function()
+    -- Looting has finished 
+    self:finished()
+  end)
   for k,item in pairs(container:getItems()) do
-    local wait = Helper.safeDelay(1000, 3000)
-    scheduleEvent(function() g_game.move(item, {pos.x, pos.y, }, -1) end, wait)
-    delay = delay + wait + g_game.getPing()
+    print(item:getId())
+    local toPos = {x=65535, y=64, z=0}
+    queue:add(MoveEvent.new(k, item, toPos, function()
+      print("Moved " .. tostring(item:getId()))
+    end))
   end
 
-  scheduleEvent(function() self:finished() end, delay)
+  -- Start looting items
+  queue:start()
+  return true
 end
 
 function LootEvent:finished()
   print("LootEvent:finished")
-  local done = function(event)
-    event:setLooted(true)
-    event:stopOpenCheck()
-    disconnect(Container, { onOpen = event.hook })
-    local callback = event:getCallback()
+  local done = function()
+    self:setLooted(true)
+    self:stopOpenCheck()
+    disconnect(Container, { onOpen = self.hook })
+    local callback = self:getCallback()
     if callback then
-      callback()
+      addEvent(callback)
     end
   end
-  done(self)
+  done()
+end
+
+function LootEvent:addDebugBeacon(pos)
+  local effect = Effect.create() effect:setId(12)
+  local list = {}
+  for i=1,5 do 
+    table.insert(list, function(continue)
+      scheduleEvent(function()
+        g_map.addThing(effect, pos)
+        continue()
+      end, 2000)
+    end)
+  end
+  queue(list)
 end
