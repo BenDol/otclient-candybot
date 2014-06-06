@@ -1,27 +1,18 @@
 --[[
   @Authors: Ben Dol (BeniS)
-  @Details: Listener class for listening events logic.
+  @Details: CandyListener class for listening events logic.
 ]]
 
-Listener = {}
-Listener.__index = Listener
-
-Listener.__class = "Listener"
+CandyListener = newclass("CandyListener")
 
 ListenerConnection = {
   connect = 1,
   disconnect = 2
 }
 
-Listener.new = function(id, connections, state)
-  ls = {
-    id = 0,
-    connections = {},
-    prevConnections = {},
-    state = false,
-    connected = false
-  }
-
+CandyListener.create = function(id, connections, state)
+  local ls = CandyListener.internalCreate()
+  
   if type(id) ~= 'number' then
     error('invalid id provided.')
   end
@@ -31,43 +22,45 @@ Listener.new = function(id, connections, state)
     error('invalid connections table provided.')
   end
   ls.connections = connections
-  ls.state = state
+  ls.state = state or false
 
-  setmetatable(ls, Listener)
+  ls.prevConnections = {}
+  ls.connected = false
+
   return ls
 end
 
 -- gets/sets
 
-function Listener:getId()
+function CandyListener:getId()
   return self.id
 end
 
-function Listener:setId(id)
+function CandyListener:setId(id)
   self.id = id
 end
 
-function Listener:getConnections(type)
+function CandyListener:getConnections(type)
   return self.connections
 end
 
-function Listener:getConnection(type)
+function CandyListener:getConnection(type)
   return self.connections[type]
 end
 
-function Listener:setConnection(type, connection)
+function CandyListener:setConnection(type, connection)
   self.connections[type] = connection
 end
 
-function Listener:getState()
+function CandyListener:getState()
   return self.state
 end
 
-function Listener:setState(state)
+function CandyListener:setState(state)
   self.state = state
 end
 
-function Listener:setConnection(connection)
+function CandyListener:setConnection(connection)
   if type(connection) ~= "table" then
     error("Invalid connection table parameter")
     return
@@ -85,28 +78,28 @@ end
 
 -- methods
 
-function Listener:connect()
+function CandyListener:connect()
   if CandyBot.isEnabled() then
     self.connections[ListenerConnection.connect](self.id)
     connected = true
   end
 end
 
-function Listener:disconnect()
+function CandyListener:disconnect()
   self.connections[ListenerConnection.disconnect](self.id)
   connected = false
 end
 
-function Listener:reload()
+function CandyListener:reload()
   self:disconnect()
   self:connect()
 end
 
-function Listener:isConnected()
+function CandyListener:isConnected()
   return connected
 end
 
-function Listener:isConnectionEqual(connection)
+function CandyListener:isConnectionEqual(connection)
   if type(connection) ~= "table" then
     error("Invalid connection table parameter")
     return
@@ -115,7 +108,7 @@ function Listener:isConnectionEqual(connection)
     and connection[ListenerConnection.disconnect] == self.connections[ListenerConnection.disconnect])
 end
 
-function Listener:usePreviousConnection()
+function CandyListener:usePreviousConnection()
   if table.empty(self.prevConnections) then
     error("previous connection is empty")
     return

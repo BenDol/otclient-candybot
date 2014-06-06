@@ -1,68 +1,56 @@
 --[[
   @Authors: Ben Dol (BeniS)
-  @Details: Module class for ecapsulating module 
+  @Details: CandyModule class for ecapsulating module 
             specific variables and methods.
 ]]
 
-Module = {}
-Module.__index = Module
+CandyModule = newclass("CandyModule")
 
-Module.__class = "Module"
-
-Module.new = function(id, handler, events, listeners)
-  local handler, events, listeners = handler or {}, 
-    events or {}, listeners or {}
-    
-  mod = {
-    id = "",
-    handler = {},
-    events = {},
-    listeners = {}
-  }
+CandyModule.create = function(id, handler, events, listeners)
+  local mod = CandyModule.internalCreate()
 
   if type(id) ~= 'string' then
     error('invalid id provided.')
   end
   mod.id = id
-  mod.handler = handler
-  mod.events = events
-  mod.listeners = listeners
+  mod.handler = handler or {}
+  mod.events = events or {}
+  mod.listeners = listeners or {}
 
-  setmetatable(mod, Module)
   return mod
 end
 
 -- gets/sets
 
-function Module:getId()
+function CandyModule:getId()
   return self.id
 end
 
-function Module:setId(id)
+function CandyModule:setId(id)
   self.id = id
 end
 
-function Module:getHandler()
+function CandyModule:getHandler()
   return self.handler
 end
 
-function Module:setHandler(handler)
+function CandyModule:setHandler(handler)
   self.handler = handler
 end
 
-function Module:getListener(id)
+function CandyModule:getListener(id)
   return self.listeners[id]
 end
 
-function Module:getListeners()
+function CandyModule:getListeners()
   return self.listeners
 end
 
-function Module:setListeners(listeners)
+function CandyModule:setListeners(listeners)
   self.listeners = listeners
 end
 
-function Module:getListenerInfo(listenerId)
+function CandyModule:getListenerInfo(listenerId)
   if listenerId then
     return self.handler.listeners[listenerId]
   else
@@ -70,23 +58,23 @@ function Module:getListenerInfo(listenerId)
   end
 end
 
-function Module:setParentUI(parent)
+function CandyModule:setParentUI(parent)
   self.handler.parentUI = parent
 end
 
-function Module:getEvent(id)
+function CandyModule:getEvent(id)
   return self.events[id]
 end
 
-function Module:getEvents()
+function CandyModule:getEvents()
   return self.events
 end
 
-function Module:setEvents(events)
+function CandyModule:setEvents(events)
   self.events = events
 end
 
-function Module:getEventInfo(eventId)
+function CandyModule:getEventInfo(eventId)
   if eventId then
     return self.handler.events[eventId]
   else
@@ -94,15 +82,15 @@ function Module:getEventInfo(eventId)
   end
 end
 
-function Module:getParentUI()
+function CandyModule:getParentUI()
   return self.handler.parentUI
 end
 
-function Module:getPanel()
+function CandyModule:getPanel()
   return self.handler.getPanel()
 end
 
-function Module:getEventSignalIgnores()
+function CandyModule:getEventSignalIgnores()
   local ignores = {}
   for event, info in pairs(self:getEventInfo()) do
     if info.signalIgnore then
@@ -112,7 +100,7 @@ function Module:getEventSignalIgnores()
   return ignores
 end
 
-function Module:getListenerSignalIgnores()
+function CandyModule:getListenerSignalIgnores()
   local ignores = {}
   for listener, info in pairs(self:getListenerInfo()) do
     if info.signalIgnore then
@@ -122,13 +110,13 @@ function Module:getListenerSignalIgnores()
   return ignores
 end
 
-function Module:getOptions()
+function CandyModule:getOptions()
   return self.handler.options
 end
 
 -- methods
 
-function Module:notify(key, state)
+function CandyModule:notify(key, state)
   EventHandler.response(self.handler.getModuleId(), 
     self.handler.events, key, state)
 
@@ -140,7 +128,7 @@ function Module:notify(key, state)
   end
 end
 
-function Module:registration()
+function CandyModule:registration()
   for event, data in pairs(self.handler.events) do
     EventHandler.registerEvent(self.handler.getModuleId(), 
       event, data.callback, false)
@@ -155,11 +143,11 @@ function Module:registration()
   end
 end
 
-function Module:getDependancies()
+function CandyModule:getDependancies()
   return self.handler.dependencies
 end
 
-function Module:addEvent(id, event)
+function CandyModule:addEvent(id, event)
   self.events[id] = event
 
   if self.handler.onAddEvent then
@@ -167,7 +155,7 @@ function Module:addEvent(id, event)
   end
 end
 
-function Module:removeEvent(id, stop)
+function CandyModule:removeEvent(id, stop)
   local stop = stop or true
   if stop then
     self.events[id]:stopEvent()
@@ -179,7 +167,7 @@ function Module:removeEvent(id, stop)
   end
 end
 
-function Module:stopEvent(id)
+function CandyModule:stopEvent(id)
   self.events[id]:stopEvent()
 
   if self.handler.onStopEvent then
@@ -187,13 +175,13 @@ function Module:stopEvent(id)
   end
 end
 
-function Module:stopEvents()
+function CandyModule:stopEvents()
   for id, event in pairs(self.events) do
     if event then self:stopEvent(id) end
   end
 end
 
-function Module:addListener(id, listener)
+function CandyModule:addListener(id, listener)
   self.listeners[id] = listener
 
   if self.handler.onAddListener then
@@ -201,7 +189,7 @@ function Module:addListener(id, listener)
   end
 end
 
-function Module:removeListener(id)
+function CandyModule:removeListener(id)
   self.listeners[id]:disconnectListener()
   self.listeners[id] = nil
 
@@ -210,7 +198,7 @@ function Module:removeListener(id)
   end
 end
 
-function Module:disconnectListener(id)
+function CandyModule:disconnectListener(id)
   self.listeners[id]:disconnect()
 
   if self.handler.onDisconnectListener then
@@ -218,13 +206,13 @@ function Module:disconnectListener(id)
   end
 end
 
-function Module:disconnectListeners()
+function CandyModule:disconnectListeners()
   for id, listener in pairs(self.listeners) do
     if listener then self:disconnectListener(id) end
   end
 end
 
-function Module:stop()
+function CandyModule:stop()
   self.handler.stop()
 
   if self.handler.onModuleStop then
@@ -232,7 +220,7 @@ function Module:stop()
   end
 end
 
-function Module:terminate()
+function CandyModule:terminate()
   self.handler.terminate()
 
   if self.handler.onModuleTerminate then

@@ -3,50 +3,21 @@
   @Details: MoveEvent class for auto looting logic.
 ]]
 
-MoveEvent = {}
-MoveEvent.__index = MoveEvent
+MoveEvent = extends(CallbackEvent, "MoveEvent")
 
-MoveEvent.__class = "MoveEvent"
-MoveEvent.Hook = nil
+MoveEvent.create = function(id, item, position, callback)
+  local event = MoveEvent.internalCreate()
 
-MoveEvent.new = function(id, item, position, callback)
-  moveEv = {
-    id = nil,
-    callback = nil,
-    item = nil,
-    position = {}
-  }
+  event:setId(id)
+  event:setCallback(callback)
 
-  moveEv.id = id
-  moveEv.callback = callback
-  moveEv.item = item
-  moveEv.position = position
+  event.position = position or {}
+  event.item = item
 
-  setmetatable(moveEv, MoveEvent)
-  return moveEv
+  return event
 end
 
 -- gets/sets
-
---@RequiredBy:Queue
-function MoveEvent:getId()
-  return self.id
-end
-
---@RequiredBy:Queue
-function MoveEvent:setId(id)
-  self.id = id
-end
-
---@RequiredBy:Queue
-function MoveEvent:getCallback()
-  return self.callback
-end
-
---@RequiredBy:Queue
-function MoveEvent:setCallback(callback)
-  self.callback = callback
-end
 
 function MoveEvent:getItem()
   return self.item
@@ -69,6 +40,8 @@ end
 --@RequiredBy:Queue
 function MoveEvent:start()
   print("MoveEvent:start")
+  CallbackEvent.start(self)
+
   local wait = Helper.safeDelay(1000, 3000) --[[+ g_game.getPing()]]
   -- ensure brief delay before looting
   scheduleEvent(function()

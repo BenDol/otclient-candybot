@@ -3,8 +3,6 @@
   @Details: Event handler for module functionality.
 ]]
 
-dofile('classes/event.lua')
-
 EventHandler = {}
 
 OptionState = {
@@ -41,7 +39,7 @@ function EventHandler.registerEvent(moduleId, eventId, callback, state, bypass)
   local bypass = bypass or false
   local module = Modules.getModule(moduleId)
 
-  local event = Event.new(eventId, addEvent(function()
+  local event = CandyEvent.create(eventId, addEvent(function()
     if CandyBot.isEnabled() or bypass then callback(eventId) end
   end), callback, state)
 

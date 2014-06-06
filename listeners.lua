@@ -3,8 +3,6 @@
   @Details: Listener handler for module listeners.
 ]]
 
-dofile('classes/listener.lua')
-
 ListenerHandler = {}
 
 function ListenerHandler.init()
@@ -54,7 +52,7 @@ function ListenerHandler.registerListener(moduleId, listenerId, callbacks, state
   end
   local module = Modules.getModule(moduleId)
 
-  local listener = Listener.new(listenerId, callbacks, state)
+  local listener = CandyListener.create(listenerId, callbacks, state)
   module:addListener(listenerId, listener)
   return true
 end

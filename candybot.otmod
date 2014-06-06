@@ -8,10 +8,7 @@ Module
   autoload: true
   autoload-priority: 1000
   sandbox: true
+  scripts: [ candybot ]
 
-  @onLoad: |
-    dofile 'candybot'
-    CandyBot.init()
-
-  @onUnload: |
-    CandyBot.terminate()
+  @onLoad: init()
+  @onUnload: terminate()

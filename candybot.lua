@@ -4,7 +4,7 @@
             main bot controls and functionality.
 ]]
 
-CandyBot = extends(UIWidget)
+CandyBot = extends(UIWidget, "CandyBot")
 CandyBot.window = nil
 CandyBot.options = {}
 CandyBot.defaultOptions = {}
@@ -13,7 +13,18 @@ dofile('consts.lua')
 dofile('helper.lua')
 dofile('logger.lua')
 
-dofiles('classes')
+dofile('modules.lua')
+dofile('events.lua')
+dofile('listeners.lua')
+
+dofile('classes/candymodule.lua')
+dofile('classes/candyevent.lua')
+dofile('classes/candylistener.lua')
+dofile('classes/target.lua')
+dofile('classes/moveevent.lua')
+dofile('classes/lootevent.lua')
+
+dofiles('extensions')
 
 local botButton
 local botTabBar
@@ -30,18 +41,13 @@ local function setupDefaultOptions()
 end
 
 local function loadModules()
-  dofile('modules.lua')
   Modules.init()
 
   -- setup the default options
   setupDefaultOptions()
 end
 
-local function loadExtensions()
-  dofiles('extensions')
-end
-
-function CandyBot.init()
+function init()
   CandyBot.window = g_ui.displayUI('candybot.otui')
   CandyBot.window:setVisible(false)
 
@@ -63,9 +69,6 @@ function CandyBot.init()
     g_resources.makeDir(writeDir)
   end
 
-  -- load extensions
-  loadExtensions()
-
   -- load modules
   loadModules()
 
@@ -86,7 +89,7 @@ function CandyBot.init()
   end
 end
 
-function CandyBot.terminate()
+function terminate()
   CandyBot.hide()
   disconnect(g_game, {
     onGameStart = CandyBot.online,

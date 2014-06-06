@@ -3,7 +3,7 @@
   @Details: Alert list that is used within the Afk module.
 ]]
 
-AlertList = extends(UIWidget)
+AlertList = extends(UIWidget, "AlertList")
 
 local alertListWindow
 

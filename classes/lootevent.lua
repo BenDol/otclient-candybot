@@ -3,52 +3,25 @@
   @Details: LootEvent class for auto looting logic.
 ]]
 
-LootEvent = {}
-LootEvent.__index = LootEvent
-
-LootEvent.__class = "LootEvent"
+LootEvent = extends(CallbackEvent, "LootEvent")
 LootEvent.Hook = nil
 
-LootEvent.new = function(id, position, callback)
-  lootEv = {
-    id = nil,
-    callback = nil,
-    position = {},
-    looted = false,
-    hook = nil,
-    openCheck = nil,
-    attempting = false
-  }
+LootEvent.create = function(id, position, callback)
+  local event = LootEvent.internalCreate()
 
-  lootEv.id = id -- used for creature id
-  lootEv.callback = callback
-  lootEv.position = position
+  event:setId(id) -- used for creature id
+  event:setCallback(callback)
 
-  setmetatable(lootEv, LootEvent)
-  return lootEv
+  event.position = position or {}
+  event.looted = false
+  event.hook = nil
+  event.openCheck = nil
+  event.attempting = false
+  
+  return event
 end
 
 -- gets/sets
-
---@RequiredBy:Queue
-function LootEvent:getId()
-  return self.id
-end
-
---@RequiredBy:Queue
-function LootEvent:setId(id)
-  self.id = id
-end
-
---@RequiredBy:Queue
-function LootEvent:getCallback()
-  return self.callback
-end
-
---@RequiredBy:Queue
-function LootEvent:setCallback(callback)
-  self.callback = callback
-end
 
 function LootEvent:getPosition()
   return self.position
@@ -71,6 +44,8 @@ end
 --@RequiredBy:Queue
 function LootEvent:start()
   print("LootEvent:start")
+  CallbackEvent.start(self)
+
   -- Ensure there is a corpse
   if self:findCorpse() then
     print("corpse exists at "..postostring(self.position))
@@ -145,14 +120,14 @@ function LootEvent:loot(container, prevContainer)
   local pos = player:getPosition()
 
   local delay = 0
-  local queue = Queue.new(function()
+  local queue = Queue.create(function()
     -- Looting has finished 
     self:finished()
   end)
   for k,item in pairs(container:getItems()) do
     print(item:getId())
     local toPos = {x=65535, y=64, z=0}
-    queue:add(MoveEvent.new(k, item, toPos, function()
+    queue:add(MoveEvent.create(k, item, toPos, function()
       print("Moved " .. tostring(item:getId()))
     end))
   end

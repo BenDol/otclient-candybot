@@ -65,7 +65,7 @@ end
 
 function AutoTarget.addCreature(creature)
   -- Avoid adding new targets when attacking
-  if creature then
+  if creature and creature ~= g_game.getLocalPlayer() then
     --connect(creature, { onHealthPercentChange = AutoTarget.onTargetHealthChange })
     connect(creature, { onDeath = AutoTarget.onTargetDeath })
 
@@ -112,7 +112,7 @@ function AutoTarget.startLooting()
   print("AutoTarget.startLooting")
   AutoTarget.looting = true
 
-  local queue = Queue.new(function()
+  local queue = Queue.create(function()
     -- Executed when the queue is finished
     print("Queue finished callback called")
     AutoTarget.stopLooting()
@@ -121,7 +121,7 @@ function AutoTarget.startLooting()
   for id,loot in pairs(AutoTarget.lootQueue) do
     if loot and not loot.looted then
       print("Added ".. tostring(id) .. " [" .. postostring(loot.position).. "]")
-      queue:add(LootEvent.new(id, loot.position, function()
+      queue:add(LootEvent.create(id, loot.position, function()
         print("Fired LootEvent Callback: " .. tostring(id))
         loot.looted = true
       end))
@@ -160,7 +160,7 @@ function AutoTarget.Event(event)
 
   -- Find a valid target to attack
   for id,target in pairs(AutoTarget.creatureData) do
-    if target and AutoTarget.isValidTarget(target) then 
+    if target and AutoTarget.isValidTarget(target) then
       g_game.attack(target) break 
     end
   end

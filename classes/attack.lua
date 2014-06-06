@@ -3,25 +3,16 @@
   @Details: Attack class for auto attack logic.
 ]]
 
-Attack = {}
-Attack.__index = Attack
+Attack = newclass("Attack")
 
-Attack.__class = "Attack"
-
-Attack.new = function(type, words, item, ticks)
-  atk = {
-    type = nil,
-    words = '',
-    item = 0,
-    ticks = 100
-  }
+Attack.create = function(type, words, item, ticks)
+  local atk = Attack.internalCreate()
 
   atk.type = type
-  atk.words = words
-  atk.item = item
-  atk.ticks = ticks
+  atk.words = words or ''
+  atk.item = item or 0
+  atk.ticks = ticks or 100
 
-  setmetatable(atk, Attack)
   return atk
 end
 

@@ -4,30 +4,19 @@
             target logic setting.
 ]]
 
-TargetSetting = {}
-TargetSetting.__index = TargetSetting
+TargetSetting = newclass("TargetSetting")
 
-TargetSetting.__class = "TargetSetting"
+TargetSetting.create = function(movement, stance, attack, range, equip, target)
+  local setting = TargetSetting.internalCreate()
 
-TargetSetting.new = function(movement, stance, attack, range, equip, target)
-  setting = {
-    movement = 0,
-    stance = "",
-    attack = nil,
-    range = {100, 0},
-    equip = {},
-    target = nil,
-    index = 0
-  }
-  setting.movement = movement
-  setting.stance = stance
+  setting.movement = movement or 0
+  setting.stance = stance or ""
   setting.attack = attack
-  setting.range = range
-  setting.equip = equip
+  setting.range = range or {100, 0}
+  setting.equip = equip or {}
   setting.target = target
-  setting.index = index
-
-  setmetatable(setting, TargetSetting)
+  setting.index = index or 0
+  
   return setting
 end
 
@@ -143,29 +132,30 @@ function TargetSetting:isIndexValid(index)
   return index > 0 and index < 3
 end
 
+
+function TargetSetting.toNode(setting)
+  local node = {}
+  for k,v in pairs(setting) do
+    if type(v) ~= "function" then
+      node[k] = v
+    end
+  end
+  return node
+end
+
 --[[ Target Class]]
 
-Target = {}
-Target.__index = Target
+Target = newclass("Target")
 
-Target.__class = "Target"
-
-Target.new = function(name, priority, settings, loot, alarm)
-  target = {
-    name = "",
-    priority = 0,
-    settings = {},
-    loot = true,
-    alarm = false
-  }
-
-  target.settings = settings
-  target.name = name
-  target.priority = priority
-  target.loot = loot
+Target.create = function(name, priority, settings, loot, alarm)
+  local target = Target.internalCreate()
+  
+  target.name = name or ""
+  target.priority = priority or 0
+  target.settings = settings or {}
+  target.loot = loot or true
   target.alarm = alarm
-
-  setmetatable(target, Target)
+  
   return target
 end
 
@@ -251,3 +241,22 @@ function Target:setAlarm(alarm)
 end
 
 -- methods
+
+function Target:toNode()
+  local node = {}
+  for k,v in pairs(self) do
+    print(tostring(k) .. " | " .. tostring(v))
+    local t = type(v)
+    print(t)
+    if t ~= "function" and t ~= "userdata" then
+      -- check for metatables
+      if t == "table" then
+        for _,d in pairs(v) do
+          print(type(d))
+        end
+      end
+      node[k] = v
+    end
+  end
+  return node
+end

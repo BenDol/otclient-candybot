@@ -3,25 +3,25 @@
   @Details: Module handler for managing registered modules.
 ]]
 
-dofile('classes/module.lua')
-
 Modules = {}
 
 local modules = {}
+local loaded = false
 
 function Modules.init()
   modules = {}
 
   -- initiate the modules event handler
-  dofile('events.lua')
   EventHandler.init()
 
   -- initiate the modules listener handler
-  dofile('listeners.lua')
   ListenerHandler.init()
 
   -- initiate modules
-  dofiles('modules', true, '_handler.lua')
+  if not loaded then
+    dofiles('modules', true, '_handler.lua')
+    loaded = true
+  end
 
   -- check all the module dependencies
   Modules.checkDependencies()
@@ -98,7 +98,7 @@ function Modules.registerModule(handler)
     error("This module("..moduleId..") is already registered")
     return false
   end
-  local module = Module.new(moduleId, handler)
+  local module = CandyModule.create(moduleId, handler)
 
   modules[moduleId] = module
   -- register the modules events

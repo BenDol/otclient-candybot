@@ -174,9 +174,8 @@ function TargetsModule.getTargetListItem(target)
 end
 
 function TargetsModule.addNewTarget(name)
-  print("addNewTarget")
   if not TargetsModule.hasTarget(name) then
-    local target = Target.new(name, 1, {}, false, false)
+    local target = Target.create(name, 1, {}, false, false)
 
     -- Target connections
 
@@ -206,7 +205,7 @@ function TargetsModule.addNewTarget(name)
     })
 
     -- Add first setting
-    TargetsModule.addTargetSetting(target, TargetSetting.new(
+    TargetsModule.addTargetSetting(target, TargetSetting.create(
       0, "", nil, {100, 0}, {}
     ))
 
@@ -218,8 +217,8 @@ function TargetsModule.addNewTarget(name)
 end
 
 function TargetsModule.addTargetSetting(target, setting)
-  if target.__class ~= "Target" then return end
-  if setting.__class ~= "TargetSetting" then return end
+  if target:getClassName() ~= "Target" then return end
+  if setting:getClassName() ~= "TargetSetting" then return end
 
   connect(setting, {
     onMovementChange = function(setting, movement, oldMovement)
@@ -428,8 +427,17 @@ end
 function writeTargets(config)
   if not config then return end
 
-  local targets = TargetsModule.getTargets() or {}
-  --g_settings.setNode('Targets', targets)
+  local targetClasses = TargetsModule.getTargets()
+  local targets = {}
+
+  print(#targetClasses)
+  for k,v in pairs(targetClasses) do
+    local node = v:toNode()
+    table.insert(targets, node)
+    table.tostring(node)
+  end
+  config.setNode('Targets', targets)
+  config:save()
 end
 
 function parseTargets(config)
