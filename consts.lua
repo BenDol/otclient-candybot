@@ -3,6 +3,8 @@
   @Details: Constant variable declartions.
 ]]
 
+Consts = {}
+
 RestoreType = {
   cast = 1,
   item = 2

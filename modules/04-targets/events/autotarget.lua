@@ -9,8 +9,9 @@ AutoTarget = TargetsModule.AutoTarget
 -- Variables
 
 AutoTarget.creatureData = {}
-AutoTarget.lootQueue = {}
+AutoTarget.lootList = {}
 AutoTarget.looting = false
+AutoTarget.lootProc = nil
 
 -- Methods
 
@@ -88,54 +89,95 @@ end
 
 function AutoTarget.onTargetDeath(creature)
   if AutoTarget.canLoot(creature) then
-    AutoTarget.lootQueue[creature:getId()] = {
-      position = creature:getPosition(),
-      looted = false
+    local creatureId = creature:getId()
+    AutoTarget.lootList[creatureId] = {
+      id = creatureId,
+      position = creature:getPosition()
     }
   end
 end
 
-function AutoTarget.removeLoot(creature)
-  AutoTarget.lootQueue[creature:getId()] = nil
+function AutoTarget.removeLoot(creatureId)
+  print("AutoTarget.removeLoot: "..tostring(creatureId))
+  AutoTarget.lootList[creatureId] = nil
 end
 
 function AutoTarget.hasUncheckedLoot()
-  for _,loot in pairs(AutoTarget.lootQueue) do
-    if loot and not loot.looted then
+  for _,loot in pairs(AutoTarget.lootList) do
+    if loot then
       return true
     end
   end
   return false
 end
 
+function AutoTarget.getClosestLoot()
+  local player = g_game.getLocalPlayer()
+  local playerPos = player:getPosition()
+
+  local corpse = {distance=nil, loot = nil, creatureId=nil}
+  for id,loot in pairs(AutoTarget.lootList) do
+    if loot then
+      print(postostring(loot.position))
+      local distance = Position.distance(playerPos, loot.position)
+      print(distance)
+      if not corpse.loot or distance < corpse.distance then
+        print("Found loot to go to")
+        corpse.distance = distance
+        corpse.loot = loot
+        corpse.creatureId = id
+      end
+    end
+  end
+  return corpse
+end
+
 function AutoTarget.startLooting()
   print("AutoTarget.startLooting")
   AutoTarget.looting = true
 
-  local queue = Queue.create(function()
-    -- Executed when the queue is finished
-    print("Queue finished callback called")
-    AutoTarget.stopLooting()
-  end)
+  AutoTarget.lootNext()
+end
 
-  for id,loot in pairs(AutoTarget.lootQueue) do
-    if loot and not loot.looted then
-      print("Added ".. tostring(id) .. " [" .. postostring(loot.position).. "]")
-      queue:add(LootEvent.create(id, loot.position, function()
-        print("Fired LootEvent Callback: " .. tostring(id))
-        loot.looted = true
-      end))
-    end
+function AutoTarget.lootNext()
+  local data = AutoTarget.getClosestLoot()
+  if data.loot then
+    AutoTarget.lootProc = LootProcedure.create(data.creatureId, data.loot.position)
+
+    -- Loot procedure finished
+    connect(AutoTarget.lootProc, { onFinished = function(id)
+      AutoTarget.removeLoot(id)
+      AutoTarget.lootNext()
+    end })
+
+    -- Loot procedure timed out
+    connect(AutoTarget.lootProc, { onTimedOut = function(id)
+      AutoTarget.removeLoot(id)
+      AutoTarget.lootNext()
+    end })
+
+    -- Loot procedure cancelled
+    connect(AutoTarget.lootProc, { onCancelled = function(id)
+      AutoTarget.lootProc = nil -- dereference
+    end })
+
+    AutoTarget.lootProc:start()
+  else
+    AutoTarget.stopLooting()
   end
-  queue:start()
 end
 
 function AutoTarget.stopLooting()
   print("AutoTarget.stopLooting")
   AutoTarget.looting = false
 
-  -- Clean up loot data?
-  AutoTarget.lootQueue = {}
+  if AutoTarget.lootProc then
+    -- attempt to cancel loot
+    AutoTarget.lootProc:cancel()
+  end
+
+  -- Clean up loot data
+  AutoTarget.lootList = {}
 end
 
 function AutoTarget.isValidTarget(creature)
@@ -154,7 +196,7 @@ function AutoTarget.Event(event)
   -- Cannot continue if still attacking or looting
   if g_game.isAttacking() or AutoTarget.looting then
     EventHandler.rescheduleEvent(TargetsModule.getModuleId(), 
-      event, Helper.safeDelay(1500, 4000))
+      event, Helper.safeDelay(600, 2000))
     return
   end
 

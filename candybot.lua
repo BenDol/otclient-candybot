@@ -17,13 +17,7 @@ dofile('modules.lua')
 dofile('events.lua')
 dofile('listeners.lua')
 
-dofile('classes/candymodule.lua')
-dofile('classes/candyevent.lua')
-dofile('classes/candylistener.lua')
-dofile('classes/target.lua')
-dofile('classes/moveevent.lua')
-dofile('classes/lootevent.lua')
-
+dofiles('classes')
 dofiles('extensions')
 
 local botButton
