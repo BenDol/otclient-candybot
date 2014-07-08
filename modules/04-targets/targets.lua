@@ -186,6 +186,10 @@ end
 function TargetsModule.onStopEvent(eventId)
   if eventId == TargetsModule.autoTarget then
     TargetsModule.AutoTarget.onStopped()
+  elseif eventId == TargetsModule.autoLoot then
+    TargetsModule.AutoLoot.onStopped()
+  elseif eventId == TargetsModule.attackMode then
+    TargetsModule.AttackMode.onStopped()
   end
 end
 

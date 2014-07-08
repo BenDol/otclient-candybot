@@ -146,6 +146,10 @@ function AutoLoot.canLoot(creature)
   return false
 end
 
+function AutoLoot.onStopped()
+  AutoLoot.pauseLooting()
+end
+
 function AutoLoot.Event(event)
   -- Cannot continue if still attacking or looting
   if g_game.isAttacking() or AutoLoot.isLooting() then
