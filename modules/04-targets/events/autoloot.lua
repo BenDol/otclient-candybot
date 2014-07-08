@@ -85,8 +85,9 @@ end
 function AutoLoot.lootNext()
   local data = AutoLoot.getClosestLoot()
   if data.loot then
-    AutoLoot.lootProc = LootProcedure.create(data.creatureId, data.loot.position)
-
+    AutoLoot.lootProc = LootProcedure.create(data.creatureId, 
+      data.loot.position, 20000)
+    
     -- Loot procedure finished
     connect(AutoLoot.lootProc, { onFinished = function(id)
       AutoLoot.removeLoot(id)

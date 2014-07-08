@@ -100,6 +100,7 @@ end
 function Procedure:startTimeout()
   self:stopTimeout()
 
+  print("Timeout ticks: ".. tostring(self.timeoutTicks))
   self.timeoutEvent = scheduleEvent(function() 
     self:timeout() end, self.timeoutTicks)
 end

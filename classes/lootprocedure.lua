@@ -54,7 +54,7 @@ end
 
 function LootProcedure:start()
   print("LootProcedure:start")
-  self.super:start()
+  Procedure.start(self)
 
   -- Ensure there is a corpse
   if self:findCorpse() then
@@ -187,7 +187,7 @@ function LootProcedure:getBestItem()
 end
 
 function LootProcedure:fail()
-  self.super:fail()
+  Procedure.fail(self)
   print("LootProcedure:fail()")
 
   self:clean()
@@ -196,7 +196,7 @@ function LootProcedure:fail()
 end
 
 function LootProcedure:stop()
-  self.super:stop()
+  Procedure.stop(self)
   print("LootProcedure:stop()")
 
   self:clean()
@@ -205,7 +205,7 @@ function LootProcedure:stop()
 end
 
 function LootProcedure:cancel()
-  self.super:cancel()
+  Procedure.cancel(self)
   print("LootProcedure:cancel()")
 
   self:clean()
@@ -214,7 +214,7 @@ function LootProcedure:cancel()
 end
 
 function LootProcedure:timeout()
-  self.super:timeout()
+  Procedure.timeout(self)
   print("LootProcedure:timeout()")
 
   self:clean()
@@ -223,7 +223,7 @@ function LootProcedure:timeout()
 end
 
 function LootProcedure:finish()
-  self.super:finish()
+  Procedure.finish(self)
   print("LootProcedure:finish()")
   self:setLooted(true)
 
@@ -233,7 +233,7 @@ function LootProcedure:finish()
 end
 
 function LootProcedure:clean()
-  self.super:clean()
+  Procedure.clean(self)
   print("LootProcedure:clean()")
 
   self:stopOpenCheck()

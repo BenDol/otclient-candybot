@@ -18,7 +18,9 @@ MoveProcedure.create = function(thing, position, verify, timeoutTicks)
   end
   proc.position = position
 
+  print(proc:getTickoutTicks())
   if timeoutTicks then
+    print(timeoutTicks)
     proc:setTimeoutTicks(timeoutTicks)
   end
   proc.tryMoveEvent = nil
@@ -60,7 +62,7 @@ end
 
 function MoveProcedure:start()
   print("MoveProcedure:start")
-  self.super:start()
+  Procedure.start(self)
 
   -- try move thing
   self:tryMove()
@@ -120,7 +122,7 @@ function MoveProcedure:stopTryMove()
 end
 
 function MoveProcedure:stop()
-  self.super:stop()
+  Procedure.stop(self)
   print("MoveProcedure:stop()")
 
   self:clean()
@@ -129,7 +131,7 @@ function MoveProcedure:stop()
 end
 
 function MoveProcedure:cancel()
-  self.super:cancel()
+  Procedure.cancel(self)
   print("MoveProcedure:cancel()")
 
   self:clean()
@@ -138,7 +140,7 @@ function MoveProcedure:cancel()
 end
 
 function MoveProcedure:fail()
-  self.super:fail()
+  Procedure.fail(self)
   print("MoveProcedure:fail()")
 
   self:clean()
@@ -147,7 +149,7 @@ function MoveProcedure:fail()
 end
 
 function MoveProcedure:timeout()
-  self.super:timeout()
+  Procedure.timeout(self)
   print("MoveProcedure:timeout()")
 
   self:clean()
@@ -156,7 +158,7 @@ function MoveProcedure:timeout()
 end
 
 function MoveProcedure:finish()
-  self.super:finish()
+  Procedure.finish(self)
   print("MoveProcedure:finish()")
 
   self:clean()
@@ -165,7 +167,7 @@ function MoveProcedure:finish()
 end
 
 function MoveProcedure:clean()
-  self.super:clean()
+  Procedure.clean(self)
   print("MoveProcedure:clean()")
 
   signalcall(self.onCleaned, self.id)
