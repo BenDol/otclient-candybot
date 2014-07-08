@@ -237,7 +237,6 @@ function LootProcedure:clean()
   print("LootProcedure:clean()")
 
   self:stopOpenCheck()
-  self:stopTimeout()
   if self.hook then
     disconnect(Container, { onOpen = self.hook })
   end

@@ -14,14 +14,12 @@ AutoTarget.creatureData = {}
 
 function AutoTarget.init()
   connect(Creature, { onAppear = AutoTarget.addCreature })
-  connect(Creature, { onDisappear = AutoTarget.removeCreature })
   connect(TargetsModule, { onAddTarget = AutoTarget.scan })
   connect(g_game, { onAttackingCreatureChange = AutoTarget.targetChanged })
 end
 
 function AutoTarget.terminate()
   disconnect(Creature, { onAppear = AutoTarget.addCreature })
-  disconnect(Creature, { onDisappear = AutoTarget.removeCreature })
   disconnect(TargetsModule, { onAddTarget = AutoTarget.scan })
   disconnect(g_game, { onAttackingCreatureChange = AutoTarget.targetChanged })
 end
@@ -50,6 +48,7 @@ function AutoTarget.getCreatureData()
 end
 
 function AutoTarget.scan()
+  print("scanning")
   local targetList = {}
   for k,v in pairs(TargetsModule.getTargets()) do
     table.insert(targetList, v:getName())
@@ -75,9 +74,10 @@ end
 
 function AutoTarget.addCreature(creature)
   -- Avoid adding new targets when attacking
-  if creature and creature ~= g_game.getLocalPlayer() then
+  if creature and creature:isMonster() then
     --connect(creature, { onHealthPercentChange = AutoTarget.onTargetHealthChange })
     connect(creature, { onDeath = AutoLoot.onTargetDeath })
+    connect(creature, { onDisappear = AutoTarget.removeCreature })
 
     AutoTarget.creatureData[creature:getId()] = creature
   end
@@ -87,6 +87,7 @@ function AutoTarget.removeCreature(creature)
   if creature then
     --disconnect(creature, { onHealthPercentChange = AutoTarget.onTargetHealthChange })
     disconnect(creature, { onDeath = AutoLoot.onTargetDeath })
+    disconnect(creature, { onDisappear = AutoTarget.removeCreature })
 
     AutoTarget.creatureData[creature:getId()] = nil
   end
@@ -97,7 +98,8 @@ function AutoTarget.onTargetHealthChange(creature)
 end
 
 function AutoTarget.isValidTarget(creature)
-  return TargetsModule.hasTarget(creature:getName())
+  local player = g_game.getLocalPlayer()
+  return TargetsModule.hasTarget(creature:getName()) and player:canStandBy(creature)
 end
 
 function AutoTarget.getBestTarget()
