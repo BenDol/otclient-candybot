@@ -82,6 +82,7 @@ function MoveProcedure:tryMove()
     self.tryMoveEvent = scheduleEvent(function() 
       if self:isTimedOut() then return end
 
+      -- TODO: Fix verification
       if not self.verify or self:verify() then
         self:finish()
       else

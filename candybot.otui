@@ -15,6 +15,8 @@ BotOptionVerticalScrollBar < VerticalScrollBar
 
 BotOptionComboBoxPopupMenuButton < ComboBoxPopupMenuButton
 BotOptionComboBoxPopupMenu < ComboBoxPopupMenu
+BotOptionComboBoxPopupScrollMenu < ComboBoxPopupScrollMenu
+BotOptionComboBoxPopupScrollMenuButton < ComboBoxPopupScrollMenuButton
 BotOptionComboBox < ComboBox
   @onOptionChange: CandyBot.changeOption(self:getId(), self:getCurrentOption().text)
 

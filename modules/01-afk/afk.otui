@@ -44,6 +44,9 @@ Panel
     anchors.top: AutoEat.top
     width: 140
     mouse-scroll: false
+    menu-scroll: true
+    menu-height: 145
+    menu-scroll-step: 25
     options:
       - Any
 

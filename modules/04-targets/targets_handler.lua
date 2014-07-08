@@ -24,13 +24,26 @@ TargetsModule.options = {
 --[[ Register Events ]]
 
 table.merge(TargetsModule, {
-  autoTarget = 1
+  autoTarget = 1,
+  autoLoot = 2,
+  attackMode = 3
 })
 
 TargetsModule.events = {
   [TargetsModule.autoTarget] = {
     option = "AutoTarget", 
-    callback = TargetsModule.AutoTarget.Event
+    callback = TargetsModule.AutoTarget.Event,
+    stopped = TargetsModule.AutoTarget.onStopped
+  },
+  [TargetsModule.autoLoot] = {
+    option = "AutoTarget", 
+    callback = TargetsModule.AutoLoot.Event,
+    stopped = TargetsModule.AutoLoot.onStopped
+  },
+  [TargetsModule.attackMode] = {
+    option = "AutoTarget", 
+    callback = TargetsModule.AttackMode.Event,
+    stopped = TargetsModule.AttackMode.onStopped
   }
 }
 

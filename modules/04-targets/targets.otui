@@ -24,7 +24,7 @@ Panel
     focusable: false
     vertical-scrollbar: TargetScrollBar
     width: 140
-    height: 180
+    height: 235
     auto-focus: first
 
   VerticalScrollBar
@@ -40,7 +40,7 @@ Panel
     anchors.left: TargetScrollBar.right
     anchors.right: parent.right
     anchors.top: parent.top
-    anchors.bottom: AddTargetText.bottom
+    anchors.bottom: TargetList.bottom
     enabled: true
 
     Button
@@ -188,6 +188,15 @@ Panel
         anchors.top: prev.bottom
         margin-top: 3
 
+      TextEdit
+        id: SettingModeText
+        anchors.top: prev.bottom
+        anchors.left: prev.left
+        anchors.right: parent.right
+        margin-top: 6
+        visible: false
+        height: 1
+
       CheckBox
         id: SettingLoot
         !text: tr('Loot')
@@ -215,29 +224,6 @@ Panel
           if target then
             target:setAlarm(self:isChecked())
           end
-
-  TextEdit
-    id: AddTargetText
-    anchors.left: TargetList.left
-    anchors.right: next.left
-    anchors.top: TargetList.bottom
-    margin-top: 5
-    margin-right: 5
-
-  Button
-    id: AddTargetButton
-    !text: tr('Add')
-    !tooltip: tr('Add a new target')
-    anchors.right: TargetScrollBar.right
-    anchors.top: TargetList.bottom
-    margin-top: 5
-    width: 40
-    @onClick: | 
-      local parent = self:getParent()
-      local textEdit = parent:getChildById("AddTargetText")
-      if TargetsModule.addNewTarget(textEdit:getText()) then
-        textEdit:setText('')
-      end
 
   HorizontalSeparator
     anchors.left: parent.left

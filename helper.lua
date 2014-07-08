@@ -5,6 +5,8 @@
 
 Helper = {}
 
+Helper.castIndex = {}
+
 function Helper.safeDelay(min, max)
   if g_game.isOfficialTibia() then
     return math.random(min, max)
@@ -62,6 +64,44 @@ function Helper.safeUseInventoryItemWith(itemId, thing, forceCheck)
   return true
 end
 
+function Helper.castSpell(player, words)
+  local spell = nil
+  if BotModule.isPrecisionMode() then
+    spell = Spells.getSpellByWords(words)
+  end
+
+  local playerId = player:getId()
+  local newTime = os.time()
+  if spell then
+    local castIndex = Helper.castIndex[playerId]
+    if castIndex and castIndex[words] then
+      local lastCasted = castIndex[words]
+      if (newTime - lastCasted) * 1000 <= Helper.getSpellDelay(words) then
+        --BotLogger.warning("You are too exhausted("..spell.exhaustion..") to cast this spell("..spell.words..").")
+        return false
+      end
+    else
+      Helper.castIndex[playerId] = {}
+    end
+
+    if player:getSoul() < spell.soul then
+      BotLogger.warning("Not enough soul points("..spell.soul..") to cast this spell.")
+      return false
+    end
+
+    if player:getMana() >= spell.mana then
+      Helper.castIndex[playerId][words] = newTime
+
+      g_game.talk(spell.words)
+    end
+  else
+    Helper.castIndex[playerId][words] = newTime
+
+    g_game.talk(words)
+  end
+  return true
+end
+
 function Helper.hasEnoughMana(player, words)
   local spell = Spells.getSpellByWords(words)
   if spell then
@@ -91,6 +131,12 @@ function Helper.getItemUseDelay()
     ping = 150
   end
   return Helper.safeDelay(ping + 200, ping + 400)
+end
+
+function Helper.getRandomVocationSpell(vocId, groups)
+  local vocSpells = Spells.getSpellsByVocationId(vocId)
+  local spells = Spells.filterSpellsByGroups(vocSpells, groups)
+  return not table.empty(spells) and spells[math.random(1,#spells)] or {}
 end
 
 function Helper.startChooseItem(releaseCallback)

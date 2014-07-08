@@ -19,6 +19,12 @@ local saveOverWindow
 local loadWindow
 local removeTargetWindow
 
+local AttackModes = {
+  None = "No Mode",
+  SpellMode = "Spell Mode",
+  ItemMode = "Item Mode"
+}
+
 function TargetsModule.getPanel() return Panel end
 function TargetsModule.setPanel(panel) Panel = panel end
 function TargetsModule.getUI() return UI end
@@ -52,6 +58,7 @@ function TargetsModule.init()
 
   -- Event inits
   AutoTarget.init()
+  AttackMode.init()
 end
 
 function TargetsModule.terminate()
@@ -63,12 +70,11 @@ function TargetsModule.terminate()
   g_keyboard.unbindKeyPress('Up', UI.TargetsPanel)
   g_keyboard.unbindKeyPress('Down', UI.TargetsPanel)
 
-  for k,_ in pairs(UI) do
-    UI[k] = nil
-  end
+  TargetsModule.unloadUI()
 
   -- Event terminates
   AutoTarget.terminate()
+  AttackMode.terminate()
 end
 
 function TargetsModule.loadUI(panel)
@@ -92,6 +98,7 @@ function TargetsModule.loadUI(panel)
     SettingStanceList = panel:recursiveGetChildById('SettingStanceList'),
     SettingModeLabel = panel:recursiveGetChildById('SettingModeLabel'),
     SettingModeList = panel:recursiveGetChildById('SettingModeList'),
+    SettingModeText = panel:recursiveGetChildById('SettingModeText'),
     SettingLoot = panel:recursiveGetChildById('SettingLoot'),
     SettingAlarm = panel:recursiveGetChildById('SettingAlarm'),
     AddTargetText = panel:recursiveGetChildById('AddTargetText'),
@@ -101,20 +108,24 @@ function TargetsModule.loadUI(panel)
     LoadList = panel:recursiveGetChildById('LoadList'),
     LoadButton = panel:recursiveGetChildById('LoadButton'),
   }
+
+  -- Setting Mode List
+  UI.SettingModeList:addOption(AttackModes.None)
+  UI.SettingModeList:addOption(AttackModes.SpellMode)
+  UI.SettingModeList:addOption(AttackModes.ItemMode)
+end
+
+function TargetsModule.unloadUI()
+  --if UI.SettingModeList then
+  --  UI.SettingModeList:clearOptions()
+  --end
+
+  for k,_ in pairs(UI) do
+    UI[k] = nil
+  end
 end
 
 function TargetsModule.bindHandlers()
-  connect(UI.SettingNameEdit, {
-    onTextChange = function(self, text, oldText)
-      if not selectedTarget then
-        local newTarget = TargetsModule.addNewTarget(text)
-        if newTarget then TargetsModule.selectTarget(newTarget) end
-      else
-        TargetsModule.changeTargetName(oldText, text)
-      end
-    end
-  })
-
   connect(UI.TargetList, {
     onChildFocusChange = function(self, focusedChild)
       if focusedChild == nil then return end
@@ -124,7 +135,41 @@ function TargetsModule.bindHandlers()
         selectedTarget = TargetsModule.getTarget(focusedChild:getText())
         TargetsModule.setCurrentSetting(selectedTarget:getSetting(1))
       else
-        TargetsModule.updateSettingInfo()
+        TargetsModule.syncSetting()
+      end
+    end
+  })
+
+  connect(UI.SettingNameEdit, {
+    onTextChange = function(self, text, oldText)
+      if not selectedTarget then
+        local newTarget = TargetsModule.addNewTarget(text)
+        if newTarget then TargetsModule.selectTarget(newTarget) end
+      else
+        selectedTarget:setName(text)
+      end
+    end
+  })
+
+  connect(UI.SettingModeList, {
+    onOptionChange = function(self, text, data)
+      if selectedTarget then
+        local setting = TargetsModule.getCurrentSetting()
+        if setting then
+          local attack = Attack.create(text, nil, nil, 100)
+          if text == AttackModes.SpellMode then
+            local spell = Helper.getRandomVocationSpell(1, {1,4})
+            if spell then
+              attack:setWords(spell.words)
+            else
+              attack:setWords("<add spell>")
+            end
+          elseif text == AttackModes.ItemMode then
+            -- TODO
+            attack:setItem(0) 
+          end
+          setting:setAttack(attack)
+        end
       end
     end
   })
@@ -138,11 +183,14 @@ function TargetsModule.bindHandlers()
     end, UI.TargetsPanel)
 end
 
-function TargetsModule.changeTargetName(oldName, newName)
-  local target = TargetsModule.getTarget(oldName)
-  if target then
-    target:setName(newName)
+function TargetsModule.onStopEvent(eventId)
+  if eventId == TargetsModule.autoTarget then
+    TargetsModule.AutoTarget.onStopped()
   end
+end
+
+function TargetsModule.getAttackModeText()
+  return UI.SettingModeText:isVisible() and UI.SettingModeText:getText() or nil
 end
 
 function TargetsModule.selectTarget(target)
@@ -159,7 +207,7 @@ end
 function TargetsModule.setCurrentSetting(setting)
   currentSetting = setting
 
-  TargetsModule.updateSettingInfo()
+  TargetsModule.syncSetting()
 end
 
 function TargetsModule.getCurrentSetting()
@@ -238,6 +286,8 @@ function TargetsModule.addTargetSetting(target, setting)
     onAttackChange = function(setting, attack, oldAttack)
       local target = setting:getTarget()
       print("["..target:getName().."]["..setting:getIndex().."] Attack Changed: " .. tostring(attack))
+      print("onAttackChange")
+      TargetsModule.syncAttackSetting(attack)
     end
   })
 
@@ -320,17 +370,23 @@ function TargetsModule.removeTarget(name)
   end
 end
 
-function TargetsModule.updateSettingInfo()
+function TargetsModule.syncSetting()
   if selectedTarget then
     UI.SettingNameEdit:setText(selectedTarget:getName(), true)
     UI.SettingLoot:setChecked(selectedTarget:getLoot())
     UI.SettingAlarm:setChecked(selectedTarget:getAlarm())
+    UI.SettingModeList:setEnabled(true)
+    UI.SettingStanceList:setEnabled(true)
 
     if currentSetting then
       UI.SettingHpRange1:setText(currentSetting:getRange(1), true)
       UI.SettingHpRange2:setText(currentSetting:getRange(2), true)
       --[[UI.SettingStanceList:
       UI.SettingModeList:]]
+      local attack = currentSetting:getAttack()
+      if attack then
+        TargetsModule.syncAttackSetting(attack)
+      end
     end
   else
     UI.SettingNameEdit:setText("", true)
@@ -338,6 +394,34 @@ function TargetsModule.updateSettingInfo()
     UI.SettingHpRange2:setText("0", true)
     UI.SettingLoot:setChecked(false)
     UI.SettingAlarm:setChecked(false)
+    UI.SettingModeText:setHeight(1)
+    UI.SettingModeText:setVisible(false)
+    UI.SettingModeList:setCurrentOption("No Mode", true)
+    UI.SettingModeList:setEnabled(false)
+    --UI.SettingStanceList:setCurrentOption("No Mode", true)
+    UI.SettingStanceList:setEnabled(false)
+  end
+end
+
+function TargetsModule.syncAttackSetting(attack)
+  UI.SettingModeList:setCurrentOption(attack:getType(), true)
+
+  -- spell mode setup
+  if attack:getWords() ~= "" then
+    UI.SettingModeText:setHeight(20)
+    UI.SettingModeText:setVisible(true)
+    UI.SettingModeText:setTooltip("Words of the spell you would like to cast")
+    UI.SettingModeText:setText(attack:getWords())
+  else
+    UI.SettingModeText:setHeight(1)
+    UI.SettingModeText:setVisible(false)
+  end
+
+  -- item mode setup
+  if attack:getItem() ~= 0 then
+    -- TODO
+  else
+    -- TODO
   end
 end
 

@@ -14,19 +14,7 @@ function MagicTrain.Event(event)
     local manaRequired = AfkModule.getPanel():getChildById('MagicTrainManaRequired'):getValue()
     if player:getManaPercent() >= manaRequired then
       local words = AfkModule.getPanel():getChildById('MagicTrainSpellText'):getText()
-
-      local spell = nil
-      if BotModule.isPrecisionMode() then
-        spell = Spells.getSpellByWords(words)
-      end
-
-      if spell then
-        if player:getMana() >= spell.mana then
-          g_game.talk(spell.words)
-        end
-      else
-        g_game.talk(words)
-      end
+      Helper.castSpell(player, words)
     end
   end
 

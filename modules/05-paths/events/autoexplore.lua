@@ -31,7 +31,7 @@ AutoExplore.idleTime = 15 -- seconds
 function AutoExplore.checkPathing(dirs, override, dontChange)
   print("AutoExplore.checkPathing")
   -- Check if we are performing other bot tasks
-  if AutoTarget.isLooting() then
+  if AutoLoot.isLooting() then
     print("return 0")
     return false
   end
@@ -167,7 +167,7 @@ function startCheckEvent()
   stopCheckEvent()
 
   AutoExplore.checkEvent = cycleEvent(function()
-      if not AutoTarget.isLooting() then
+      if not AutoLoot.isLooting() then
         AutoExplore.checkPathing(direction)
       end
     end, AutoExplore.checkTicks)
@@ -181,7 +181,7 @@ function stopCheckEvent()
 end
 
 function AutoExplore.ConnectListener(listener)
-   print("AutoExplore.ConnectListener")
+  print("AutoExplore.ConnectListener")
   connect(LocalPlayer, { onAutoWalkFail = AutoExplore.changeDirection })
 
   -- Start the listener
