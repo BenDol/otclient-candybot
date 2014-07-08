@@ -63,6 +63,11 @@ function Procedure:start()
   self:startTimeout()
 end
 
+function Procedure:stop()
+  print("Procedure:stop()")
+  signalcall(self.onStop, self.id)
+end
+
 function Procedure:cancel()
   print("Procedure:cancel()")
   signalcall(self.onCancel, self.id)

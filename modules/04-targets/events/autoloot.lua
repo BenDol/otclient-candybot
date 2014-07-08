@@ -119,14 +119,19 @@ function AutoLoot.pauseLooting()
   AutoLoot.looting = false
 
   if AutoLoot.lootProc then
-    -- attempt to cancel loot
-    AutoLoot.lootProc:cancel()
+    -- stop looting loot
+    AutoLoot.lootProc:stop()
   end
 end
 
 function AutoLoot.stopLooting()
   print("AutoLoot.stopLooting")
-  AutoLoot.pauseLooting()
+  AutoLoot.looting = false
+
+  if AutoLoot.lootProc then
+    -- attempt to cancel loot
+    AutoLoot.lootProc:cancel()
+  end
 
   -- Clean up loot data
   AutoLoot.lootList = {}

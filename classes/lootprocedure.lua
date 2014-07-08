@@ -195,6 +195,15 @@ function LootProcedure:fail()
   signalcall(self.onFailed, self.id)
 end
 
+function LootProcedure:stop()
+  self.super:stop()
+  print("LootProcedure:stop()")
+
+  self:clean()
+
+  signalcall(self.onStopped, self.id)
+end
+
 function LootProcedure:cancel()
   self.super:cancel()
   print("LootProcedure:cancel()")

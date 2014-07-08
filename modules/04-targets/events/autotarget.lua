@@ -100,12 +100,22 @@ function AutoTarget.isValidTarget(creature)
   return TargetsModule.hasTarget(creature:getName())
 end
 
-function AutoTarget.getValidTarget()
-  for id,target in pairs(AutoTarget.creatureData) do
-    if target and AutoTarget.isValidTarget(target) then
-      return target
+function AutoTarget.getBestTarget()
+  local player = g_game.getLocalPlayer()
+  local playerPos = player:getPosition()
+  local target, distance = nil, nil
+
+  for id,t in pairs(AutoTarget.creatureData) do
+    if t and AutoTarget.isValidTarget(t) then
+      local d = Position.distance(playerPos, t:getPosition())
+      if not target or d < distance then
+        print("Found closest target")
+        target = t
+        distance = d
+      end
     end
   end
+  return target
 end
 
 function AutoTarget.onStopped()
@@ -121,13 +131,13 @@ function AutoTarget.Event(event)
   end
 
   -- Find a valid target to attack
-  local target = AutoTarget.getValidTarget()
+  local target = AutoTarget.getBestTarget()
   if target then
     -- If looting pause to prioritize targeting
     if AutoLoot.isLooting() then
       AutoLoot.pauseLooting()
     end
-  
+
     g_game.attack(target)
   end
 

@@ -119,6 +119,15 @@ function MoveProcedure:stopTryMove()
   end
 end
 
+function MoveProcedure:stop()
+  self.super:stop()
+  print("MoveProcedure:stop()")
+
+  self:clean()
+
+  signalcall(self.onStopped, self.id)
+end
+
 function MoveProcedure:cancel()
   self.super:cancel()
   print("MoveProcedure:cancel()")
