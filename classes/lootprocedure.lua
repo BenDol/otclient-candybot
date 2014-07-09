@@ -150,11 +150,9 @@ end
 function LootProcedure:takeNextItem()
   local item = self:getBestItem()
   if item then
-    print(item:getId())
     local toPos = {x=65535, y=64, z=0} -- TODO: get container with free space
-    self.moveProc = MoveProcedure.create(item, toPos, true)
+    self.moveProc = MoveProcedure.create(item, toPos, true, 8000)
     connect(self.moveProc, { onFinished = function(id)
-      -- TODO: check if the item still exists in the same place
       print("connection: MoveProcedure.onFinished")
       self:removeItem(id)
       self:takeNextItem()
@@ -173,7 +171,6 @@ function LootProcedure:takeNextItem()
 end
 
 function LootProcedure:getBestItem()
-  print("LootProcedure:getBestItem")
   local data = {item=nil, z=nil}
   for k,i in pairs(self.items) do
     if not data.item or (i and i:getPosition().z < data.z) then
@@ -236,6 +233,12 @@ function LootProcedure:clean()
   print("LootProcedure:clean()")
 
   self:stopOpenCheck()
+
+  if self.moveProc then
+    self.moveProc:cancel()
+    self.moveProc = nil
+  end
+
   if self.hook then
     disconnect(Container, { onOpen = self.hook })
   end

@@ -83,8 +83,10 @@ function AutoLoot.startLooting()
 end
 
 function AutoLoot.lootNext()
+  local player = g_game.getLocalPlayer()
   local data = AutoLoot.getClosestLoot()
-  if data.loot then
+
+  if data.loot and player:getFreeCapacity() > 0 then
     AutoLoot.lootProc = LootProcedure.create(data.creatureId, 
       data.loot.position)
     

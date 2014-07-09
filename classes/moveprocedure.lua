@@ -70,6 +70,7 @@ function MoveProcedure:start()
   signalcall(self.onStarted, self.id)
 end
 
+-- TODO: This needs to be reworked
 function MoveProcedure:tryMove()
   self:stopTryMove()
   
