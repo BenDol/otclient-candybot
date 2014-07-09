@@ -135,7 +135,6 @@ function LootProcedure:loot(container, prevContainer)
 
   -- ensure its the right container
   if not corpseItem or containerItem:getId() ~= corpseItem:getId() then
-    print(tostring(containerItem:getId()) .. " ~= " .. tostring(corpseItem:getId()))
     return false
   end
 
@@ -153,7 +152,7 @@ function LootProcedure:takeNextItem()
   if item then
     print(item:getId())
     local toPos = {x=65535, y=64, z=0} -- TODO: get container with free space
-    self.moveProc = MoveProcedure.create(item, toPos, false)
+    self.moveProc = MoveProcedure.create(item, toPos, true)
     connect(self.moveProc, { onFinished = function(id)
       -- TODO: check if the item still exists in the same place
       print("connection: MoveProcedure.onFinished")

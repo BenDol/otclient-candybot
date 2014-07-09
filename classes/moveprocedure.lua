@@ -65,52 +65,32 @@ function MoveProcedure:start()
   Procedure.start(self)
 
   -- try move thing
-  self:tryMove()
+  scheduleEvent(function() self:tryMove() end, Helper.safeDelay(800, 1200))
 
   signalcall(self.onStarted, self.id)
 end
 
 function MoveProcedure:tryMove()
-  local wait = Helper.safeDelay(1000, 1500) --[[+ g_game.getPing()]]
-
   self:stopTryMove()
-
-  -- ensure brief delay before looting
-  scheduleEvent(function()
+  
+  if self:isTimedOut() then return end
+  g_game.move(self.thing, self.position, self.thing:getCount())
+  
+  -- the move has been called schedule finish
+  self.tryMoveEvent = scheduleEvent(function() 
     if self:isTimedOut() then return end
-    g_game.move(self.thing, self.position, self.thing:getCount())
-    
-    -- the move has been called schedule finish
-    self.tryMoveEvent = scheduleEvent(function() 
-      if self:isTimedOut() then return end
 
-      -- TODO: Fix verification
-      if not self.verify or self:verify() then
-        self:finish()
-      else
-        self:tryMove()
-      end
-    end, g_game.getPing())
-  end, wait)
+    -- TODO: Fix verification
+    if not self.verify or self:verifyMoved() then
+      self:finish()
+    else
+      self:tryMove()
+    end
+  end, (g_game.getPing()*1.5))
 end
 
-function MoveProcedure:verify()
-  print("MoveProcedure:verify()")
-  local player = g_game.getLocalPlayer()
-  if self.thing:getClassName() == "Item" then
-    local bypass = false
-    local thing = player:getItem(self.thing:getId())
-    if thing then
-      if not thing:isStackable() then
-        if Position.equals(self.position, thing:getPosition()) then
-          return true
-        end
-      else
-        bypass = true -- was stackable might not be in desired position
-      end
-    end
-    return g_map.getThing(self.position, self.thing:getStackPos()) ~= nil or bypass
-  end
+function MoveProcedure:verifyMoved()
+  print("MoveProcedure:verifyMoved()")
   return true
 end
 
@@ -169,6 +149,8 @@ end
 function MoveProcedure:clean()
   Procedure.clean(self)
   print("MoveProcedure:clean()")
+
+  self:stopTryMove()
 
   signalcall(self.onCleaned, self.id)
 end
