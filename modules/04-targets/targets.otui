@@ -280,7 +280,7 @@ Panel
       !text: tr('Load Targets')
       anchors.top: LoadList.bottom
       anchors.left: LoadList.left
-      anchors.right: LoadList.right
+      anchors.right: LoadSettingScrollBar.right
       margin-top: 3
       enabled: false
       @onClick: |

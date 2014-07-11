@@ -135,6 +135,7 @@ function AutoLoot.pauseLooting()
   if AutoLoot.lootProc then
     -- stop looting loot
     AutoLoot.lootProc:stop()
+    AutoLoot.lootProc = nil
   end
 end
 

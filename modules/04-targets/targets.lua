@@ -16,6 +16,7 @@ local selectedTarget
 local currentSetting
 local refreshEvent
 local loadListIndex
+local currentFileLoaded
 
 local saveOverWindow
 local loadWindow
@@ -596,6 +597,7 @@ function TargetsModule.saveTargets(file)
 
     UI.SaveNameEdit:setText("")
   end
+  TargetsModule.addFile(file..".otml")
 end
 
 function TargetsModule.loadTargets(file, force)
@@ -612,8 +614,9 @@ function TargetsModule.loadTargets(file, force)
         if target then TargetsModule.addTarget(target) end
       end
       UI.TargetList:focusNextChild()
-
+      
       if not force then
+        currentFileLoaded = file
         CandyBot.changeOption(UI.LoadList:getId(), file)
       end
     end
