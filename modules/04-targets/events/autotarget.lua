@@ -76,6 +76,18 @@ function AutoTarget.removeCreature(creature)
   end
 end
 
+function AutoTarget.checkChaseMode(target)
+  if not target then return end
+  local t = TargetsModule.getTarget(target:getName())
+  if t then
+    if t:getFollow() then
+      g_game.setChaseMode(ChaseOpponent)
+    else
+      g_game.setChaseMode(DontChase)
+    end
+  end
+end
+
 function AutoTarget.onTargetHealthChange(creature)
 
 end
@@ -128,6 +140,8 @@ function AutoTarget.Event(event)
     if AutoLoot.isLooting() then
       AutoLoot.pauseLooting()
     end
+
+    AutoTarget.checkChaseMode(target)
 
     g_game.attack(target)
   end

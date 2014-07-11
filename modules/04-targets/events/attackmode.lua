@@ -25,8 +25,14 @@ end
 function AttackMode.Event(event)
   -- Cannot continue if still attacking or in pz
   local player = g_game.getLocalPlayer()
-  if not g_game.isAttacking() or player:hasState(PlayerStates.Pz) then
-    return Helper.safeDelay(300, 500)
+  if not g_game.isAttacking() then
+    if player:hasState(PlayerStates.Swords) then
+      return Helper.safeDelay(300, 500)
+    else
+      return Helper.safeDelay(1500, 2000)
+    end
+  elseif player:hasState(PlayerStates.Pz) then
+    return 3000
   end
 
   local target = g_game.getAttackingCreature()

@@ -247,6 +247,7 @@ function TargetsModule.addNewTarget(name)
     connect(target, {
       onFollowChange = function(target, follow)
         print("["..target:getName().."] Follow Changed: " .. tostring(follow))
+        AutoTarget.checkChaseMode(g_game.getAttackingCreature())
       end
     })
 
