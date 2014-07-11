@@ -220,9 +220,9 @@ Panel
           end
 
       CheckBox
-        id: SettingAlarm
-        !text: tr('Alarm')
-        !tooltip: tr('Play a sound alert when a creature appears.')
+        id: SettingFollow
+        !text: tr('Follow')
+        !tooltip: tr('Follow this creature when targeting.')
         anchors.left: prev.right
         anchors.right: parent.right
         anchors.top: prev.top
@@ -230,7 +230,7 @@ Panel
         @onCheckChange: |
           local target = TargetsModule.getSelectedTarget()
           if target then
-            target:setAlarm(self:isChecked())
+            target:setFollow(self:isChecked())
           end
 
   HorizontalSeparator

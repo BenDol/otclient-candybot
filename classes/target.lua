@@ -147,14 +147,14 @@ end
 
 Target = newclass("Target")
 
-Target.create = function(name, priority, settings, loot, alarm)
+Target.create = function(name, priority, settings, loot, follow)
   local target = Target.internalCreate()
   
   target.name = name or ""
   target.priority = priority or 0
   target.settings = settings or {}
-  target.loot = loot or true
-  target.alarm = alarm
+  target.loot = loot ~= nil and loot or true
+  target.follow = follow ~= nil and follow or true
   
   return target
 end
@@ -227,16 +227,16 @@ function Target:setLoot(loot)
   end
 end
 
-function Target:getAlarm()
-  return self.alarm
+function Target:getFollow()
+  return self.follow
 end
 
-function Target:setAlarm(alarm)
-  local oldAlarm = self.alarm
-  if alarm ~= oldAlarm then
-    self.alarm = alarm
+function Target:setFollow(follow)
+  local oldFollow = self.follow
+  if follow ~= oldFollow then
+    self.follow = follow
 
-    signalcall(self.onAlarmChange, self, alarm)
+    signalcall(self.onFollowChange, self, follow)
   end
 end
 

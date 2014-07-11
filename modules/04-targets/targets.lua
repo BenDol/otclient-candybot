@@ -100,7 +100,7 @@ function TargetsModule.loadUI(panel)
     SettingModeList = panel:recursiveGetChildById('SettingModeList'),
     SettingModeText = panel:recursiveGetChildById('SettingModeText'),
     SettingLoot = panel:recursiveGetChildById('SettingLoot'),
-    SettingAlarm = panel:recursiveGetChildById('SettingAlarm'),
+    SettingFollow = panel:recursiveGetChildById('SettingFollow'),
     AddTargetText = panel:recursiveGetChildById('AddTargetText'),
     AddTargetButton = panel:recursiveGetChildById('AddTargetButton'),
     SaveNameEdit = panel:recursiveGetChildById('SaveNameEdit'),
@@ -227,7 +227,7 @@ end
 
 function TargetsModule.addNewTarget(name)
   if not TargetsModule.hasTarget(name) then
-    local target = Target.create(name, 1, {}, false, false)
+    local target = Target.create(name, 1, {})
 
     -- Target connections
 
@@ -245,8 +245,8 @@ function TargetsModule.addNewTarget(name)
     })
 
     connect(target, {
-      onAlarmChange = function(target, alarm)
-        print("["..target:getName().."] Alarm Changed: " .. tostring(alarm))
+      onFollowChange = function(target, follow)
+        print("["..target:getName().."] Follow Changed: " .. tostring(follow))
       end
     })
 
@@ -378,7 +378,7 @@ function TargetsModule.syncSetting()
   if selectedTarget then
     UI.SettingNameEdit:setText(selectedTarget:getName(), true)
     UI.SettingLoot:setChecked(selectedTarget:getLoot())
-    UI.SettingAlarm:setChecked(selectedTarget:getAlarm())
+    UI.SettingFollow:setChecked(selectedTarget:getFollow())
     UI.SettingModeList:setEnabled(true)
     UI.SettingStanceList:setEnabled(true)
 
@@ -400,7 +400,7 @@ function TargetsModule.syncSetting()
     UI.SettingHpRange1:setText("100", true)
     UI.SettingHpRange2:setText("0", true)
     UI.SettingLoot:setChecked(false)
-    UI.SettingAlarm:setChecked(false)
+    UI.SettingFollow:setChecked(false)
     UI.SettingModeText:setHeight(1)
     UI.SettingModeText:setVisible(false)
     UI.SettingModeList:setCurrentOption("No Mode", true)
