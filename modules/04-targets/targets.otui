@@ -172,6 +172,7 @@ Panel
         anchors.right: parent.right
         anchors.top: prev.bottom
         margin-top: 3
+        mouse-scroll: false
 
       Label
         id: SettingModeLabel
@@ -187,6 +188,7 @@ Panel
         anchors.right: parent.right
         anchors.top: prev.bottom
         margin-top: 3
+        mouse-scroll: false
 
       TextEdit
         id: SettingModeText
