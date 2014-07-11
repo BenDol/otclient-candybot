@@ -58,7 +58,7 @@ function TargetsModule.init()
 
   -- setup refresh event
   TargetsModule.refresh()
-  refreshEvent = cycleEvent(TargetsModule.refresh, 20000)
+  refreshEvent = cycleEvent(TargetsModule.refresh, 8000)
 
   -- register module
   Modules.registerModule(TargetsModule)
@@ -425,6 +425,14 @@ function TargetsModule.removeTarget(name)
   end
 end
 
+function TargetsModule.clearTargetList()
+  for k,t in pairs(UI.TargetList:getChildren()) do
+    if t:getId() ~= "new" then
+      TargetsModule.removeTarget(t:getText())
+    end
+  end
+end
+
 function TargetsModule.syncSetting()
   if selectedTarget then
     UI.SettingNameEdit:setText(selectedTarget:getName(), true)
@@ -597,7 +605,7 @@ function TargetsModule.loadTargets(file, force)
   print(tostring(config))
   if config then
     local loadFunc = function()
-      UI.TargetList:destroyChildren()
+      TargetsModule.clearTargetList()
 
       local targets = parseTargets(config)
       for v,target in pairs(targets) do
