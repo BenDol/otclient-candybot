@@ -78,16 +78,21 @@ function MoveProcedure:tryMove()
   g_game.move(self.thing, self.position, self.thing:getCount())
   
   -- the move has been called schedule finish
-  self.tryMoveEvent = scheduleEvent(function() 
-    if self:isTimedOut() then return end
+  local wait = (g_game.getPing()*1.5)
+  if wait > 0 then
+    self.tryMoveEvent = scheduleEvent(function() 
+      if self:isTimedOut() then return end
 
-    -- TODO: Fix verification
-    if not self.verify or self:verifyMoved() then
-      self:finish()
-    else
-      self:tryMove()
-    end
-  end, (g_game.getPing()*1.5))
+      -- TODO: Fix verification
+      if not self.verify or self:verifyMoved() then
+        self:finish()
+      else
+        self:tryMove()
+      end
+    end, wait)
+  else
+    self:finish()
+  end
 end
 
 function MoveProcedure:verifyMoved()

@@ -8,7 +8,7 @@ end
 
 LootProcedure = extends(Procedure, "LootProcedure")
 
-LootProcedure.create = function(id, position, timeoutTicks)
+LootProcedure.create = function(id, position, corpse, timeoutTicks)
   local proc = LootProcedure.internalCreate()
 
   proc:setId(id) -- used for creature id
@@ -17,6 +17,7 @@ LootProcedure.create = function(id, position, timeoutTicks)
     perror(debug.traceback("position is not valid"))
   end
   proc.position = position
+  proc.corpse = corpse
 
   if timeoutTicks then
     proc:setTimeoutTicks(timeoutTicks)
@@ -102,6 +103,9 @@ function LootProcedure:start()
 end
 
 function LootProcedure:findCorpse()
+  if self.corpse and self.corpse:isContainer() then
+    return self.corpse
+  end
   local tile = g_map.getTile(self.position)
   local corpse = nil
   if tile then

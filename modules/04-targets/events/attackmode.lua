@@ -22,23 +22,29 @@ function AttackMode.onStopped()
   
 end
 
-function AttackMode.checkAttackMode()
-  -- temporary for testing
-  local text = TargetsModule.getAttackModeText()
-  if text and g_game.isAttacking() then
-    Helper.castSpell(g_game.getLocalPlayer(), text)
-  end
-end
-
 function AttackMode.Event(event)
-  -- Cannot continue if still attacking or looting
-  if g_game.isAttacking() or AutoLoot.isLooting() then
-    EventHandler.rescheduleEvent(TargetsModule.getModuleId(), 
-      event, Helper.safeDelay(500, 800))
-    return
+  -- Cannot continue if still attacking or in pz
+  local player = g_game.getLocalPlayer()
+  if not g_game.isAttacking() or player:hasState(PlayerStates.Pz) then
+    return Helper.safeDelay(300, 500)
+  end
+
+  local target = g_game.getAttackingCreature()
+  if target then
+    local setting = TargetsModule.getTargetSetting(target:getName(), 1)
+    if setting then
+      local attack = setting:getAttack()
+      if attack then
+        local words = attack:getWords()
+        if words then
+          Helper.castSpell(player, words)
+        end
+      end
+
+      -- TODO: multi actions
+    end
   end
 
   -- Keep the event live
-  EventHandler.rescheduleEvent(TargetsModule.getModuleId(), 
-    event, Helper.safeDelay(500, 800))
+  return Helper.safeDelay(300, 500)
 end

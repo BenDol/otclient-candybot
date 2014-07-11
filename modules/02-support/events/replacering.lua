@@ -13,8 +13,7 @@ function AutoReplaceRing.Event(event)
     
     local handPos = {['x'] = 65535, ['y'] = slot, ['z'] = 0}
     if player:getInventoryItem(slot) and player:getInventoryItem(slot):getCount() > 5 then
-      EventHandler.rescheduleEvent(SupportModule.getModuleId(), event, 10000)
-      return
+      return 10000
     end
 
     if item and not player:getInventoryItem(slot) then
@@ -22,6 +21,5 @@ function AutoReplaceRing.Event(event)
     end
   end
 
-  EventHandler.rescheduleEvent(SupportModule.getModuleId(), 
-    event, Helper.safeDelay(500, 1500))
+  return Helper.safeDelay(500, 1500)
 end

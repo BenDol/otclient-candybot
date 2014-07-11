@@ -25,9 +25,7 @@ function RuneMake.Event(event)
         end
 
         if reschedule then
-          EventHandler.rescheduleEvent(AfkModule.getModuleId(), 
-            event, Helper.safeDelay(3000, 9000))
-          return false
+          return Helper.safeDelay(3000, 9000)
         end
       end
     end
@@ -38,10 +36,7 @@ function RuneMake.Event(event)
     
     if not checkContainer and not g_game.isOfficialTibia() then
       scheduleEvent(function() g_game.talk(words) end, talkDelay)
-
-      EventHandler.rescheduleEvent(AfkModule.getModuleId(), 
-        event, Helper.safeDelay(3000, 9000))
-      return false
+      return Helper.safeDelay(3000, 9000)
     end
 
     local blankRune = player:getItem(Runes.blank) -- blank rune item
@@ -50,6 +45,5 @@ function RuneMake.Event(event)
     end
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), 
-    event, Helper.safeDelay(3000, 9000))
+  return Helper.safeDelay(3000, 9000)
 end

@@ -22,8 +22,7 @@ function AutoReplaceHands.Event(event)
     local handPos = {['x'] = 65535, ['y'] = hand, ['z'] = 0}
 
     if player:getInventoryItem(hand) and player:getInventoryItem(hand):getCount() > 5 then
-      EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, 10000)
-      return
+      return 10000
     end
 
     if item and not player:getInventoryItem(hand) then
@@ -31,6 +30,5 @@ function AutoReplaceHands.Event(event)
     end
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), 
-    event, Helper.safeDelay(500, 1500))
+  return Helper.safeDelay(500, 1500)
 end

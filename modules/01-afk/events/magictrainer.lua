@@ -9,7 +9,9 @@ MagicTrain = AfkModule.MagicTrain
 function MagicTrain.Event(event)
   if g_game.isOnline() then
     local player = g_game.getLocalPlayer()
-    if not player then return end
+    if player:hasState(PlayerStates.Pz) then
+      return Helper.safeDelay(8000, 12000)
+    end
 
     local manaRequired = AfkModule.getPanel():getChildById('MagicTrainManaRequired'):getValue()
     if player:getManaPercent() >= manaRequired then
@@ -18,6 +20,5 @@ function MagicTrain.Event(event)
     end
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), 
-    event, Helper.safeDelay(2000, 3000))
+  return Helper.safeDelay(2000, 3000)
 end

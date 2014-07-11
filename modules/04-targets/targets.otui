@@ -196,6 +196,14 @@ Panel
         margin-top: 6
         visible: false
         height: 1
+        @onTextChange: |
+          local setting = TargetsModule.getCurrentSetting()
+          if setting then
+            local attack = setting:getAttack()
+            if attack then
+              attack:setWords(self:getText())
+            end
+          end
 
       CheckBox
         id: SettingLoot

@@ -29,10 +29,21 @@ end
 function AutoLoot.onTargetDeath(creature)
   if AutoLoot.canLoot(creature) then
     local creatureId = creature:getId()
+    local creaturePos = creature:getPosition()
+    
     AutoLoot.lootList[creatureId] = {
       id = creatureId,
-      position = creature:getPosition()
+      position = creaturePos,
+      corpse = nil
     }
+
+    local tile = g_map.getTile(creaturePos)
+    if tile then
+      local topThing = tile:getTopThing()
+      if topThing and topThing:isContainer() then
+        AutoLoot.lootList[creatureId].corpse = topThing
+      end
+    end
   end
 end
 
@@ -88,7 +99,7 @@ function AutoLoot.lootNext()
 
   if data.loot and player:getFreeCapacity() > 0 then
     AutoLoot.lootProc = LootProcedure.create(data.creatureId, 
-      data.loot.position)
+      data.loot.position, data.loot.corpse)
     
     -- Loot procedure finished
     connect(AutoLoot.lootProc, { onFinished = function(id)
@@ -155,9 +166,7 @@ end
 function AutoLoot.Event(event)
   -- Cannot continue if still attacking or looting
   if g_game.isAttacking() or AutoLoot.isLooting() then
-    EventHandler.rescheduleEvent(TargetsModule.getModuleId(), 
-      event, Helper.safeDelay(500, 800))
-    return
+    return Helper.safeDelay(500, 800)
   end
 
   -- Try loot if not attacking still
@@ -166,6 +175,5 @@ function AutoLoot.Event(event)
   end
 
   -- Keep the event live
-  EventHandler.rescheduleEvent(TargetsModule.getModuleId(), 
-    event, Helper.safeDelay(500, 800))
+  return Helper.safeDelay(500, 800)
 end

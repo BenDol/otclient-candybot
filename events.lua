@@ -40,7 +40,7 @@ function EventHandler.registerEvent(moduleId, eventId, callback, state, bypass)
   local module = Modules.getModule(moduleId)
 
   local event = CandyEvent.create(eventId, addEvent(function()
-    if CandyBot.isEnabled() or bypass then callback(eventId) end
+    EventHandler.process(moduleId, eventId, callback, nil, bypass) 
   end), callback, state)
 
   module:addEvent(eventId, event)
@@ -69,18 +69,32 @@ function EventHandler.rescheduleEvent(moduleId, eventId, ticks, bypass)
     local module = Modules.getModule(moduleId)
 
     for k, event in pairs(module:getEvents()) do
-      if event then
-        if k == eventId then
-          module:removeEvent(k)
+      if event and k == eventId then
+        module:removeEvent(eventId)
 
-          local callback = event.callback
-          event:setEvent(scheduleEvent(function() 
-            if CandyBot.isEnabled() or bypass then callback(k) end
-          end, ticks))
+        local callback = event.callback
+        event:setEvent(scheduleEvent(function() 
+          EventHandler.process(moduleId, eventId, callback, ticks, bypass) 
+        end, ticks))
 
-          module:addEvent(k, event)
-        end
+        module:addEvent(eventId, event)
       end
+    end
+  end
+end
+
+function EventHandler.process(moduleId, eventId, callback, ticks, bypass)
+  if CandyBot.isEnabled() or bypass then
+    local newTicks, newBypass = callback(eventId)
+    if not newTicks or type(newTicks) ~= "number" and newTicks < 1 then
+      newTicks = ticks
+    end
+    if not newBypass or type(newBypass) ~= "boolean" then
+      newBypass = bypass
+    end
+
+    if newTicks then
+      EventHandler.rescheduleEvent(moduleId, eventId, newTicks, newBypass)
     end
   end
 end

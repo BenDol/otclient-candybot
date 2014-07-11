@@ -43,7 +43,7 @@ function CreatureAlert.Event(event)
     CreatureAlert.stopAlert()
   end
 
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, 800)
+  return 800
 end
 
 function CreatureAlert.alert()

@@ -15,28 +15,11 @@ AutoTarget.creatureData = {}
 function AutoTarget.init()
   connect(Creature, { onAppear = AutoTarget.addCreature })
   connect(TargetsModule, { onAddTarget = AutoTarget.scan })
-  connect(g_game, { onAttackingCreatureChange = AutoTarget.targetChanged })
 end
 
 function AutoTarget.terminate()
   disconnect(Creature, { onAppear = AutoTarget.addCreature })
   disconnect(TargetsModule, { onAddTarget = AutoTarget.scan })
-  disconnect(g_game, { onAttackingCreatureChange = AutoTarget.targetChanged })
-end
-
-function AutoTarget.targetChanged(creature, oldCreature)
-  AutoTarget.currentTarget = creature
-
-  if AutoTarget.currentTarget then
-    connect(AutoTarget.currentTarget, {
-      onDeath = function(creature)
-        local t = AutoTarget.currentTarget
-        if t and t:getId() == creature:getId() then
-          AutoTarget.currentTarget = nil
-        end
-      end
-    })
-  end
 end
 
 function AutoTarget.hasTargets()
@@ -132,11 +115,10 @@ function AutoTarget.Event(event)
   -- it and also add a fail safe timeout mechanism.
   -- See: https://github.com/BenDol/otclient-candybot/issues/20
 
-  -- Cannot continue if still attacking or looting
-  if g_game.isAttacking() then
-    EventHandler.rescheduleEvent(TargetsModule.getModuleId(), 
-      event, Helper.safeDelay(600, 2000))
-    return
+  -- Cannot continue if still attacking or is in pz
+  local player = g_game.getLocalPlayer()
+  if g_game.isAttacking() or player:hasState(PlayerStates.Pz) then
+    return Helper.safeDelay(600, 2000)
   end
 
   -- Find a valid target to attack
@@ -151,6 +133,5 @@ function AutoTarget.Event(event)
   end
 
   -- Keep the event live
-  EventHandler.rescheduleEvent(TargetsModule.getModuleId(), 
-    event, Helper.safeDelay(600, 1400))
+  return Helper.safeDelay(600, 1400)
 end

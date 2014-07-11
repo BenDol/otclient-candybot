@@ -16,7 +16,7 @@ function AutoHaste.DisconnectListener(listener)
 end
 
 function AutoHaste.check(player, states, oldStates, tries)
-  if not player:hasState(PlayerStates.Haste, states) then
+  if not player:hasState(PlayerStates.Haste, states) and not player:hasState(PlayerStates.Pz, states) then
     AutoHaste.execute(player, tries)
   end
 end

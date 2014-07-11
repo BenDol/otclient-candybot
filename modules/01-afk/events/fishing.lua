@@ -34,6 +34,5 @@ function AutoFishing.Event(event)
       end
     end
   end
-  EventHandler.rescheduleEvent(AfkModule.getModuleId(), 
-    event, Helper.safeDelay(2000, 5000))
+  return Helper.safeDelay(2000, 5000)
 end

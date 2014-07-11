@@ -7,10 +7,10 @@ AfkModule.AutoEat = {}
 AutoEat = AfkModule.AutoEat
 
 function AutoEat.Event(event)
-  if not g_game.isOnline() then
-    return
-  end
   local player = g_game.getLocalPlayer()
+  if player:hasState(PlayerStates.Pz) then
+    return Helper.safeDelay(6000, 12000)
+  end
 
   local foodOption, food = AfkModule.getPanel():getChildById('AutoEatSelect'):getText(), nil
   if foodOption == 'Any' then
@@ -29,9 +29,9 @@ function AutoEat.Event(event)
     if player:getRegenerationTime() < 600 then
       Helper.safeUseInventoryItem(food)
     end
-    EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(2000, 7000))
+    return Helper.safeDelay(2000, 7000)
   else
     Helper.safeUseInventoryItem(food)
-    EventHandler.rescheduleEvent(AfkModule.getModuleId(), event, Helper.safeDelay(6000, 12000))
+    return Helper.safeDelay(6000, 12000)
   end
 end

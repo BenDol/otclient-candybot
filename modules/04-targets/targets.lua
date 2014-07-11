@@ -390,6 +390,9 @@ function TargetsModule.syncSetting()
       local attack = currentSetting:getAttack()
       if attack then
         TargetsModule.syncAttackSetting(attack)
+      else
+        UI.SettingModeText:setVisible(false)
+        UI.SettingModeList:setCurrentOption("No Mode", true)
       end
     end
   else
@@ -451,6 +454,11 @@ end
 
 function TargetsModule.hasTarget(name)
   return TargetsModule.getTarget(name) ~= nil
+end
+
+function TargetsModule.getTargetSetting(name, index)
+  local target = TargetsModule.getTarget(name)
+  return target and target:getSetting(index) or nil
 end
 
 function TargetsModule.saveTargets(file)
