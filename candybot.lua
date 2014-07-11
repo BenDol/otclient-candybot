@@ -190,21 +190,15 @@ function CandyBot.changeOption(key, state, loading)
   end
 
   if g_game.isOnline() then
-    Modules.notifyChange(key, state)
-
     local panel = CandyBot.window
 
     if loading then
+      local widget
       for k, p in pairs(Modules.getPanels()) do
-        if p:getChildById(key) ~= nil then
-          panel = p
-        end
+        widget = p:recursiveGetChildById(key)
+        if widget then break end
       end
-
-      local widget = panel:getChildById(key)
-      if not widget then
-        return
-      end
+      if not widget then print("no widget found") return end
 
       local style = widget:getStyle().__class
 
@@ -219,8 +213,14 @@ function CandyBot.changeOption(key, state, loading)
       elseif style == 'UIScrollBar' then
         local value = tonumber(state)
         if value then widget:setValue(value) end
+      elseif style == 'UIScrollArea' then
+        local child = widget:getChildById(state)
+        if child then print("found child") widget:focusChild(child, MouseFocusReason) end
       end
     end
+
+    Modules.notifyChange(key, state)
+
     local char = g_game.getCharacterName()
 
     if CandyBot.options[char] == nil then

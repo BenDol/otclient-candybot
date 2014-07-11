@@ -18,7 +18,8 @@ TargetsModule.dependencies = {
 --[[ Default Options ]]
 
 TargetsModule.options = {
-  ['AutoTarget'] = false
+  ['AutoTarget'] = false,
+  ['LoadList'] = ''
 }
 
 --[[ Register Events ]]

@@ -28,7 +28,6 @@ function CandyConfig:parseNode(node)
   for k,v in pairs(node) do
     local t = type(v)
     if t ~= "function" and t ~= "userdata" and t ~= "table" then
-      print(tostring(k).." | "..tostring(v))
       self[k] = v
     end
   end

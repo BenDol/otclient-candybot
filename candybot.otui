@@ -5,7 +5,11 @@ BotOptionCheckBox < CheckBox
   @onCheckChange: CandyBot.changeOption(self:getId(), self:isChecked())
 
 BotOptionTextList < TextList
-  @onCheckChange: CandyBot.changeOption(self:getId(), self:isChecked())
+  @onChildFocusChange: |
+    local focusedChild = self:getFocusedChild()
+    if focusedChild then
+      CandyBot.changeOption(self:getId(), focusedChild:getText())
+    end
 
 BotOptionHorizontalScrollBar < HorizontalScrollBar
   @onValueChange: CandyBot.changeOption(self:getId(), self:getValue())

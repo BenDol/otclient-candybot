@@ -15,6 +15,7 @@ local targetsDir = CandyBot.getWriteDir().."/targets"
 local selectedTarget
 local currentSetting
 local refreshEvent
+local loadListIndex
 
 local saveOverWindow
 local loadWindow
@@ -157,9 +158,11 @@ function TargetsModule.bindHandlers()
     onChildFocusChange = function(self, focusedChild)
         if focusedChild == nil then 
           UI.LoadButton:setEnabled(false)
+          loadListIndex = nil
         else
           UI.LoadButton:setEnabled(true)
           UI.SaveNameEdit:setText(string.gsub(focusedChild:getText(), ".otml", ""))
+          loadListIndex = UI.LoadList:getChildIndex(focusedChild)
         end
       end
     })
@@ -214,6 +217,12 @@ function TargetsModule.onStopEvent(eventId)
     TargetsModule.AutoLoot.onStopped()
   elseif eventId == TargetsModule.attackMode then
     TargetsModule.AttackMode.onStopped()
+  end
+end
+
+function TargetsModule.onNotify(key, state)
+  if key == "LoadList" then
+    TargetsModule.loadTargets(state, true)
   end
 end
 
@@ -507,7 +516,7 @@ function TargetsModule.addFile(file)
   local item = g_ui.createWidget('ListRowComplex', UI.LoadList)
   item:setText(file)
   item:setTextAlign(AlignLeft)
-  item:setId(#UI.LoadList:getChildren()+1)
+  item:setId(file)
 
   local removeButton = item:getChildById('remove')
   connect(removeButton, {
@@ -546,6 +555,7 @@ function TargetsModule.refresh()
   for _,file in pairs(files) do
     TargetsModule.addFile(file)
   end
+  UI.LoadList:focusChild(UI.LoadList:getChildByIndex(loadListIndex))
 end
 
 function TargetsModule.saveTargets(file)
@@ -580,35 +590,48 @@ function TargetsModule.saveTargets(file)
   end
 end
 
-function TargetsModule.loadTargets(file)
+function TargetsModule.loadTargets(file, force)
   print("TargetsModule.loadTargets("..file..")")
   local path = targetsDir.."/"..file
   local config = g_configs.load(path)
   print(tostring(config))
-  if config and not loadWindow then
-    local msg = "Would you like to load "..file.."?"
-
-    local yesCallback = function()
+  if config then
+    local loadFunc = function()
       UI.TargetList:destroyChildren()
 
       local targets = parseTargets(config)
       for v,target in pairs(targets) do
         if target then TargetsModule.addTarget(target) end
       end
+      UI.TargetList:focusNextChild()
 
-      loadWindow:destroy()
-      loadWindow=nil
+      if not force then
+        CandyBot.changeOption(UI.LoadList:getId(), file)
+      end
     end
 
-    local noCallback = function()
-      loadWindow:destroy()
-      loadWindow=nil
-    end
+    if force then
+      loadFunc()
+    elseif not loadWindow then
+      local msg = "Would you like to load "..file.."?"
 
-    loadWindow = displayGeneralBox(tr('Load Targets'), tr(msg), {
-      { text=tr('Yes'), callback = yesCallback},
-      { text=tr('No'), callback = noCallback},
-      anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
+      local yesCallback = function()
+        loadFunc()
+
+        loadWindow:destroy()
+        loadWindow=nil
+      end
+
+      local noCallback = function()
+        loadWindow:destroy()
+        loadWindow=nil
+      end
+
+      loadWindow = displayGeneralBox(tr('Load Targets'), tr(msg), {
+        { text=tr('Yes'), callback = yesCallback},
+        { text=tr('No'), callback = noCallback},
+        anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
+    end
   end
 end
 
@@ -626,7 +649,7 @@ function writeTargets(config)
   config:setNode('Targets', targets)
   config:save()
 
-  print("Saved "..tostring(#targets) .." targets to "..config:getFileName())
+  print("Saved "..tostring(#targetObjs) .." targets to "..config:getFileName())
 end
 
 function parseTargets(config)
@@ -637,14 +660,12 @@ function parseTargets(config)
   -- loop each target node
   local index = 1
   for k,v in pairs(config:getNode("Targets")) do
-    print(tostring(k).." | " .. tostring(v))
     local target = Target.create()
     target:parseNode(v)
     targets[index] = target
     index = index + 1
   end
 
-  print(table.tostring(targets))
   return targets
 end
 
