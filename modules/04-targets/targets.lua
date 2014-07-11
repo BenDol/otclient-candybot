@@ -14,10 +14,12 @@ local UI = {}
 local targetsDir = CandyBot.getWriteDir().."/targets"
 local selectedTarget
 local currentSetting
+local refreshEvent
 
 local saveOverWindow
 local loadWindow
 local removeTargetWindow
+local removeFileWindow
 
 local AttackModes = {
   None = "No Mode",
@@ -53,6 +55,10 @@ function TargetsModule.init()
     g_resources.makeDir(targetsDir)
   end
 
+  -- setup refresh event
+  TargetsModule.refresh()
+  refreshEvent = cycleEvent(TargetsModule.refresh, 20000)
+
   -- register module
   Modules.registerModule(TargetsModule)
 
@@ -71,6 +77,11 @@ function TargetsModule.terminate()
   g_keyboard.unbindKeyPress('Down', UI.TargetsPanel)
 
   TargetsModule.unloadUI()
+
+  if refreshEvent then
+    refreshEvent:cancel()
+    refreshEvent = nil
+  end
 
   -- Event terminates
   AutoTarget.terminate()
@@ -133,12 +144,25 @@ function TargetsModule.bindHandlers()
       selectedTarget = nil
       if focusedChild:getId() ~= "new" then
         selectedTarget = TargetsModule.getTarget(focusedChild:getText())
-        TargetsModule.setCurrentSetting(selectedTarget:getSetting(1))
+        if selectedTarget then
+          TargetsModule.setCurrentSetting(selectedTarget:getSetting(1))
+        end
       else
         TargetsModule.syncSetting()
       end
     end
   })
+
+  connect(UI.LoadList, {
+    onChildFocusChange = function(self, focusedChild)
+        if focusedChild == nil then 
+          UI.LoadButton:setEnabled(false)
+        else
+          UI.LoadButton:setEnabled(true)
+          UI.SaveNameEdit:setText(string.gsub(focusedChild:getText(), ".otml", ""))
+        end
+      end
+    })
 
   connect(UI.SettingNameEdit, {
     onTextChange = function(self, text, oldText)
@@ -229,6 +253,19 @@ function TargetsModule.addNewTarget(name)
   if not TargetsModule.hasTarget(name) then
     local target = Target.create(name, 1, {})
 
+    TargetsModule.addTarget(target)
+
+    -- Add first setting
+    TargetsModule.addTargetSetting(target, TargetSetting.create())
+
+    signalcall(TargetsModule.onAddNewTarget, target)
+    return target
+  end
+end
+
+function TargetsModule.addTarget(target)
+  if not TargetsModule.hasTarget(name) then
+
     -- Target connections
 
     connect(target, {
@@ -257,10 +294,10 @@ function TargetsModule.addNewTarget(name)
       end
     })
 
-    -- Add first setting
-    TargetsModule.addTargetSetting(target, TargetSetting.create(
-      0, "", nil, {100, 0}, {}
-    ))
+    -- ensure the settings are connected
+    for k,setting in pairs(target:getSettings()) do
+      TargetsModule.connectSetting(target, setting)
+    end
 
     TargetsModule.addToTargetList(target)
 
@@ -273,6 +310,12 @@ function TargetsModule.addTargetSetting(target, setting)
   if target:getClassName() ~= "Target" then return end
   if setting:getClassName() ~= "TargetSetting" then return end
 
+  TargetsModule.connectSetting(target, setting)
+
+  target:addSetting(setting)
+end
+
+function TargetsModule.connectSetting(target, setting)
   connect(setting, {
     onMovementChange = function(setting, movement, oldMovement)
       local target = setting:getTarget()
@@ -323,8 +366,6 @@ function TargetsModule.addTargetSetting(target, setting)
       print("["..target:getName().."]["..setting:getIndex().."] Index Changed: "..tostring(index))
     end
   })
-
-  target:addSetting(setting)
 end
 
 function TargetsModule.addToTargetList(target)
@@ -462,6 +503,51 @@ function TargetsModule.getTargetSetting(name, index)
   return target and target:getSetting(index) or nil
 end
 
+function TargetsModule.addFile(file)
+  local item = g_ui.createWidget('ListRowComplex', UI.LoadList)
+  item:setText(file)
+  item:setTextAlign(AlignLeft)
+  item:setId(#UI.LoadList:getChildren()+1)
+
+  local removeButton = item:getChildById('remove')
+  connect(removeButton, {
+    onClick = function(button)
+      if removeFileWindow then return end
+
+      local row = button:getParent()
+      local fileName = row:getText()
+
+      local yesCallback = function()
+        g_resources.deleteFile(targetsDir..'/'..fileName)
+        row:destroy()
+
+        removeFileWindow:destroy()
+        removeFileWindow=nil
+      end
+      local noCallback = function()
+        removeFileWindow:destroy()
+        removeFileWindow=nil
+      end
+
+      removeFileWindow = displayGeneralBox(tr('Delete'), 
+        tr('Delete '..fileName..'?'), {
+        { text=tr('Yes'), callback=yesCallback },
+        { text=tr('No'), callback=noCallback },
+        anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
+    end
+  })
+end
+
+function TargetsModule.refresh()
+  -- refresh the files
+  UI.LoadList:destroyChildren()
+
+  local files = g_resources.listDirectoryFiles(targetsDir)
+  for _,file in pairs(files) do
+    TargetsModule.addFile(file)
+  end
+end
+
 function TargetsModule.saveTargets(file)
   local path = targetsDir.."/"..file..".otml"
   local config = g_configs.load(path)
@@ -495,13 +581,20 @@ function TargetsModule.saveTargets(file)
 end
 
 function TargetsModule.loadTargets(file)
-  local path = targetsDir.."/"..file..".otml"
+  print("TargetsModule.loadTargets("..file..")")
+  local path = targetsDir.."/"..file
   local config = g_configs.load(path)
+  print(tostring(config))
   if config and not loadWindow then
     local msg = "Would you like to load "..file.."?"
 
     local yesCallback = function()
-      parseTargets(config)
+      UI.TargetList:destroyChildren()
+
+      local targets = parseTargets(config)
+      for v,target in pairs(targets) do
+        if target then TargetsModule.addTarget(target) end
+      end
 
       loadWindow:destroy()
       loadWindow=nil
@@ -524,17 +617,16 @@ end
 function writeTargets(config)
   if not config then return end
 
-  local targetClasses = TargetsModule.getTargets()
+  local targetObjs = TargetsModule.getTargets()
   local targets = {}
 
-  print(#targetClasses)
-  for k,v in pairs(targetClasses) do
-    local node = v:toNode()
-    table.insert(targets, node)
-    table.tostring(node)
+  for k,v in pairs(targetObjs) do
+    targets[v:getName()] = v:toNode()
   end
-  config.setNode('Targets', targets)
+  config:setNode('Targets', targets)
   config:save()
+
+  print("Saved "..tostring(#targets) .." targets to "..config:getFileName())
 end
 
 function parseTargets(config)
@@ -542,8 +634,17 @@ function parseTargets(config)
 
   local targets = {}
 
-  --
+  -- loop each target node
+  local index = 1
+  for k,v in pairs(config:getNode("Targets")) do
+    print(tostring(k).." | " .. tostring(v))
+    local target = Target.create()
+    target:parseNode(v)
+    targets[index] = target
+    index = index + 1
+  end
 
+  print(table.tostring(targets))
   return targets
 end
 

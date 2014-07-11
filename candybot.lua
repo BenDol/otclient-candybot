@@ -24,7 +24,7 @@ local botButton
 local botTabBar
 
 local enabled = false
-local writeDir = "candybot"
+local writeDir = "/candybot"
 
 local function setupDefaultOptions()
   for _, module in pairs(Modules.getOptions()) do

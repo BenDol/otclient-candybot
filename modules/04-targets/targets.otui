@@ -262,14 +262,14 @@ Panel
       padding: 1
       focusable: false
       vertical-scrollbar: LoadSettingScrollBar
-      width: 150
+      width: 140
       height: 80
 
     VerticalScrollBar
       id: LoadSettingScrollBar
       anchors.top: LoadList.top
       anchors.bottom: LoadList.bottom
-      anchors.right: LoadList.right
+      anchors.left: LoadList.right
       step: 14
       pixels-scroll: true
 
@@ -281,19 +281,25 @@ Panel
       anchors.right: LoadList.right
       margin-top: 3
       enabled: false
+      @onClick: |
+        local parent = self:getParent()
+        local focusedChild = parent:getChildById('LoadList'):getFocusedChild()
+        if focusedChild then
+          TargetsModule.loadTargets(focusedChild:getText())
+        end
 
     Label
       id: NewLabel
       !text: tr('Name:')
-      anchors.top: LoadList.top
-      anchors.left: LoadList.right
+      anchors.top: LoadSettingScrollBar.top
+      anchors.left: LoadSettingScrollBar.right
       width: 35 
       margin-top: 2
       margin-left: 6
 
     TextEdit
       id: SaveNameEdit
-      anchors.top: LoadList.top
+      anchors.top: LoadSettingScrollBar.top
       anchors.left: prev.right
       anchors.right: parent.right
       margin-left: 6

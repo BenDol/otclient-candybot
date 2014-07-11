@@ -2,8 +2,11 @@
   @Authors: Ben Dol (BeniS)
   @Details: Attack class for auto attack logic.
 ]]
+if not CandyConfig then
+  dofile("candyconfig.lua")
+end
 
-Attack = newclass("Attack")
+Attack = extends(CandyConfig, "Attack")
 
 Attack.create = function(type, words, item, ticks)
   local atk = Attack.internalCreate()
@@ -52,3 +55,16 @@ end
 
 -- methods
 
+function Attack:toNode()
+  local node = CandyConfig.toNode(self)
+
+  -- complex nodes
+
+  return node
+end
+
+function Attack:parseNode(node)
+  CandyConfig.parseNode(self, node)
+
+  -- complex parse
+end

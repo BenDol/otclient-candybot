@@ -3,10 +3,13 @@
   @Details: Target setting class that represents a 
             target logic setting.
 ]]
+if not CandyConfig then
+  dofile("candyconfig.lua")
+end
 
-TargetSetting = newclass("TargetSetting")
+TargetSetting = extends(CandyConfig, "TargetSetting")
 
-TargetSetting.create = function(movement, stance, attack, range, equip, target)
+TargetSetting.create = function(target, movement, stance, attack, range, equip)
   local setting = TargetSetting.internalCreate()
 
   setting.movement = movement or 0
@@ -133,19 +136,42 @@ function TargetSetting:isIndexValid(index)
 end
 
 
-function TargetSetting.toNode(setting)
-  local node = {}
-  for k,v in pairs(setting) do
-    if type(v) ~= "function" then
-      node[k] = v
-    end
+function TargetSetting:toNode()
+  local node = CandyConfig.toNode(self)
+  
+  -- complex nodes
+
+  node.range = self.range
+  node.equip = self.equip
+
+  if self.attack then
+    node.attack = self.attack:toNode()
   end
   return node
 end
 
+function TargetSetting:parseNode(node)
+  CandyConfig.parseNode(self, node)
+
+  -- complex parse
+
+  if node.range then
+    for k,v in pairs(node.range) do
+      self.range[tonumber(k)] = v
+    end
+  end
+  if node.equip then
+    self.equip = node.equip
+  end
+  if node.attack then
+    self.attack = Attack.create()
+    self.attack:parseNode(node.attack)
+  end
+end
+
 --[[ Target Class]]
 
-Target = newclass("Target")
+Target = extends(CandyConfig, "Target")
 
 Target.create = function(name, priority, settings, loot, follow)
   local target = Target.internalCreate()
@@ -243,20 +269,32 @@ end
 -- methods
 
 function Target:toNode()
-  local node = {}
-  for k,v in pairs(self) do
-    print(tostring(k) .. " | " .. tostring(v))
-    local t = type(v)
-    print(t)
-    if t ~= "function" and t ~= "userdata" then
-      -- check for metatables
-      if t == "table" then
-        for _,d in pairs(v) do
-          print(type(d))
-        end
+  local node = CandyConfig.toNode(self)
+  
+  -- complex nodes
+
+  if self.settings then
+    node.settings = {}
+    for i,setting in pairs(self.settings) do
+      if setting then
+        node.settings[i] = setting:toNode()
       end
-      node[k] = v
     end
   end
   return node
+end
+
+function Target:parseNode(node)
+  CandyConfig.parseNode(self, node)
+
+  -- complex parse
+
+  if node.settings then
+    self.settings = {}
+    for k,v in pairs(node.settings) do
+      local setting = TargetSetting.create(self)
+      setting:parseNode(v)
+      self.settings[tonumber(k)] = setting
+    end
+  end
 end
