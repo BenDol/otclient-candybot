@@ -322,13 +322,6 @@ function TargetsModule.addTarget(target)
     })
 
     connect(target, {
-      onFollowChange = function(target, follow)
-        print("["..target:getName().."] Follow Changed: " .. tostring(follow))
-        AutoTarget.checkChaseMode(g_game.getAttackingCreature())
-      end
-    })
-
-    connect(target, {
       onLootChange = function(target, loot)
         print("["..target:getName().."] Loot Changed: " .. tostring(loot))
       end
@@ -398,6 +391,13 @@ function TargetsModule.connectSetting(target, setting)
     onEquipChange = function(setting, equip, oldEquip)
       local target = setting:getTarget()
       print("["..target:getName().."]["..setting:getIndex().."] Equip Changed: "..tostring(equip))
+    end
+  })
+
+  connect(setting, {
+    onFollowChange = function(setting, follow, oldFollow)
+      print("["..target:getName().."]["..setting:getIndex().."] Follow Changed: " .. tostring(follow))
+      AutoTarget.checkChaseMode(g_game.getAttackingCreature())
     end
   })
 
@@ -475,11 +475,11 @@ function TargetsModule.syncSetting()
   if selectedTarget then
     UI.SettingNameEdit:setText(selectedTarget:getName(), true)
     UI.SettingLoot:setChecked(selectedTarget:getLoot())
-    UI.SettingFollow:setChecked(selectedTarget:getFollow())
 
     if currentSetting then
       UI.SettingHpRange1:setText(currentSetting:getRange(1), true)
       UI.SettingHpRange2:setText(currentSetting:getRange(2), true)
+      UI.SettingFollow:setChecked(currentSetting:getFollow())
 
       UI.SettingLoot:setEnabled(true)
       UI.SettingFollow:setEnabled(true)

@@ -9,7 +9,7 @@ end
 
 TargetSetting = extends(CandyConfig, "TargetSetting")
 
-TargetSetting.create = function(target, movement, stance, attack, range, equip)
+TargetSetting.create = function(target, movement, stance, attack, range, equip, follow)
   local setting = TargetSetting.internalCreate()
 
   setting.movement = movement or 0
@@ -19,6 +19,7 @@ TargetSetting.create = function(target, movement, stance, attack, range, equip)
   setting.equip = equip or {}
   setting.target = target
   setting.index = index or 0
+  target.follow = follow ~= nil and follow or true
   
   return setting
 end
@@ -105,6 +106,19 @@ function TargetSetting:setEquip(equip)
   end
 end
 
+function TargetSetting:getFollow()
+  return self.follow
+end
+
+function TargetSetting:setFollow(follow)
+  local oldFollow = self.follow
+  if follow ~= oldFollow then
+    self.follow = follow
+
+    signalcall(self.onFollowChange, self, follow, oldFollow)
+  end
+end
+
 function TargetSetting:getTarget()
   return self.target
 end
@@ -173,14 +187,13 @@ end
 
 Target = extends(CandyConfig, "Target")
 
-Target.create = function(name, priority, settings, loot, follow)
+Target.create = function(name, priority, settings, loot)
   local target = Target.internalCreate()
   
   target.name = name or ""
   target.priority = priority or 0
   target.settings = settings or {}
   target.loot = loot ~= nil and loot or true
-  target.follow = follow ~= nil and follow or true
   
   return target
 end
@@ -250,19 +263,6 @@ function Target:setLoot(loot)
     self.loot = loot
 
     signalcall(self.onLootChange, self, loot, oldLoot)
-  end
-end
-
-function Target:getFollow()
-  return self.follow
-end
-
-function Target:setFollow(follow)
-  local oldFollow = self.follow
-  if follow ~= oldFollow then
-    self.follow = follow
-
-    signalcall(self.onFollowChange, self, follow, oldFollow)
   end
 end
 

@@ -80,10 +80,22 @@ function AutoTarget.checkChaseMode(target)
   if not target then return end
   local t = TargetsModule.getTarget(target:getName())
   if t then
-    if t:getFollow() then
+    local setting = t:getSetting(1)
+    if setting:getFollow() then
       g_game.setChaseMode(ChaseOpponent)
     else
       g_game.setChaseMode(DontChase)
+    end
+  end
+end
+
+function AutoTarget.checkStance(target)
+  if not target then return end
+  local t = TargetsModule.getTarget(target:getName())
+  if t then
+    local setting = t:getSetting(1)
+    if setting then
+      g_game.setFightMode(setting:getStance())
     end
   end
 end
@@ -142,6 +154,7 @@ function AutoTarget.Event(event)
     end
 
     AutoTarget.checkChaseMode(target)
+    AutoTarget.checkStance(target)
 
     g_game.attack(target)
   end

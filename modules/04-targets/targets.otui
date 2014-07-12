@@ -295,9 +295,9 @@ Panel
         anchors.bottom: SettingLoot.bottom
         width: 55
         @onCheckChange: |
-          local target = TargetsModule.getSelectedTarget()
-          if target then
-            target:setFollow(self:isChecked())
+          local setting = TargetsModule.getCurrentSetting()
+          if setting then
+            setting:setFollow(self:isChecked())
           end
 
       FightOffensiveBox
