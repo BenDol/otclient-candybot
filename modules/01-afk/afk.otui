@@ -151,7 +151,7 @@ Panel
     anchors.left: prev.right
     anchors.top: prev.top
     margin-left: 10
-    @onClick: AfkModule.startChooseReplaceItem()
+    @onClick: Helper.startChooseItem(AfkModule.onChooseReplaceItem)
 
   HorizontalSeparator
     anchors.left: parent.left

@@ -23,8 +23,8 @@ Panel
     padding: 1
     focusable: false
     vertical-scrollbar: TargetScrollBar
-    width: 140
-    height: 235
+    width: 130
+    height: 220
     auto-focus: first
 
   VerticalScrollBar
@@ -32,15 +32,24 @@ Panel
     anchors.top: TargetList.top
     anchors.bottom: TargetList.bottom
     anchors.left: TargetList.right
-    step: 14
+    step: 18
     pixels-scroll: true
+
+  Button
+    id: AdvancedButton
+    !text: tr('Advanced Settings')
+    anchors.top: TargetList.bottom
+    anchors.left: TargetList.left
+    anchors.right: TargetScrollBar.right
+    margin-top: 5
+    height: 23
 
   Panel
     id: SettingPanel
     anchors.left: TargetScrollBar.right
     anchors.right: parent.right
     anchors.top: parent.top
-    anchors.bottom: TargetList.bottom
+    anchors.bottom: AdvancedButton.bottom
     enabled: true
 
     Button
@@ -49,8 +58,8 @@ Panel
       anchors.left: parent.left
       anchors.top: parent.top
       margin-bottom: 5
-      width: 15
-      height: 15
+      width: 18
+      height: 19
 
     Button
       id: NewSettingButton
@@ -58,18 +67,17 @@ Panel
       anchors.right: NextSettingButton.left
       anchors.left: PrevSettingButton.right
       anchors.top: PrevSettingButton.top
-      margin-left: 8
-      margin-right: 8
-      width: 91
-      height: 15
+      anchors.bottom: PrevSettingButton.bottom
+      margin-left: 4
+      margin-right: 4
 
     Button
       id: NextSettingButton
       !text: tr('>')
       anchors.right: parent.right
       anchors.top: PrevSettingButton.top
-      width: 15
-      height: 15
+      anchors.bottom: PrevSettingButton.bottom
+      width: 18
 
     Panel
       anchors.top: PrevSettingButton.bottom
@@ -106,23 +114,28 @@ Panel
         id: SettingNameEdit
         anchors.top: prev.bottom
         anchors.left: prev.left
-        anchors.right: parent.right
+        width: 125
         margin-top: 3
 
       Label
         id: SettingHpRangeLabel
         text: Health Range
         !tooltip: tr('The minimum health percent required to target.')
-        anchors.top: prev.bottom
-        anchors.left: prev.left
-        margin-top: 5
+        anchors.top: SettingNameLabel.top
+        anchors.left: SettingHpRange1.left
 
-      TextEdit
+      SpinBox
         id: SettingHpRange1
-        anchors.top: prev.bottom
-        anchors.left: prev.left
-        width: 40
-        margin-top: 3
+        anchors.top: SettingNameEdit.top
+        anchors.left: SettingNameEdit.right
+        width: 32
+        height: 22
+        margin-left: 8
+        minimum: 1
+        maximum: 100
+        buttons: false
+        focusable: true
+        mouse-scroll: false
         @onTextChange: |
           local setting = TargetsModule.getCurrentSetting()
           if setting then
@@ -133,16 +146,21 @@ Panel
         !text: tr('to')
         anchors.top: prev.top
         anchors.left: prev.right
-        width: 20
-        margin-left: 7
-        margin-right: 3
+        width: 16
+        margin-left: 5
         margin-top: 3
 
-      TextEdit
+      SpinBox
         id: SettingHpRange2
         anchors.top: SettingHpRange1.top
         anchors.left: prev.right
-        width: 40
+        width: 32
+        height: 22
+        minimum: 0
+        maximum: 100
+        focusable: true
+        buttons: false
+        mouse-scroll: false
         @onTextChange: |
           local setting = TargetsModule.getCurrentSetting()
           if setting then
@@ -150,43 +168,70 @@ Panel
           end
 
       Label
-        text: %
-        anchors.top: prev.top
-        anchors.left: prev.right
-        width: 20
-        margin-left: 7
-        margin-right: 3
-        margin-top: 3
-
-      Label
-        id: SettingStanceLabel
-        !text: tr('Stance')
-        !tooltip: tr('The stance desired for this target.')
-        anchors.top: SettingHpRange1.bottom
-        anchors.left: SettingHpRange1.left
-        margin-top: 6
+        id: SettingMovementLabel
+        !text: tr('Movement')
+        !tooltip: tr('The movement desired for this target.')
+        anchors.top: SettingNameEdit.bottom
+        anchors.left: SettingNameEdit.left
+        margin-top: 5
 
       ComboBox
-        id: SettingStanceList
+        id: SettingMovementList
         anchors.left: prev.left
-        anchors.right: parent.right
         anchors.top: prev.bottom
+        width: 145
+        margin-top: 3
+        mouse-scroll: false
+
+      Label
+        id: SettingDangerLabel
+        !text: tr('Danger')
+        !tooltip: tr('The danger level of this targets setting.')
+        anchors.bottom: SettingDangerBox.top
+        anchors.left: SettingDangerBox.left
+        margin-bottom: 3
+
+      SpinBox
+        id: SettingDangerBox
+        anchors.top: SettingMovementList.top
+        anchors.left: SettingMovementList.right
+        anchors.right: parent.right
+        margin-left: 6
+        minimum: 1
+        maximum: 999999999
+        focusable: true
+        mouse-scroll: false
+        height: 22
+
+      Label
+        id: SettingStrategyLabel
+        !text: tr('Strategy')
+        !tooltip: tr('The strategy desired for this target.')
+        anchors.top: SettingMovementList.bottom
+        anchors.left: SettingMovementList.left
+        margin-top: 5
+
+      ComboBox
+        id: SettingStrategyList
+        anchors.left: prev.left
+        anchors.top: prev.bottom
+        anchors.right: parent.right
         margin-top: 3
         mouse-scroll: false
 
       Label
         id: SettingModeLabel
-        !text: tr('Attack Mode')
-        !tooltip: tr('The attack mode desired for this target.')
-        anchors.top: prev.bottom
-        anchors.left: prev.left
-        margin-top: 6
+        !text: tr('Attack')
+        !tooltip: tr('Set how we will attack the target.')
+        anchors.top: SettingStrategyList.bottom
+        anchors.left: SettingStrategyList.left
+        margin-top: 5
 
       ComboBox
         id: SettingModeList
-        anchors.left: prev.left
+        anchors.left: SettingModeLabel.left
         anchors.right: parent.right
-        anchors.top: prev.bottom
+        anchors.top: SettingModeLabel.bottom
         margin-top: 3
         mouse-scroll: false
 
@@ -195,7 +240,7 @@ Panel
         anchors.top: prev.bottom
         anchors.left: prev.left
         anchors.right: parent.right
-        margin-top: 6
+        margin-top: 5
         visible: false
         height: 1
         @onTextChange: |
@@ -207,14 +252,35 @@ Panel
             end
           end
 
+      Item
+        id: SettingModeItem
+        anchors.left: SettingModeList.left
+        anchors.top: SettingModeList.bottom
+        margin-top: 5
+        virtual: true
+        visible: false
+        height: 1
+
+      Button
+        id: SelectModeItem
+        !text: tr('Select Item')
+        width: 70
+        height: 1
+        visible: false
+        anchors.right: parent.right
+        anchors.left: prev.right
+        anchors.top: prev.top
+        margin-left: 10
+        @onClick: Helper.startChooseItem(TargetsModule.onChooseSettingItem)
+
       CheckBox
         id: SettingLoot
         !text: tr('Loot')
         !tooltip: tr('Loot this target when it dies.')
-        width: 50
-        anchors.left: prev.left
-        anchors.top: prev.bottom
-        margin-top: 6
+        width: 55
+        margin-left: 10
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
         @onCheckChange: |
           local target = TargetsModule.getSelectedTarget()
           if target then
@@ -225,15 +291,35 @@ Panel
         id: SettingFollow
         !text: tr('Follow')
         !tooltip: tr('Follow this creature when targeting.')
-        anchors.left: prev.right
-        anchors.right: parent.right
-        anchors.top: prev.top
-        margin-left: 5
+        anchors.left: SettingLoot.right
+        anchors.bottom: SettingLoot.bottom
+        width: 55
         @onCheckChange: |
           local target = TargetsModule.getSelectedTarget()
           if target then
             target:setFollow(self:isChecked())
           end
+
+      FightOffensiveBox
+        id: StanceOffensiveBox
+        !tooltip: tr('Attack target in offensive stance')
+        anchors.top: next.top
+        anchors.right: next.left
+        margin: 0 4 0 0
+
+      FightBalancedBox
+        id: StanceBalancedBox
+        !tooltip: tr('Attack target in balanced stance')
+        anchors.top: next.top
+        anchors.right: next.left
+        margin: 0 4 0 0
+
+      FightDefensiveBox
+        id: StanceDefensiveBox
+        !tooltip: tr('Attack target in defensive stance')
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        margin: 0 4 0 0
 
   HorizontalSeparator
     anchors.left: parent.left
@@ -264,7 +350,7 @@ Panel
       padding: 1
       focusable: false
       vertical-scrollbar: LoadSettingScrollBar
-      width: 140
+      width: 190
       height: 80
 
     VerticalScrollBar
@@ -277,7 +363,7 @@ Panel
 
     Button
       id: LoadButton
-      !text: tr('Load Targets')
+      !text: tr('Load Selected')
       anchors.top: LoadList.bottom
       anchors.left: LoadList.left
       anchors.right: LoadSettingScrollBar.right

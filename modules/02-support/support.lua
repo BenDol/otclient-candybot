@@ -59,73 +59,22 @@ end
 
 -- Item Selection Callbacks
 
-function SupportModule.onChooseHealthItem(self, mousePosition, mouseButton)
-  local item = nil
-  
-  if mouseButton == MouseLeftButton then
-    local clickedWidget = modules.game_interface.getRootPanel()
-      :recursiveGetChildByPos(mousePosition, false)
-  
-    if clickedWidget then
-      if clickedWidget:getClassName() == 'UIMap' then
-        local tile = clickedWidget:getTile(mousePosition)
-        
-        if tile then
-          local thing = tile:getTopMoveThing()
-          if thing then
-            item = thing:asItem()
-          end
-        end
-        
-      elseif clickedWidget:getClassName() == 'UIItem' and not clickedWidget:isVirtual() then
-        item = clickedWidget:getItem()
-      end
-    end
-  end
-
+function SupportModule.onChooseHealthItem(self, item)
   if item then
     Panel.CurrentHealthItem:setItemId(item:getId())
     CandyBot.changeOption('CurrentHealthItem', item:getId())
     CandyBot.show()
+    return true
   end
-
-  g_mouse.popCursor()
-  self:ungrabMouse()
-  self:destroy()
 end
 
-function SupportModule.onChooseManaItem(self, mousePosition, mouseButton)
-  local item = nil
-  if mouseButton == MouseLeftButton then
-    local clickedWidget = modules.game_interface.getRootPanel()
-      :recursiveGetChildByPos(mousePosition, false)
-  
-    if clickedWidget then
-      if clickedWidget:getClassName() == 'UIMap' then
-        local tile = clickedWidget:getTile(mousePosition)
-        
-        if tile then
-          local thing = tile:getTopMoveThing()
-          if thing then
-            item = thing:asItem()
-          end
-        end
-        
-      elseif clickedWidget:getClassName() == 'UIItem' and not clickedWidget:isVirtual() then
-        item = clickedWidget:getItem()
-      end
-    end
-  end
-
+function SupportModule.onChooseManaItem(self, item)
   if item then
     Panel.CurrentManaItem:setItemId(item:getId())
     CandyBot.changeOption('CurrentManaItem', item:getId())
     CandyBot.show()
+    return true
   end
-
-  g_mouse.popCursor()
-  self:ungrabMouse()
-  self:destroy()
 end
 
 return SupportModule

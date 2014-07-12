@@ -23,12 +23,6 @@ local loadWindow
 local removeTargetWindow
 local removeFileWindow
 
-local AttackModes = {
-  None = "No Mode",
-  SpellMode = "Spell Mode",
-  ItemMode = "Item Mode"
-}
-
 function TargetsModule.getPanel() return Panel end
 function TargetsModule.setPanel(panel) Panel = panel end
 function TargetsModule.getUI() return UI end
@@ -107,8 +101,6 @@ function TargetsModule.loadUI(panel)
     SettingHpRangeLabel = panel:recursiveGetChildById('SettingHpRangeLabel'),
     SettingHpRange1 = panel:recursiveGetChildById('SettingHpRange1'),
     SettingHpRange2 = panel:recursiveGetChildById('SettingHpRange2'),
-    SettingStanceLabel = panel:recursiveGetChildById('SettingStanceLabel'),
-    SettingStanceList = panel:recursiveGetChildById('SettingStanceList'),
     SettingModeLabel = panel:recursiveGetChildById('SettingModeLabel'),
     SettingModeList = panel:recursiveGetChildById('SettingModeList'),
     SettingModeText = panel:recursiveGetChildById('SettingModeText'),
@@ -120,12 +112,31 @@ function TargetsModule.loadUI(panel)
     SaveButton = panel:recursiveGetChildById('SaveButton'),
     LoadList = panel:recursiveGetChildById('LoadList'),
     LoadButton = panel:recursiveGetChildById('LoadButton'),
+    SettingModeItem = panel:recursiveGetChildById('SettingModeItem'),
+    SelectModeItem = panel:recursiveGetChildById('SelectModeItem'),
+    StanceOffensiveBox = panel:recursiveGetChildById('StanceOffensiveBox'),
+    StanceBalancedBox = panel:recursiveGetChildById('StanceBalancedBox'),
+    StanceDefensiveBox = panel:recursiveGetChildById('StanceDefensiveBox'),
+    AdvancedButton = panel:recursiveGetChildById('AdvancedButton'),
+    SettingMovementLabel = panel:recursiveGetChildById('SettingMovementLabel'),
+    SettingMovementList = panel:recursiveGetChildById('SettingMovementList'),
+    SettingDangerLabel = panel:recursiveGetChildById('SettingDangerLabel'),
+    SettingDangerBox = panel:recursiveGetChildById('SettingDangerBox'),
+    SettingStrategyLabel = panel:recursiveGetChildById('SettingStrategyLabel'),
+    SettingStrategyList = panel:recursiveGetChildById('SettingStrategyList'),
   }
 
   -- Setting Mode List
   UI.SettingModeList:addOption(AttackModes.None)
   UI.SettingModeList:addOption(AttackModes.SpellMode)
   UI.SettingModeList:addOption(AttackModes.ItemMode)
+
+  -- Stance radio group
+  UI.StanceRadioGroup = UIRadioGroup.create()
+  UI.StanceRadioGroup:addWidget(UI.StanceOffensiveBox)
+  UI.StanceRadioGroup:addWidget(UI.StanceBalancedBox)
+  UI.StanceRadioGroup:addWidget(UI.StanceDefensiveBox)
+  UI.StanceRadioGroup:selectWidget(UI.StanceOffensiveBox)
 end
 
 function TargetsModule.unloadUI()
@@ -156,7 +167,8 @@ function TargetsModule.bindHandlers()
   })
 
   connect(UI.LoadList, {
-    onChildFocusChange = function(self, focusedChild)
+    onChildFocusChange = function(self, focusedChild, unfocusedChild, reason)
+        if reason == ActiveFocusReason then return end
         if focusedChild == nil then 
           UI.LoadButton:setEnabled(false)
           loadListIndex = nil
@@ -188,18 +200,36 @@ function TargetsModule.bindHandlers()
           if text == AttackModes.SpellMode then
             local spell = Helper.getRandomVocationSpell(1, {1,4})
             if spell then
-              attack:setWords(spell.words)
+              attack:setWords(spells.words)
             else
               attack:setWords("<add spell>")
             end
           elseif text == AttackModes.ItemMode then
-            -- TODO
-            attack:setItem(0) 
+            attack:setItem(3155)
           end
           setting:setAttack(attack)
         end
       end
     end
+  })
+
+  connect(UI.StanceRadioGroup, { 
+    onSelectionChange = function(self, selectedButton)
+      if selectedButton == nil then return end
+      local buttonId = selectedButton:getId()
+      local stanceMode
+      if buttonId == UI.StanceOffensiveBox:getId() then
+        stanceMode = FightOffensive
+      elseif buttonId == UI.StanceBalancedBox:getId() then
+        stanceMode = FightBalanced
+      else
+        stanceMode = FightDefensive
+      end
+      -- Change the settings
+      if currentSetting then
+        currentSetting:setStance(stanceMode)
+      end
+    end 
   })
 
   g_keyboard.bindKeyPress('Up', function() 
@@ -238,7 +268,7 @@ function TargetsModule.selectTarget(target)
 
   local item = TargetsModule.getTargetListItem(target)
   if item then
-    UI.TargetList:focusChild(item)
+    UI.TargetList:focusChild(item, ActiveFocusReason)
   end
 end
 
@@ -337,12 +367,19 @@ function TargetsModule.connectSetting(target, setting)
     onStanceChange = function(setting, stance, oldStance)
       local target = setting:getTarget()
       print("["..target:getName().."]["..setting:getIndex().."] Stance Changed: " .. tostring(stance))
+      TargetsModule.syncStanceSetting(stance)
     end
   })
 
   connect(setting, {
     onAttackChange = function(setting, attack, oldAttack)
       local target = setting:getTarget()
+
+      connect(attack, {
+        onItemChange = function(atk, item, oldItem)
+          TargetsModule.syncAttackSetting(attack)
+        end
+      })
       print("["..target:getName().."]["..setting:getIndex().."] Attack Changed: " .. tostring(attack))
       print("onAttackChange")
       TargetsModule.syncAttackSetting(attack)
@@ -439,14 +476,28 @@ function TargetsModule.syncSetting()
     UI.SettingNameEdit:setText(selectedTarget:getName(), true)
     UI.SettingLoot:setChecked(selectedTarget:getLoot())
     UI.SettingFollow:setChecked(selectedTarget:getFollow())
-    UI.SettingModeList:setEnabled(true)
-    UI.SettingStanceList:setEnabled(true)
 
     if currentSetting then
       UI.SettingHpRange1:setText(currentSetting:getRange(1), true)
       UI.SettingHpRange2:setText(currentSetting:getRange(2), true)
-      --[[UI.SettingStanceList:
-      UI.SettingModeList:]]
+
+      UI.SettingLoot:setEnabled(true)
+      UI.SettingFollow:setEnabled(true)
+      UI.SettingModeList:setEnabled(true)
+      UI.SettingStrategyList:setEnabled(true)
+      UI.SettingMovementList:setEnabled(true)
+      UI.SettingDangerBox:setEnabled(true)
+      UI.SettingHpRange1:setEnabled(true)
+      UI.SettingHpRange2:setEnabled(true)
+      UI.StanceOffensiveBox:setEnabled(true)
+      UI.StanceDefensiveBox:setEnabled(true)
+      UI.StanceBalancedBox:setEnabled(true)
+      UI.NewSettingButton:setEnabled(true)
+      UI.NextSettingButton:setEnabled(true)
+      UI.PrevSettingButton:setEnabled(true)
+
+      TargetsModule.syncStanceSetting(currentSetting:getStance())
+
       local attack = currentSetting:getAttack()
       if attack then
         TargetsModule.syncAttackSetting(attack)
@@ -463,11 +514,37 @@ function TargetsModule.syncSetting()
     UI.SettingFollow:setChecked(false)
     UI.SettingModeText:setHeight(1)
     UI.SettingModeText:setVisible(false)
+    UI.SettingModeItem:setHeight(1)
+    UI.SettingModeItem:setVisible(false)
+    UI.SelectModeItem:setHeight(1)
+    UI.SelectModeItem:setVisible(false)
     UI.SettingModeList:setCurrentOption("No Mode", true)
+
+    UI.SettingLoot:setEnabled(false)
+    UI.SettingFollow:setEnabled(false)
     UI.SettingModeList:setEnabled(false)
-    --UI.SettingStanceList:setCurrentOption("No Mode", true)
-    UI.SettingStanceList:setEnabled(false)
+    UI.SettingStrategyList:setEnabled(false)
+    UI.SettingMovementList:setEnabled(false)
+    UI.SettingDangerBox:setEnabled(false)
+    UI.SettingHpRange1:setEnabled(false)
+    UI.SettingHpRange2:setEnabled(false)
+    UI.StanceOffensiveBox:setEnabled(false)
+    UI.StanceDefensiveBox:setEnabled(false)
+    UI.StanceBalancedBox:setEnabled(false)
+    UI.NewSettingButton:setEnabled(false)
+    UI.NextSettingButton:setEnabled(false)
+    UI.PrevSettingButton:setEnabled(false)
   end
+end
+
+function TargetsModule.syncStanceSetting(stanceMode)
+  local stanceWidget = UI.StanceDefensiveBox
+  if stanceMode == FightOffensive then
+    stanceWidget = UI.StanceOffensiveBox
+  elseif stanceMode == FightBalanced then
+    stanceWidget = UI.StanceBalancedBox
+  end
+  UI.StanceRadioGroup:selectWidget(stanceWidget, true)
 end
 
 function TargetsModule.syncAttackSetting(attack)
@@ -475,7 +552,7 @@ function TargetsModule.syncAttackSetting(attack)
 
   -- spell mode setup
   if attack:getWords() ~= "" then
-    UI.SettingModeText:setHeight(20)
+    UI.SettingModeText:setHeight(22)
     UI.SettingModeText:setVisible(true)
     UI.SettingModeText:setTooltip("Words of the spell you would like to cast")
     UI.SettingModeText:setText(attack:getWords())
@@ -486,9 +563,30 @@ function TargetsModule.syncAttackSetting(attack)
 
   -- item mode setup
   if attack:getItem() ~= 0 then
-    -- TODO
+    UI.SettingModeItem:setItemId(attack:getItem())
+    UI.SettingModeItem:setHeight(30)
+    UI.SettingModeItem:setVisible(true)
+    UI.SelectModeItem:setHeight(30)
+    UI.SelectModeItem:setVisible(true)
   else
-    -- TODO
+    UI.SettingModeItem:setHeight(1)
+    UI.SettingModeItem:setVisible(false)
+    UI.SelectModeItem:setHeight(1)
+    UI.SelectModeItem:setVisible(false)
+  end
+end
+
+function TargetsModule.onChooseSettingItem(self, item)
+  if item then
+    if currentSetting then
+      local attack = currentSetting:getAttack()
+      if attack then
+        attack:setItem(item:getId())
+      end
+    end
+
+    CandyBot.show()
+    return true
   end
 end
 
@@ -564,7 +662,7 @@ function TargetsModule.refresh()
   for _,file in pairs(files) do
     TargetsModule.addFile(file)
   end
-  UI.LoadList:focusChild(UI.LoadList:getChildByIndex(loadListIndex))
+  UI.LoadList:focusChild(UI.LoadList:getChildByIndex(loadListIndex), ActiveFocusReason)
 end
 
 function TargetsModule.saveTargets(file)
@@ -597,7 +695,11 @@ function TargetsModule.saveTargets(file)
 
     UI.SaveNameEdit:setText("")
   end
-  TargetsModule.addFile(file..".otml")
+
+  local formatedFile = file..".otml"
+  if not UI.LoadList:getChildById(formatedFile) then
+    TargetsModule.addFile(formatedFile)
+  end
 end
 
 function TargetsModule.loadTargets(file, force)

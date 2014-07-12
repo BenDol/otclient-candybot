@@ -41,13 +41,17 @@ function AttackMode.Event(event)
     if setting then
       local attack = setting:getAttack()
       if attack then
+        local type = attack:getType()
+        local item = attack:getItem()
         local words = attack:getWords()
-        if words then
+
+        -- TODO: multi actions decider/queue
+        if type == AttackModes.ItemMode and item > 0 then
+          Helper.safeUseInventoryItemWith(item, target)
+        elseif type == AttackModes.SpellMode and words and words ~= "" then
           Helper.castSpell(player, words)
         end
       end
-
-      -- TODO: multi actions
     end
   end
 

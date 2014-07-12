@@ -67,51 +67,13 @@ function AfkModule.onStopEvent(event)
   end
 end
 
-function AfkModule.startChooseReplaceItem()
-  local mouseGrabberWidget = g_ui.createWidget('UIWidget')
-  mouseGrabberWidget:setVisible(false)
-  mouseGrabberWidget:setFocusable(false)
-
-  connect(mouseGrabberWidget, { onMouseRelease = AfkModule.onChooseReplaceItemMouseRelease })
-  
-  mouseGrabberWidget:grabMouse()
-  g_mouse.pushCursor('target')
-
-  CandyBot.hide()
-end
-
-function AfkModule.onChooseReplaceItemMouseRelease(self, mousePosition, mouseButton)
-  local item = nil
-  
-  if mouseButton == MouseLeftButton then
-    local clickedWidget = modules.game_interface.getRootPanel()
-      :recursiveGetChildByPos(mousePosition, false)
-  
-    if clickedWidget then
-      if clickedWidget:getClassName() == 'UIMap' then
-        local tile = clickedWidget:getTile(mousePosition)
-        
-        if tile then
-          local thing = tile:getTopMoveThing()
-          if thing then
-            item = thing:asItem()
-          end
-        end
-      elseif clickedWidget:getClassName() == 'UIItem' and not clickedWidget:isVirtual() then
-        item = clickedWidget:getItem()
-      end
-    end
-  end
-
+function AfkModule.onChooseReplaceItem(self, item)
   if item then
     Panel.ItemToReplace:setItemId(item:getId())
     CandyBot.changeOption('ItemToReplace', item:getId())
     CandyBot.show()
+    return true
   end
-
-  g_mouse.popCursor()
-  self:ungrabMouse()
-  self:destroy()
 end
 
 function AfkModule.toggleAlertList()

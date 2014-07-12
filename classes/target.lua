@@ -13,7 +13,7 @@ TargetSetting.create = function(target, movement, stance, attack, range, equip)
   local setting = TargetSetting.internalCreate()
 
   setting.movement = movement or 0
-  setting.stance = stance or ""
+  setting.stance = stance or FightOffensive
   setting.attack = attack
   setting.range = range or {100, 0}
   setting.equip = equip or {}
@@ -249,7 +249,7 @@ function Target:setLoot(loot)
   if loot ~= oldLoot then
     self.loot = loot
 
-    signalcall(self.onLootChange, self, loot)
+    signalcall(self.onLootChange, self, loot, oldLoot)
   end
 end
 
@@ -262,7 +262,7 @@ function Target:setFollow(follow)
   if follow ~= oldFollow then
     self.follow = follow
 
-    signalcall(self.onFollowChange, self, follow)
+    signalcall(self.onFollowChange, self, follow, oldFollow)
   end
 end
 

@@ -26,7 +26,12 @@ function Attack:getType()
 end
 
 function Attack:setType(type)
-  self.type = type
+  local oldType = self.type
+  if type ~= oldType then
+    self.type = type
+
+    signalcall(self.onTypeChange, self, type, oldType)
+  end
 end
 
 function Attack:getWords()
@@ -34,7 +39,12 @@ function Attack:getWords()
 end
 
 function Attack:setWords(words)
-  self.words = words
+  local oldWords = self.words
+  if words ~= oldWords then
+    self.words = words
+
+    signalcall(self.onWordsChange, self, words, oldWords)
+  end
 end
 
 function Attack:getItem()
@@ -42,7 +52,12 @@ function Attack:getItem()
 end
 
 function Attack:setItem(item)
-  self.item = item
+  local oldItem = self.item
+  if item ~= oldItem then
+    self.item = item
+
+    signalcall(self.onItemChange, self, item, oldItem)
+  end
 end
 
 function Attack:getTicks()
@@ -50,7 +65,12 @@ function Attack:getTicks()
 end
 
 function Attack:setTicks(ticks)
-  self.ticks = ticks
+  local oldTicks = self.ticks
+  if ticks ~= oldTicks then
+    self.ticks = ticks
+
+    signalcall(self.onTicksChange, self, ticks, oldTicks)
+  end
 end
 
 -- methods

@@ -88,7 +88,7 @@ BotTabBarPanel < MoveableTabBarPanel
     anchors.right: parent.right
     padding-top: -6
     padding-bottom: -6
-    step: 27
+    step: 45
     pixels-scroll: true
 
 BotTabBarButton < MoveableTabBarButton
@@ -98,9 +98,7 @@ BotTabBarButton < MoveableTabBarButton
 MainWindow
   id: botWindow
   !text: tr('CandyBot')
-  size: 372 535
-  
-  @onEnter: CandyBot.hide()
+  size: 422 535
   @onEscape: CandyBot.hide()
 
   &save: true

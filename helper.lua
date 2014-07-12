@@ -147,7 +147,36 @@ function Helper.startChooseItem(releaseCallback)
   mouseGrabberWidget:setVisible(false)
   mouseGrabberWidget:setFocusable(false)
 
-  connect(mouseGrabberWidget, { onMouseRelease = releaseCallback })
+  connect(mouseGrabberWidget, { onMouseRelease = function(self, mousePosition, mouseButton)
+    local item = nil
+    if mouseButton == MouseLeftButton then
+      local clickedWidget = modules.game_interface.getRootPanel()
+        :recursiveGetChildByPos(mousePosition, false)
+    
+      if clickedWidget then
+        if clickedWidget:getClassName() == 'UIMap' then
+          local tile = clickedWidget:getTile(mousePosition)
+          
+          if tile then
+            local thing = tile:getTopMoveThing()
+            if thing then
+              item = thing:asItem()
+            end
+          end
+          
+        elseif clickedWidget:getClassName() == 'UIItem' and not clickedWidget:isVirtual() then
+          item = clickedWidget:getItem()
+        end
+      end
+    end
+    
+    if releaseCallback(self, item) then
+      -- revert mouse change
+      g_mouse.popCursor()
+      self:ungrabMouse()
+      self:destroy()
+    end
+  end })
   
   mouseGrabberWidget:grabMouse()
   g_mouse.pushCursor('target')

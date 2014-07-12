@@ -53,11 +53,6 @@ function init()
   botTabBar:setContentWidget(CandyBot.window:getChildById('botContent'))
   botTabBar:setTabSpacing(-1)
 
-  -- bind keys
-  g_keyboard.bindKeyDown('Ctrl+Shift+B', CandyBot.toggle)
-  g_keyboard.bindKeyPress('Tab', function() botTabBar:selectNextTab() end, CandyBot.window)
-  g_keyboard.bindKeyPress('Shift+Tab', function() botTabBar:selectPrevTab() end, CandyBot.window)
-
   -- setup resources
   if not g_resources.directoryExists(writeDir) then
     g_resources.makeDir(writeDir)
@@ -108,6 +103,9 @@ end
 
 function CandyBot.online()
   addEvent(CandyBot.loadOptions)
+
+  -- bind keys
+  g_keyboard.bindKeyDown('Ctrl+Shift+B', CandyBot.toggle)
 end
 
 function CandyBot.offline()
@@ -115,6 +113,7 @@ function CandyBot.offline()
 
   CandyBot.hide()
 
+  -- unbind keys
   g_keyboard.unbindKeyDown('Ctrl+Shift+B')
 end
 
