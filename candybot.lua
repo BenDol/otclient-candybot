@@ -18,6 +18,7 @@ dofile('events.lua')
 dofile('listeners.lua')
 
 dofiles('classes')
+dofiles('classes/ui')
 dofiles('extensions')
 
 local botButton

@@ -4,10 +4,10 @@ Panel
   anchors.right: parent.right
   anchors.top: parent.top
   padding-right: 8
-  height: 500
+  height: 310
 
   BotOptionCheckBox
-    id: AutoPathCheck
+    id: AutoPath
     width: 120
     !text: tr('Auto Pathing')
     !tooltip: tr('Enable auto pathing')
@@ -16,15 +16,15 @@ Panel
 
   TextList
     id: PathList
-    anchors.top: AutoPathCheck.bottom
+    anchors.top: AutoPath.bottom
     anchors.left: parent.left
     margin-bottom: 5
-    margin-top: 10
+    margin-top: 8
     padding: 1
     focusable: false
     vertical-scrollbar: PathListScrollBar
-    width: 160
-    height: 230
+    width: 140
+    height: 270
 
   VerticalScrollBar
     id: PathListScrollBar
@@ -33,6 +33,33 @@ Panel
     anchors.left: PathList.right
     step: 16
     pixels-scroll: true
+
+  VerticalScrollBar
+    id: miniwindowScrollBar
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    step: 14
+    margin-top: 22
+    margin-right: 3
+    margin-bottom: 3
+    pixels-scroll: true
+
+    $!on:
+      width: 0
+
+  ScrollablePanel
+    anchors.left: PathListScrollBar.right
+    anchors.right: parent.right
+    anchors.top: PathList.top
+    anchors.bottom: PathList.bottom
+    border: 2 black
+    vertical-scrollbar: miniwindowScrollBar
+
+    PathMap
+      id: PathMap
+      anchors.fill: parent
+      autowalk: false
 
   BotOptionCheckBox
     id: AutoExplore

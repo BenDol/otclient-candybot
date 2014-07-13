@@ -18,20 +18,21 @@ PathsModule.dependencies = {
 --[[ Default Options ]]
 
 PathsModule.options = {
+  ['AutoPath'] = false,
   ['SmartPath'] = false
 }
 
 --[[ Register Events ]]
 
 table.merge(PathsModule, {
-  --autoTarget = 1
+  autoPath = 1
 })
 
 PathsModule.events = {
-  --[PathsModule.autoTarget] = {
-  --  option = "AutoTarget", 
-  --  callback = PathsModule.AutoTarget.Event
-  --}
+  [PathsModule.autoPath] = {
+    option = "AutoPath", 
+    callback = PathsModule.AutoPath.Event
+  }
 }
 
 --[[ Register Listeners ]]

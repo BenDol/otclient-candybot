@@ -28,6 +28,18 @@ SmartPath.checkEvent = nil
 SmartPath.checkTicks = 2000 -- millis
 SmartPath.idleTime = 15 -- seconds
 
+function SmartPath.init()
+  
+end
+
+function SmartPath.terminate()
+
+end
+
+function SmartPath.onStopped()
+  
+end
+
 function SmartPath.checkPathing(dirs, override, dontChange)
   print("SmartPath.checkPathing")
   -- Check if we are performing other bot tasks

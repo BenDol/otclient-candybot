@@ -66,9 +66,6 @@ end
 function TargetsModule.terminate()
   TargetsModule.stop()
 
-  Panel:destroy()
-  Panel = nil
-
   g_keyboard.unbindKeyPress('Up', UI.TargetsPanel)
   g_keyboard.unbindKeyPress('Down', UI.TargetsPanel)
 
@@ -147,6 +144,9 @@ function TargetsModule.unloadUI()
   for k,_ in pairs(UI) do
     UI[k] = nil
   end
+
+  Panel:destroy()
+  Panel = nil
 end
 
 function TargetsModule.bindHandlers()

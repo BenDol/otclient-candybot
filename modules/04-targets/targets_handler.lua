@@ -33,18 +33,15 @@ table.merge(TargetsModule, {
 TargetsModule.events = {
   [TargetsModule.autoTarget] = {
     option = "AutoTarget", 
-    callback = TargetsModule.AutoTarget.Event,
-    stopped = TargetsModule.AutoTarget.onStopped
+    callback = TargetsModule.AutoTarget.Event
   },
   [TargetsModule.autoLoot] = {
     option = "AutoTarget", 
-    callback = TargetsModule.AutoLoot.Event,
-    stopped = TargetsModule.AutoLoot.onStopped
+    callback = TargetsModule.AutoLoot.Event
   },
   [TargetsModule.attackMode] = {
     option = "AutoTarget", 
-    callback = TargetsModule.AttackMode.Event,
-    stopped = TargetsModule.AttackMode.onStopped
+    callback = TargetsModule.AttackMode.Event
   }
 }
 

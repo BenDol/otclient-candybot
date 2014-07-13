@@ -95,6 +95,32 @@ BotTabBarButton < MoveableTabBarButton
   height: 25
   padding: 18
 
+PathMap < UIPathMap
+  draggable: true
+  focusable: false
+  cross: true
+  color: black
+
+  MinimapFloorUpButton
+    id: floorUp
+    @onClick: self:getParent():floorUp(1)
+
+  MinimapFloorDownButton
+    id: floorDown
+    @onClick: self:getParent():floorDown(1)
+
+  MinimapZoomInButton
+    id: zoomIn
+    @onClick: self:getParent():zoomIn()
+
+  MinimapZoomOutButton
+    id: zoomOut
+    @onClick: self:getParent():zoomOut()
+
+  MinimapResetButton
+    id: reset
+    @onClick: self:getParent():reset()
+
 MainWindow
   id: botWindow
   !text: tr('CandyBot')
