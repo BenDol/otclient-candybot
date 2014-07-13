@@ -10,26 +10,26 @@
         steps and have it avoid back tracking.
 ]]
 
-PathsModule.AutoExplore = {}
-AutoExplore = PathsModule.AutoExplore
+PathsModule.SmartPath = {}
+SmartPath = PathsModule.SmartPath
 
-AutoExplore.lastDest = {
+SmartPath.lastDest = {
   pos = {},
   time = nil
 }
-AutoExplore.lastPos = {
+SmartPath.lastPos = {
   pos = {},
   time = nil
 }
-AutoExplore.prevPositions = {}
-AutoExplore.dirStack = {}
-AutoExplore.lastDir = North
-AutoExplore.checkEvent = nil
-AutoExplore.checkTicks = 2000 -- millis
-AutoExplore.idleTime = 15 -- seconds
+SmartPath.prevPositions = {}
+SmartPath.dirStack = {}
+SmartPath.lastDir = North
+SmartPath.checkEvent = nil
+SmartPath.checkTicks = 2000 -- millis
+SmartPath.idleTime = 15 -- seconds
 
-function AutoExplore.checkPathing(dirs, override, dontChange)
-  print("AutoExplore.checkPathing")
+function SmartPath.checkPathing(dirs, override, dontChange)
+  print("SmartPath.checkPathing")
   -- Check if we are performing other bot tasks
   if AutoLoot.isLooting() then
     print("return 0")
@@ -48,19 +48,19 @@ function AutoExplore.checkPathing(dirs, override, dontChange)
   local idle = false
 
   -- Set the players last position if different
-  local lastPos = AutoExplore.lastPos.pos
+  local lastPos = SmartPath.lastPos.pos
   if Position.equals(playerPos, lastPos) then
     -- Check if the play is idle
-    print(currentTime - AutoExplore.lastPos.time)
-    if currentTime - AutoExplore.lastPos.time >= AutoExplore.idleTime then
+    print(currentTime - SmartPath.lastPos.time)
+    if currentTime - SmartPath.lastPos.time >= SmartPath.idleTime then
       print("player is idle")
       idle = true
     end
   else
-    print("AutoExplore.lastPos.pos: " .. postostring(playerPos))
-    print("AutoExplore.lastPos.time: " .. tostring(currentTime))
-    AutoExplore.lastPos.pos = playerPos
-    AutoExplore.lastPos.time = currentTime
+    print("SmartPath.lastPos.pos: " .. postostring(playerPos))
+    print("SmartPath.lastPos.time: " .. tostring(currentTime))
+    SmartPath.lastPos.pos = playerPos
+    SmartPath.lastPos.time = currentTime
   end
 
   -- Make sure we are in sync with the walk reschedule
@@ -77,55 +77,55 @@ function AutoExplore.checkPathing(dirs, override, dontChange)
 
   -- We are stuck going in this direction
   if idle and not dontChange then
-    if currentTime - AutoExplore.lastPos.time >= AutoExplore.idleTime * 3 then
-      AutoExplore.changeDirection(PathFindResults.NoWay)
+    if currentTime - SmartPath.lastPos.time >= SmartPath.idleTime * 3 then
+      SmartPath.changeDirection(PathFindResults.NoWay)
       return false
     end
   end
 
-  local tile = AutoExplore.getBestWalkableTile(player, AutoExplore.lastDir, override)
+  local tile = SmartPath.getBestWalkableTile(player, SmartPath.lastDir, override)
   if tile then
     local destPos = tile:getPosition()
     print("player:autoWalk: " .. postostring(destPos))
     player:stopAutoWalk()
     if player:autoWalk(destPos) then
-      AutoExplore.lastDest.pos = destPos
-      AutoExplore.lastDest.time = currentTime
+      SmartPath.lastDest.pos = destPos
+      SmartPath.lastDest.time = currentTime
     end
   elseif not dontChange then
-    AutoExplore.changeDirection(PathFindResults.NoWay)
+    SmartPath.changeDirection(PathFindResults.NoWay)
     return false
   end
   return true
 end
 
-function AutoExplore.changeDirection(lastWalkResult, tries)
-  print("AutoExplore.changeDirection")
+function SmartPath.changeDirection(lastWalkResult, tries)
+  print("SmartPath.changeDirection")
   local tries = tries or 0
   local newDir = math.random(North, NorthWest)
 
   local cachedDirs = {}
-  local stackSize = #AutoExplore.dirStack < 2 and #AutoExplore.dirStack or 2
+  local stackSize = #SmartPath.dirStack < 2 and #SmartPath.dirStack or 2
   for i = 0,stackSize do
-    table.insert(cachedDirs, AutoExplore.dirStack[#AutoExplore.dirStack-i])
+    table.insert(cachedDirs, SmartPath.dirStack[#SmartPath.dirStack-i])
   end
   
   print(table.tostring(cachedDirs))
 
   -- Cannot change if the same or if the dir was used recently
-  if (newDir == AutoExplore.lastDir or table.contains(cachedDirs, newDir)) and tries < 7 then
+  if (newDir == SmartPath.lastDir or table.contains(cachedDirs, newDir)) and tries < 7 then
     print("recursive change")
-    AutoExplore.changeDirection(lastWalkResult, tries + 1)
+    SmartPath.changeDirection(lastWalkResult, tries + 1)
   else
     print("new dir: " .. dirtostring(newDir))
-    table.insert(AutoExplore.dirStack, AutoExplore.lastDir)
-    AutoExplore.lastDir = newDir
-    AutoExplore.checkPathing(nil, tries > 6, true)
+    table.insert(SmartPath.dirStack, SmartPath.lastDir)
+    SmartPath.lastDir = newDir
+    SmartPath.checkPathing(nil, tries > 6, true)
   end
 end
 
-function AutoExplore.getBestWalkableTile(player, direction, override)
-  print("AutoExplore.getBestWalkableTile")
+function SmartPath.getBestWalkableTile(player, direction, override)
+  print("SmartPath.getBestWalkableTile")
   local tile = nil
   local tileCount = 0
   local houseTileCount = 0
@@ -166,23 +166,23 @@ end
 function startCheckEvent()
   stopCheckEvent()
 
-  AutoExplore.checkEvent = cycleEvent(function()
+  SmartPath.checkEvent = cycleEvent(function()
       if not AutoLoot.isLooting() then
-        AutoExplore.checkPathing(direction)
+        SmartPath.checkPathing(direction)
       end
-    end, AutoExplore.checkTicks)
+    end, SmartPath.checkTicks)
 end
 
 function stopCheckEvent()
-  if AutoExplore.checkEvent then
-    AutoExplore.checkEvent:cancel()
-    AutoExplore.checkEvent = nil
+  if SmartPath.checkEvent then
+    SmartPath.checkEvent:cancel()
+    SmartPath.checkEvent = nil
   end
 end
 
-function AutoExplore.ConnectListener(listener)
-  print("AutoExplore.ConnectListener")
-  connect(LocalPlayer, { onAutoWalkFail = AutoExplore.changeDirection })
+function SmartPath.ConnectListener(listener)
+  print("SmartPath.ConnectListener")
+  connect(LocalPlayer, { onAutoWalkFail = SmartPath.changeDirection })
 
   -- Start the listener
   if g_game.isOnline() then
@@ -190,13 +190,13 @@ function AutoExplore.ConnectListener(listener)
   end
 end
 
-function AutoExplore.DisconnectListener(listener)
-  print("AutoExplore.DisconnectListener")
-  disconnect(LocalPlayer, { onAutoWalkFail = AutoExplore.changeDirection })
+function SmartPath.DisconnectListener(listener)
+  print("SmartPath.DisconnectListener")
+  disconnect(LocalPlayer, { onAutoWalkFail = SmartPath.changeDirection })
 
   stopCheckEvent()
 
-  AutoExplore.dirStack = {}
+  SmartPath.dirStack = {}
 
   if g_game.isOnline() then
     g_game.cancelAttackAndFollow()

@@ -7,9 +7,38 @@ Panel
   height: 500
 
   BotOptionCheckBox
-    id: AutoExplore
-    width: 100
-    !text: tr('Auto Explore')
-    !tooltip: tr('Automatically explore the map.')
+    id: AutoPathCheck
+    width: 120
+    !text: tr('Auto Pathing')
+    !tooltip: tr('Enable auto pathing')
     anchors.left: parent.left
     anchors.top: parent.top
+
+  TextList
+    id: PathList
+    anchors.top: AutoPathCheck.bottom
+    anchors.left: parent.left
+    margin-bottom: 5
+    margin-top: 10
+    padding: 1
+    focusable: false
+    vertical-scrollbar: PathListScrollBar
+    width: 160
+    height: 230
+
+  VerticalScrollBar
+    id: PathListScrollBar
+    anchors.top: PathList.top
+    anchors.bottom: PathList.bottom
+    anchors.left: PathList.right
+    step: 16
+    pixels-scroll: true
+
+  BotOptionCheckBox
+    id: AutoExplore
+    width: 130
+    !text: tr('Use Smart Pathing')
+    !tooltip: tr('Smart pathing will attempt to explore for you!\n(useful in caves and closed areas).')
+    anchors.left: PathList.left
+    anchors.top: PathList.bottom
+    margin-top: 4
