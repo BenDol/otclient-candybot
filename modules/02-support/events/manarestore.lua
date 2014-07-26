@@ -28,7 +28,7 @@ function AutoMana.onManaChange(player, mana, maxMana, oldMana, restoreType, trie
     local delay = Helper.getItemUseDelay()
 
     if player:getManaPercent() < manaValue then
-      Helper.safeUseInventoryItemWith(item:getId(), player)
+      Helper.safeUseInventoryItemWith(item:getId(), player, BotModule.isPrecisionMode())
     end
 
     nextMana = scheduleEvent(function()

@@ -19,7 +19,7 @@ TargetSetting.create = function(target, movement, stance, attack, range, equip, 
   setting.equip = equip or {}
   setting.target = target
   setting.index = index or 0
-  target.follow = follow ~= nil and follow or true
+  setting.follow = follow ~= nil and follow or true
   
   return setting
 end

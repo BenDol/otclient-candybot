@@ -21,11 +21,12 @@ function AutoReplaceHands.Event(event)
     end
     local handPos = {['x'] = 65535, ['y'] = hand, ['z'] = 0}
 
-    if player:getInventoryItem(hand) and player:getInventoryItem(hand):getCount() > 5 then
+    local handItem = player:getInventoryItem(hand)
+    if handItem and handItem:getCount() > 3 then
       return 10000
     end
 
-    if item and not player:getInventoryItem(hand) then
+    if item and (not handItem or handItem:getId() ~= item:getId()) then
       g_game.move(item, handPos, item:getCount())
     end
   end

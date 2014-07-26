@@ -22,6 +22,7 @@ Panel
     margin-top: 8
     padding: 1
     focusable: false
+    phantom: true
     vertical-scrollbar: PathListScrollBar
     width: 140
     height: 270

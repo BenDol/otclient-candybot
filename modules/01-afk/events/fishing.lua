@@ -28,7 +28,8 @@ function AutoFishing.Event(event)
 
       if #waterTiles > 0 then
         Helper.safeUseInventoryItemWith(Fishing['Fishing Rod'], 
-          waterTiles[math.random(1, #waterTiles)]:getThing())
+          waterTiles[math.random(1, #waterTiles)]:getThing(),
+          BotModule.isPrecisionMode())
       else
         BotLogger.warning("No water tiles found for fishing.")
       end

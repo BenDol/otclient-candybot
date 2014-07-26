@@ -89,7 +89,7 @@ function Helper.castSpell(player, words)
       return false
     end
 
-    if player:getMana() >= spell.mana then
+    if Helper.hasEnoughMana(player, spell) then
       Helper.castIndex[playerId][words] = newTime
 
       g_game.talk(spell.words)
@@ -102,8 +102,10 @@ function Helper.castSpell(player, words)
   return true
 end
 
-function Helper.hasEnoughMana(player, words)
-  local spell = Spells.getSpellByWords(words)
+function Helper.hasEnoughMana(player, spell)
+  if type(spell) ~= "table" then
+    spell = Spells.getSpellByWords(spell)
+  end
   if spell then
     return player:getMana() >= spell.mana
   end
@@ -194,10 +196,11 @@ end
 
 function Helper.getItemFromTiles(tiles, itemId)
   local items = {}
-  for i = 1, 165 do
-    if not table.empty(tiles) and tiles[i] and tiles[i]:getThing() then
-      if table.contains(itemId, tiles[i]:getThing():getId()) then
-        table.insert(items, tiles[i])
+  
+  for _,tile in pairs(tiles) do
+    if tile and tile:getThing() then
+      if table.contains(itemId, tile:getThing():getId()) then
+        table.insert(items, tile)
       end
     end
   end

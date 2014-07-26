@@ -47,7 +47,7 @@ function AttackMode.Event(event)
 
         -- TODO: multi actions decider/queue
         if type == AttackModes.ItemMode and item > 0 then
-          Helper.safeUseInventoryItemWith(item, target)
+          Helper.safeUseInventoryItemWith(item, target, BotModule.isPrecisionMode())
         elseif type == AttackModes.SpellMode and words and words ~= "" then
           Helper.castSpell(player, words)
         end

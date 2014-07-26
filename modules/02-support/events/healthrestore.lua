@@ -52,7 +52,7 @@ function AutoHeal.onHealthChange(player, health, maxHealth, oldHealth, restoreTy
     local delay = Helper.getItemUseDelay()
 
     if player:getHealthPercent() < healthValue then
-      Helper.safeUseInventoryItemWith(item:getId(), player)
+      Helper.safeUseInventoryItemWith(item:getId(), player, BotModule.isPrecisionMode())
     end
 
     nextHeal[RestoreType.item] = scheduleEvent(function()
