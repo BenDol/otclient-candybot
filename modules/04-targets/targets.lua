@@ -161,6 +161,7 @@ function TargetsModule.bindHandlers()
           TargetsModule.setCurrentSetting(selectedTarget:getSetting(1))
         end
       else
+        currentSetting = false
         TargetsModule.syncSetting()
       end
     end
