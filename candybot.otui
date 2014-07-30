@@ -202,12 +202,37 @@ MainWindow
     margin-bottom: -5
     @onClick: CandyBot.hide()
 
+  ComboBox
+    id: loggerType
+    !tooltip: tr('Log level determining what log messages will be shown. This will show messages')
+    anchors.left: parent.left
+    anchors.bottom: parent.bottom
+    margin-bottom: -10
+    margin-left: -7
+    options:
+      -Info
+      -Warning
+      -Error
+      -Debug
+    @onOptionChange: |
+      local option = self:getCurrentOption()
+      if option.text == "Info" then
+        BotLogger.logType = BotLogTypes.info
+      elseif option.text == "Warning" then
+        BotLogger.logType = BotLogTypes.warning
+      elseif option.text == "Error" then
+        BotLogger.logType = BotLogTypes.error
+      elseif option.text == Debug then
+        BotLogger.logType = BotLogTypes.debug
+      end
+
   Label
     id: versionInfo
     !text: tr('')
-    anchors.left: parent.left
+    anchors.left: loggerType.right
     anchors.bottom: parent.bottom
     margin-bottom: -5
+    margin-left: 5
     color: #ffffff44
     text-auto-resize: true
 

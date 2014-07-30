@@ -120,7 +120,7 @@ Panel
   BotOptionCheckBox
     id: AutoReplaceWeapon
     !text: tr('Auto Replace Weapons')
-    !tooltip: tr('Automatically "refill" used throwing weapons (container of replacing items must be open).')
+    !tooltip: tr('Automatically "refill" used throwing weapons\n(container of replacing items must be open).')
     anchors.left: parent.left
     anchors.top: prev.top
     margin-top: 10

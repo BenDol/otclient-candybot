@@ -16,9 +16,9 @@ function Enable.Event(event)
   EventHandler.signal() -- signal events to start
   ListenerHandler.signal() -- signal listeners to start
 
-  BotLogger.warning("Bot enabled.")
+  BotLogger.info("Bot enabled.")
 
   if g_game.isOfficialTibia() then
-    BotLogger.warning("Note: Bags must be open for certain bot features.")
+    BotLogger.info("Note: Bags must be open for certain bot features.")
   end
 end

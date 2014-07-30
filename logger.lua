@@ -7,10 +7,12 @@
 BotLogger = {}
 
 BotLogTypes = {
-  warning = 1,
-  error = 2,
-  debug = 3
+  info = 1,
+  warning = 2,
+  error = 3,
+  debug = 4
 }
+BotLogger.logType = BotLogTypes.info
 
 local MAX_LINES = 35
 
@@ -20,6 +22,10 @@ local logWindow
 function BotLogger.init()
   logWindow = CandyBot.getUI():recursiveGetChildById('logWindow')
   logBuffer = logWindow:getChildById('logBuffer')
+end
+
+function BotLogger.info(msg)
+  BotLogger.print(BotLogTypes.info, msg)
 end
 
 function BotLogger.warning(msg)
@@ -38,15 +44,29 @@ function BotLogger.print(type, msg)
   local trace = debug.getinfo(debug.getinfo(3, "f").func)
   local path = BotLogger.trimPath(trace.short_src:explode("/"))
 
-  if type == BotLogTypes.warning then
-    --g_logger.warning(msg)
-    BotLogger.createLabel(msg, "yellow")
-  elseif type == BotLogTypes.error then
-    --g_logger.error(msg)
-    BotLogger.createLabel(msg, "red")
-  elseif type == BotLogTypes.debug then
-    --g_logger.debug(msg)
-    BotLogger.createLabel(msg, "white")
+  if BotLogger.logType then
+
+    if type == BotLogTypes.info then
+      if BotLogger.logType >= BotLogTypes.info then
+        --g_logger.info(msg)
+        BotLogger.createLabel(msg, "white")
+      end
+    elseif type == BotLogTypes.warning then
+      if BotLogger.logType >= BotLogTypes.warning then
+        --g_logger.warning(msg)
+        BotLogger.createLabel(msg, "yellow")
+      end
+    elseif type == BotLogTypes.error then
+      if BotLogger.logType >= BotLogTypes.error then
+        --g_logger.error(msg)
+        BotLogger.createLabel(msg, "red")
+      end
+    elseif type == BotLogTypes.debug then
+      if BotLogger.logType >= BotLogTypes.debug then
+        --g_logger.debug(msg)
+        BotLogger.createLabel(msg, "green")
+      end
+    end
   end
 end
 

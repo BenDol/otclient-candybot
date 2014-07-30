@@ -13,5 +13,5 @@ function Disable.Event(event)
   botIcon:setTooltip("Disabled")
 
   CandyBot.enable(false)
-  BotLogger.warning("Bot disabled.")
+  BotLogger.info("Bot disabled.")
 end
