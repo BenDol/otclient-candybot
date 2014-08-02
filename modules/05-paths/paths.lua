@@ -11,8 +11,18 @@ dofiles('events')
 local Panel = {}
 local UI = {}
 
+local NodeTypes = {
+  Action = "action",
+  Ladder = "ladder",
+  Node = "node",
+  Pick = "pick",
+  Rope = "rope",
+  Shovel = "shovel",
+  Stand = "stand",
+  Walk = "walk"
+}
+
 local pathsDir = CandyBot.getWriteDir().."/paths"
-local preloaded = false
 
 function PathsModule.getPanel() return Panel end
 function PathsModule.setPanel(panel) Panel = panel end
@@ -38,6 +48,8 @@ function PathsModule.init()
     g_resources.makeDir(pathsDir)
   end
 
+  g_resources.addSearchPath(g_resources.getRealDir()..g_resources.resolvePath("images"))
+
   -- register module
   Modules.registerModule(PathsModule)
 
@@ -60,23 +72,16 @@ function PathsModule.init()
     PathsModule.online()
   end
 
-  modules.game_interface.addMenuHook("category1", tr("Creature Option"), function() 
-    print("We clicked 'Creature Option'")
-  end, function(menuPosition, lookThing, useThing, creatureThing)
-    return creatureThing ~= nil
-  end)
-
-  modules.game_interface.addMenuHook("category1", tr("Useable Item Option"), function() 
-    print("We clicked 'Useable Item Option'")
-  end, function(menuPosition, lookThing, useThing, creatureThing)
-    return useThing ~= nil
-  end)
-
-  modules.game_interface.addMenuHook("category2", tr("Global Option"), function() 
-    print("We clicked 'Global Option'")
-  end, function(menuPosition, lookThing, useThing, creatureThing)
-    return true
-  end)
+  modules.game_interface.addMenuHook("pathing", tr("Add Path"), 
+    function(menuPosition, lookThing, useThing, creatureThing)
+      local gamemap = gameRootPanel:recursiveGetChildByPos(mousePosition, false)
+      if gamemap:getClassName() == 'UIGameMap' then
+        PathsModule.createPath(gamemap:getPosition(menuPosition))
+      end
+    end,
+    function(menuPosition, lookThing, useThing, creatureThing)
+      return lookThing ~= nil and lookThing:getTile() ~= nil
+    end)
 
   -- event inits
   SmartPath.init()
@@ -89,7 +94,7 @@ function PathsModule.terminate()
     --save here
   end
 
-  modules.game_interface.removeMenuHook("category2", tr("Global Option"))
+  modules.game_interface.removeMenuHook("pathing", tr("Add Path"))
 
   disconnect(g_game, {
     onGameStart = PathsModule.online,
@@ -117,6 +122,11 @@ function PathsModule.loadUI(panel)
     AutoExplore = panel:recursiveGetChildById('AutoExplore'),
     PathMap = panel:recursiveGetChildById('PathMap')
   }
+
+  -- Load image resources
+  UI.Images = {
+    g_ui.createWidget("NodeImage", UI.PathMap)
+  }
 end
 
 function PathsModule.unloadUI()
@@ -130,11 +140,6 @@ end
 
 function PathsModule.bindHandlers()
 
-end
-
-function PathsModule.preload()
-  UI.PathMap:load()
-  preloaded = true
 end
 
 function PathsModule.online()

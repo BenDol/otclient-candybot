@@ -24,8 +24,9 @@ function UIPathMap:onCameraPositionChange(cameraPos)
   UIMinimap.onCameraPositionChange(self)
 end
 
-function UIPathMap:load()
-  local settings = g_settings.getNode('Minimap')
+function UIPathMap:load(paths)
+  -- Load the given paths
+  --[[local settings = g_settings.getNode('Minimap')
   if settings then
     if settings.flags then
       for _,flag in pairs(settings.flags) do
@@ -33,40 +34,53 @@ function UIPathMap:load()
       end
     end
     self:setZoom(settings.zoom)
-  end
-end
-
-function UIPathMap:save()
-  local settings = { flags={} }
-  for _,flag in pairs(self.flags) do
-    table.insert(settings.flags, {
-      position = flag.pos,
-      icon = flag.icon,
-      description = flag.description,
-    })
-  end
-  settings.zoom = self:getZoom()
-  g_settings.setNode('Minimap', settings)
+  end]]
 end
 
 function UIPathMap:addNode(pos, icon, description)
-  --[[if not pos or not icon then return end
-  local flag = self:getFlag(pos, icon, description)
-  if flag or not icon then
+  if not pos or not icon then return end
+  local node = self:getNode(pos, icon, description)
+  if node or not icon then
     return
   end
 
-  flag = g_ui.createWidget('MinimapFlag')
-  self:insertChild(1, flag)
-  flag.pos = pos
-  flag.description = description
-  flag.icon = icon
-  flag:setIcon('/images/game/minimap/flag' .. icon)
-  flag:setTooltip(description)
-  flag.onMouseRelease = onFlagMouseRelease
-  flag.onDestroy = function() table.removevalue(self.flags, flag) end
-  table.insert(self.flags, flag)
-  self:centerInPosition(flag, pos)]]
+  node = g_ui.createWidget('MinimapNode')
+  self:insertChild(1, node)
+  node.pos = pos
+  node.description = description
+  node.icon = icon
+  node:setIcon('/images/' .. icon)
+  node:setTooltip(description)
+  node.onMouseRelease = onNodeMouseRelease
+  node.onDestroy = function() table.removevalue(self.nodes, node) end
+  table.insert(self.nodes, node)
+  self:centerInPosition(node, pos)
+end
+
+local function onNodeMouseRelease(widget, pos, button)
+  if button == MouseRightButton then
+    local menu = g_ui.createWidget('PopupMenu')
+    menu:addOption(tr('Delete mark'), function() widget:destroy() end)
+    menu:display(pos)
+    return true
+  end
+  return false
+end
+
+function UIPathMap:getNode(pos)
+  for _,node in pairs(self.nodes) do
+    if node.pos.x == pos.x and node.pos.y == pos.y and node.pos.z == pos.z then
+      return node
+    end
+  end
+  return nil
+end
+
+function UIPathMap:removeNode(pos)
+  local node = self:getNode(pos)
+  if node then
+    node:destroy()
+  end
 end
 
 function UIPathMap:reset()

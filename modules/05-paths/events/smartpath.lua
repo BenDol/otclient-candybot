@@ -4,10 +4,7 @@
 ]]
 
 --[[
-  TODO: Make this an event rather than a listener and have 
-        it doing auto walks, I can catch auto walk fails.
-        Then I can create pathing based on the successful 
-        steps and have it avoid back tracking.
+  TODO: Rewrite this entirely.
 ]]
 
 PathsModule.SmartPath = {}
