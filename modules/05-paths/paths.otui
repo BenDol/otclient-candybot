@@ -68,7 +68,7 @@ Panel
       autowalk: false
 
   BotOptionCheckBox
-    id: AutoExplore
+    id: SmartPath
     width: 130
     !text: tr('Use Smart Pathing')
     !tooltip: tr('Smart pathing will attempt to explore for you!\n(useful in caves and closed areas).')
