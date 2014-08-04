@@ -18,7 +18,7 @@ html {
 
 body {
   margin: 0;
-  background: url("../images/gb.jpg") repeat scroll 0 0 rgba(0, 0, 0, 0);
+  /*background: url(../images/bg.jpg) repeat scroll 0 0 rgba(0, 0, 0, 0);*/
 }
 
 /* HTML5 display definitions
