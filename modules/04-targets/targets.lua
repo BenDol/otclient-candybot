@@ -201,7 +201,7 @@ function TargetsModule.bindHandlers()
           if text == AttackModes.SpellMode then
             local spell = Helper.getRandomVocationSpell(1, {1,4})
             if spell then
-              attack:setWords(spells.words)
+              attack:setWords(spell.words)
             else
               attack:setWords("<add spell>")
             end

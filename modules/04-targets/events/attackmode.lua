@@ -49,7 +49,7 @@ function AttackMode.Event(event)
         if type == AttackModes.ItemMode and item > 0 then
           Helper.safeUseInventoryItemWith(item, target, BotModule.isPrecisionMode())
         elseif type == AttackModes.SpellMode and words and words ~= "" then
-          Helper.castSpell(player, words)
+          Helper.castSpell(player, words, 1)
         end
       end
     end

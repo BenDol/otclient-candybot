@@ -5,8 +5,6 @@
 
 Helper = {}
 
-Helper.castIndex = {}
-
 function Helper.safeDelay(min, max)
   if g_game.isOfficialTibia() then
     return math.random(min, max)
@@ -64,24 +62,36 @@ function Helper.safeUseInventoryItemWith(itemId, thing, forceCheck)
   return true
 end
 
-function Helper.castSpell(player, words)
+function Helper.castSpell(player, words, defaultGroupId)
   local spell = nil
   if BotModule.isPrecisionMode() then
     spell = Spells.getSpellByWords(words)
   end
 
+  if defaultGroupId then
+    local groupCooldown = modules.game_cooldown.isGroupCooldownIconActive(defaultGroupId)
+    if groupCooldown then
+      BotLogger.debug(SpellGroups[defaultGroupId].." group cooldown is active.")
+      return false
+    end
+  end
+
   local playerId = player:getId()
-  local newTime = os.time()
   if spell then
-    local castIndex = Helper.castIndex[playerId]
-    if castIndex and castIndex[words] then
-      local lastCasted = castIndex[words]
-      if (newTime - lastCasted) * 1000 <= Helper.getSpellDelay(words) then
-        --BotLogger.warning("You are too exhausted("..spell.exhaustion..") to cast this spell("..spell.words..").")
+    local iconId = spell.id
+
+    local cooldown = modules.game_cooldown.isCooldownIconActive(iconId)
+    if cooldown then
+      BotLogger.debug("Group "..SpellGroups[iconId].." cooldown is active")
+      return false
+    end
+
+    for groupId,_ in pairs(spell.group) do
+      local groupCooldown = modules.game_cooldown.isGroupCooldownIconActive(groupId)
+      if groupCooldown then
+        BotLogger.debug("Group "..SpellGroups[groupId].." cooldown is active")
         return false
       end
-    else
-      Helper.castIndex[playerId] = {}
     end
 
     if player:getSoul() < spell.soul then
@@ -90,14 +100,12 @@ function Helper.castSpell(player, words)
     end
 
     if Helper.hasEnoughMana(player, spell) then
-      Helper.castIndex[playerId][words] = newTime
-
       g_game.talk(spell.words)
     end
   else
-    Helper.castIndex[playerId][words] = newTime
-
-    g_game.talk(words)
+    if player:getMana() > 0 then
+      g_game.talk(words)
+    end
   end
   return true
 end
@@ -109,7 +117,7 @@ function Helper.hasEnoughMana(player, spell)
   if spell then
     return player:getMana() >= spell.mana
   end
-  return false
+  return player:getMana() > 0
 end
 
 function Helper.getSpellDelay(words)

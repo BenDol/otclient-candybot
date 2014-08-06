@@ -222,7 +222,7 @@ MainWindow
         BotLogger.logType = BotLogTypes.warning
       elseif option.text == "Error" then
         BotLogger.logType = BotLogTypes.error
-      elseif option.text == Debug then
+      elseif option.text == "Debug" then
         BotLogger.logType = BotLogTypes.debug
       end
 

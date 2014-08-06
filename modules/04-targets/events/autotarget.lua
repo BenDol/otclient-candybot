@@ -141,8 +141,15 @@ function AutoTarget.Event(event)
 
   -- Cannot continue if still attacking or is in pz
   local player = g_game.getLocalPlayer()
-  if g_game.isAttacking() or player:hasState(PlayerStates.Pz) then
+  if player:hasState(PlayerStates.Pz) then
     return Helper.safeDelay(600, 2000)
+  elseif g_game.isAttacking() then
+    local target = g_game.getAttackingCreature()
+    if not target or not AutoTarget.isValidTarget(target) then
+      g_game.cancelAttackAndFollow()
+    else
+      return Helper.safeDelay(600, 2000)
+    end
   end
 
   -- Find a valid target to attack
