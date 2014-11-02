@@ -82,7 +82,7 @@ function Helper.castSpell(player, words, defaultGroupId)
 
     local cooldown = modules.game_cooldown.isCooldownIconActive(iconId)
     if cooldown then
-      BotLogger.debug("Group "..SpellGroups[iconId].." cooldown is active")
+      BotLogger.debug("Spell "..tostring(iconId).." cooldown is active")
       return false
     end
 
