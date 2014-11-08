@@ -29,7 +29,7 @@ function AutoEat.Event(event)
     if player:getRegenerationTime() < 600 then
       Helper.safeUseInventoryItem(food)
     end
-    return Helper.safeDelay(2000, 7000)
+    return Helper.safeDelay(3000, 7000)
   else
     Helper.safeUseInventoryItem(food)
     return Helper.safeDelay(6000, 12000)

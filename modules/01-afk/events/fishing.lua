@@ -9,6 +9,10 @@ AutoFishing = AfkModule.AutoFishing
 function AutoFishing.Event(event)
   if g_game.isOnline() then
     local player = g_game.getLocalPlayer()
+    -- Check if we are attacking
+    if g_game.isAttacking() then
+      return Helper.safeDelay(3000, 6000)
+    end
 
     local allowFishing = true
     if AfkModule.getPanel():getChildById('AutoFishingCheckCap'):isChecked() then

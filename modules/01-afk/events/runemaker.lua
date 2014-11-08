@@ -11,6 +11,11 @@ function RuneMake.Event(event)
     local words = AfkModule.getPanel():getChildById('RuneSpellText'):getText()
     local player = g_game.getLocalPlayer()
 
+    -- Check if we are attacking
+    if g_game.isAttacking() then
+      return Helper.safeDelay(3000, 6000)
+    end
+
     if BotModule.isPrecisionMode() then
       local spell = Spells.getSpellByWords(words)
 

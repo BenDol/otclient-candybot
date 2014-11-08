@@ -68,6 +68,11 @@ function LootProcedure:start()
     self.hook = function(container, prevContainer)
       print("self.hook called")
       self:stopOpenCheck()
+
+    -- Try eat from open corpse first
+      print("try eat")
+      addEvent(AutoEat.Event)
+
       if not self:loot(container, prevContainer) then
         self:fail() -- failed to loot
       else
