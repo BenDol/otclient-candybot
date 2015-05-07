@@ -1,4 +1,6 @@
 #CandyBot v0.1
+
+[![Join the chat at https://gitter.im/BenDol/otclient-candybot](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/BenDol/otclient-candybot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 CandyBot is an OTClient bot module that helps with Tibia game-play automation. CandyBot is designed to focus on efficiency, stability and safety (from bot-detection). It accomplishes these qualities using, modular style framework, thorough testing, and secure/safe 'game' functions + time delay randomization when logged into Cipsoft Servers.
 
 ##Developed by
