@@ -124,7 +124,7 @@ PathMap < UIPathMap
 MainWindow
   id: botWindow
   !text: tr('CandyBot')
-  size: 422 535
+  size: 422 605
   @onEscape: CandyBot.hide()
 
   &save: true
@@ -165,7 +165,7 @@ MainWindow
       clipping: true
       anchors.fill: parent
       text: Log
-      //dragable: false
+      dragable: false
       padding-top: 23
       padding-left: 5
       padding-right: 5
@@ -173,13 +173,16 @@ MainWindow
 
       ScrollablePanel
         id: logBuffer
-        vertical-scrollbar: logScrollBar
+        anchors.left: parent.left
+        anchors.right: logScrollBar.left
+        anchors.top: logScrollBar.top
+        anchors.bottom: parent.bottom
         layout:
           type: verticalBox
-          align-top: true
+          align-bottom: true
         focusable: false
-        //inverted-scroll: true
-        anchors.fill: parent
+        vertical-scrollbar: logScrollBar
+        inverted-scroll: true
         background-color: #000000
         opacity: 0.85
 
@@ -188,8 +191,15 @@ MainWindow
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-        step: 8
+        step: 15
         pixels-scroll: true
+
+    ResizeBorder
+      id: bottomResizeBorder
+      anchors.bottom: parent.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      enabled: true
 
   Button
     id: hideButton
@@ -202,8 +212,8 @@ MainWindow
     margin-bottom: -5
     @onClick: CandyBot.hide()
 
-  ComboBox
-    id: loggerType
+  BotOptionComboBox
+    id: LoggerType
     !tooltip: tr('Log level determining what log messages will be shown. This will show messages')
     anchors.left: parent.left
     anchors.bottom: parent.bottom
@@ -225,14 +235,26 @@ MainWindow
       elseif option.text == "Debug" then
         BotLogger.logType = BotLogTypes.debug
       end
+      CandyBot.changeOption(self:getId(), self:getCurrentOption().text)
+
+  BotOptionCheckBox
+    id: PrintLogs
+    width: 80
+    !text: tr('Print Logs')
+    !tooltip: tr('Also print the logs to the terminal.')
+    anchors.left: LoggerType.right
+    anchors.bottom: parent.bottom
+    margin-bottom: -7
+    margin-left: 5
+    checked: false
 
   Label
     id: versionInfo
-    !text: tr('')
-    anchors.left: loggerType.right
+    !text: tr('v0.1 Alpha')
+    anchors.right: hideButton.left
     anchors.bottom: parent.bottom
     margin-bottom: -5
-    margin-left: 5
+    margin-right: 10
     color: #ffffff44
     text-auto-resize: true
 

@@ -7,7 +7,10 @@
 CandyBot = extends(UIWidget, "CandyBot")
 CandyBot.window = nil
 CandyBot.options = {}
-CandyBot.defaultOptions = {}
+CandyBot.defaultOptions = {
+  ["LoggerType"] = 1,
+  ["PrintLogs"] = false
+}
 
 dofile('consts.lua')
 dofile('helper.lua')
@@ -198,7 +201,13 @@ function CandyBot.changeOption(key, state, loading)
         widget = p:recursiveGetChildById(key)
         if widget then break end
       end
-      if not widget then print("no widget found") return end
+      if not widget then 
+        widget = panel:recursiveGetChildById(key)
+        if not widget then
+          BotLogger.warning("CandyBot: no widget found with name '"..key.."'")
+          return
+        end
+      end
 
       local style = widget:getStyle().__class
 
@@ -215,7 +224,7 @@ function CandyBot.changeOption(key, state, loading)
         if value then widget:setValue(value) end
       elseif style == 'UIScrollArea' then
         local child = widget:getChildById(state)
-        if child then print("found child") widget:focusChild(child, MouseFocusReason) end
+        if child then widget:focusChild(child, MouseFocusReason) end
       end
     end
 

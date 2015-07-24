@@ -54,29 +54,29 @@ end
 -- logic
 
 function LootProcedure:start()
-  print("LootProcedure:start")
+  BotLogger.debug("LootProcedure:start called")
   Procedure.start(self)
 
   -- Ensure there is a corpse
   if self:findCorpse() then
-    print("corpse exists at "..postostring(self.position))
+    BotLogger.debug("LootProcedure: corpse exists at "..postostring(self.position))
     -- Disconnect existing looting hook
     if self.hook and type(self.hook) == "function" then
       disconnect(Container, { onOpen = self.hook })
     end
     -- Connect looting hook
     self.hook = function(container, prevContainer)
-      print("self.hook called")
+      BotLogger.debug("LootProcedure: self.hook called")
       self:stopOpenCheck()
 
-    -- Try eat from open corpse first
-      print("try eat")
+      -- Try eat from open corpse first
+      BotLogger.debug("LootProcedure: try eat")
       addEvent(AutoEat.Event)
 
-      if not self:loot(container, prevContainer) then
-        self:fail() -- failed to loot
-      else
+      if self:loot(container, prevContainer) then
         signalcall(self.onContainerOpened, container)
+      else
+        self:fail() -- failed to loot
       end
     end
     connect(Container, { onOpen = self.hook })
@@ -84,18 +84,19 @@ function LootProcedure:start()
     -- Run to corpse for looting
     local openFunc = function()
       local player = g_game.getLocalPlayer()
-      print("openFunc called")
+      BotLogger.debug("LootProcedure: open function called")
       if Position.isInRange(self.position, player:getPosition(), 6, 6) then
         if not self.attempting then
-          print("try open corpse")
+          self.attempting = true
+          
+          BotLogger.debug("LootProcedure: try open corpse")
           g_game.cancelAttackAndFollow()
           g_game.open(self:findCorpse())
 
-          self.attempting = true
           scheduleEvent(function() self.attempting = false end, 3000)
         end
       elseif not self.attempting and not player:isAutoWalking() and not player:isServerWalking() then
-        print("try walk to corpse")
+        BotLogger.debug("LootProcedure: try walk to corpse")
         player:autoWalk(self.position)
       end
     end
@@ -138,7 +139,7 @@ function LootProcedure:removeItem(item)
 end
 
 function LootProcedure:loot(container, prevContainer)
-  print("LootProcedure:loot")
+  BotLogger.debug("LootProcedure:loot called")
   local containerItem = container:getContainerItem()
   local corpseItem = self:findCorpse()
 
@@ -162,14 +163,14 @@ function LootProcedure:takeNextItem()
     local toPos = {x=65535, y=64, z=0} -- TODO: get container with free space
     self.moveProc = MoveProcedure.create(item, toPos, true, 8000)
     connect(self.moveProc, { onFinished = function(id)
-      print("connection: MoveProcedure.onFinished")
+      BotLogger.debug("connection: MoveProcedure.onFinished")
       self:removeItem(id)
       self:takeNextItem()
     end })
 
     -- TODO: add configuration to say what to do when timed out
     connect(self.moveProc, { onTimedOut = function(id)
-      print("connection: MoveProcedure.onTimedOut")
+      BotLogger.debug("connection: MoveProcedure.onTimedOut")
       self:removeItem(id)
       self:takeNextItem()
     end })
@@ -185,7 +186,7 @@ function LootProcedure:getBestItem()
     if not data.item or (i and i:getPosition().z < data.z) then
       data.item = i
       data.z = i:getPosition().z
-      print("Found best item: ".. i:getId())
+      BotLogger.debug("Found best item: ".. i:getId())
     end
   end
   return data.item
@@ -193,7 +194,7 @@ end
 
 function LootProcedure:fail()
   Procedure.fail(self)
-  print("LootProcedure:fail()")
+  BotLogger.debug("LootProcedure:fail() called")
 
   self:clean()
 
@@ -202,7 +203,7 @@ end
 
 function LootProcedure:stop()
   Procedure.stop(self)
-  print("LootProcedure:stop()")
+  BotLogger.debug("LootProcedure:stop() called")
 
   self:clean()
 
@@ -211,7 +212,7 @@ end
 
 function LootProcedure:cancel()
   Procedure.cancel(self)
-  print("LootProcedure:cancel()")
+  BotLogger.debug("LootProcedure:cancel() called")
 
   self:clean()
 
@@ -220,7 +221,7 @@ end
 
 function LootProcedure:timeout()
   Procedure.timeout(self)
-  print("LootProcedure:timeout()")
+  BotLogger.debug("LootProcedure:timeout() called")
 
   self:clean()
 
@@ -229,7 +230,7 @@ end
 
 function LootProcedure:finish()
   Procedure.finish(self)
-  print("LootProcedure:finish()")
+  BotLogger.debug("LootProcedure:finish() called")
   self:setLooted(true)
 
   self:clean()
@@ -239,7 +240,7 @@ end
 
 function LootProcedure:clean()
   Procedure.clean(self)
-  print("LootProcedure:clean()")
+  BotLogger.debug("LootProcedure:clean() called")
 
   self:stopOpenCheck()
 
@@ -250,7 +251,10 @@ function LootProcedure:clean()
 
   if self.hook then
     disconnect(Container, { onOpen = self.hook })
+    self.hook = nil
   end
+
+  disconnect(self, "onContainerOpened")
 
   signalcall(self.onCleaned, self.id)
 end

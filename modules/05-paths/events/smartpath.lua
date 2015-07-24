@@ -38,16 +38,16 @@ function SmartPath.onStopped()
 end
 
 function SmartPath.checkPathing(dirs, override, dontChange)
-  print("SmartPath.checkPathing")
+  BotLogger.debug("SmartPath.checkPathing called")
   -- Check if we are performing other bot tasks
   if AutoLoot.isLooting() then
-    print("return 0")
+    BotLogger.debug("SmartPath: return 0")
     return false
   end
 
   -- Check if we can perform game actions
   if not g_game.canPerformGameAction() or g_game.isAttacking() then
-    print("return 1")
+    BotLogger.debug("SmartPath: return 1")
     return false
   end
 
@@ -60,27 +60,27 @@ function SmartPath.checkPathing(dirs, override, dontChange)
   local lastPos = SmartPath.lastPos.pos
   if Position.equals(playerPos, lastPos) then
     -- Check if the play is idle
-    print(currentTime - SmartPath.lastPos.time)
+    BotLogger.debug("SmartPath: "..tostring(currentTime - SmartPath.lastPos.time))
     if currentTime - SmartPath.lastPos.time >= SmartPath.idleTime then
-      print("player is idle")
+      BotLogger.debug("SmartPath: player is idle")
       idle = true
     end
   else
-    print("SmartPath.lastPos.pos: " .. postostring(playerPos))
-    print("SmartPath.lastPos.time: " .. tostring(currentTime))
+    BotLogger.debug("SmartPath.lastPos.pos: " .. postostring(playerPos))
+    BotLogger.debug("SmartPath.lastPos.time: " .. tostring(currentTime))
     SmartPath.lastPos.pos = playerPos
     SmartPath.lastPos.time = currentTime
   end
 
   -- Make sure we are in sync with the walk reschedule
   if not player:canWalk() then
-    print("return 2")
+    BotLogger.debug("SmartPath: return 2")
     return false
   end
 
   -- When auto walking and not idling we must break out
   if (player:isAutoWalking() or player:isServerWalking()) and not idle then
-    print("return 3")
+    BotLogger.debug("SmartPath: return 3")
     return false
   end
 
@@ -95,7 +95,7 @@ function SmartPath.checkPathing(dirs, override, dontChange)
   local tile = SmartPath.getBestWalkableTile(player, SmartPath.lastDir, override)
   if tile then
     local destPos = tile:getPosition()
-    print("player:autoWalk: " .. postostring(destPos))
+    BotLogger.debug("SmartPath: player:autoWalk: " .. postostring(destPos))
     player:stopAutoWalk()
     if player:autoWalk(destPos) then
       SmartPath.lastDest.pos = destPos
@@ -109,7 +109,7 @@ function SmartPath.checkPathing(dirs, override, dontChange)
 end
 
 function SmartPath.changeDirection(lastWalkResult, tries)
-  print("SmartPath.changeDirection")
+  BotLogger.debug("SmartPath.changeDirection")
   local tries = tries or 0
   local newDir = math.random(North, NorthWest)
 
@@ -119,14 +119,14 @@ function SmartPath.changeDirection(lastWalkResult, tries)
     table.insert(cachedDirs, SmartPath.dirStack[#SmartPath.dirStack-i])
   end
   
-  print(table.tostring(cachedDirs))
+  BotLogger.debug("SmartPath: "..table.tostring(cachedDirs))
 
   -- Cannot change if the same or if the dir was used recently
   if (newDir == SmartPath.lastDir or table.contains(cachedDirs, newDir)) and tries < 7 then
-    print("recursive change")
+    BotLogger.debug("SmartPath: recursive change")
     SmartPath.changeDirection(lastWalkResult, tries + 1)
   else
-    print("new dir: " .. dirtostring(newDir))
+    BotLogger.debug("SmartPath: new dir: " .. dirtostring(newDir))
     table.insert(SmartPath.dirStack, SmartPath.lastDir)
     SmartPath.lastDir = newDir
     SmartPath.checkPathing(nil, tries > 6, true)
@@ -134,13 +134,13 @@ function SmartPath.changeDirection(lastWalkResult, tries)
 end
 
 function SmartPath.getBestWalkableTile(player, direction, override)
-  print("SmartPath.getBestWalkableTile")
+  BotLogger.debug("SmartPath.getBestWalkableTile")
   local tile = nil
   local tileCount = 0
   local houseTileCount = 0
   local pos = player:getPosition()
 
-  print("Searching for tiles on " .. tostring(pos.z))
+  BotLogger.debug("SmartPath: Searching for tiles on " .. tostring(pos.z))
 
   -- Process tiles for correct direction
   local tiles = g_map.getTiles(pos.z)
@@ -161,14 +161,14 @@ function SmartPath.getBestWalkableTile(player, direction, override)
       end
     end
   end
-  print("processed: " .. tostring(tileCount) .. " tiles")
-  print(tostring(houseTileCount).. " are house tiles")
+  BotLogger.debug("SmartPath: processed: " .. tostring(tileCount) .. " tiles")
+  BotLogger.debug("SmartPath: "..tostring(houseTileCount).. " are house tiles")
   -- If there are too many house tiles change direction
   if (houseTileCount / tileCount) * 100 >= 40 then
-    print("too many house tiles change direction")
+    BotLogger.debug("SmartPath: too many house tiles change direction")
     tile = nil
   end
-  print("found best tile: " .. (tile and postostring(tile:getPosition()) or "null"))
+  BotLogger.debug("SmartPath: found best tile: " .. (tile and postostring(tile:getPosition()) or "null"))
   return tile
 end
 
@@ -190,7 +190,7 @@ function stopCheckEvent()
 end
 
 function SmartPath.ConnectListener(listener)
-  print("SmartPath.ConnectListener")
+  BotLogger.debug("SmartPath.ConnectListener")
   connect(LocalPlayer, { onAutoWalkFail = SmartPath.changeDirection })
 
   -- Start the listener
@@ -200,7 +200,7 @@ function SmartPath.ConnectListener(listener)
 end
 
 function SmartPath.DisconnectListener(listener)
-  print("SmartPath.DisconnectListener")
+  BotLogger.debug("SmartPath.DisconnectListener")
   disconnect(LocalPlayer, { onAutoWalkFail = SmartPath.changeDirection })
 
   stopCheckEvent()

@@ -15,15 +15,17 @@ AutoLoot.lootProc = nil
 -- Methods
 
 function AutoLoot.init()
-  
+  AutoLoot.lootList = {}
+  AutoLoot.looting = false
+  AutoLoot.lootProc = nil
 end
 
 function AutoLoot.terminate()
-  
+  AutoLoot.onStopped()
 end
 
 function AutoLoot.onStopped()
-  
+  AutoLoot.stopLooting()
 end
 
 function AutoLoot.onTargetDeath(creature)
@@ -52,7 +54,7 @@ function AutoLoot.isLooting()
 end
 
 function AutoLoot.removeLoot(creatureId)
-  print("AutoLoot.removeLoot: "..tostring(creatureId))
+  BotLogger.debug("AutoLoot: removeLoot: "..tostring(creatureId))
   AutoLoot.lootList[creatureId] = nil
 end
 
@@ -72,11 +74,11 @@ function AutoLoot.getClosestLoot()
   local corpse = {distance=nil, loot = nil, creatureId=nil}
   for id,loot in pairs(AutoLoot.lootList) do
     if loot then
-      print(postostring(loot.position))
+      BotLogger.debug("AutoLoot: "..postostring(loot.position))
       local distance = Position.distance(playerPos, loot.position)
-      print(distance)
+      BotLogger.debug("AutoLoot: "..tostring(distance))
       if not corpse.loot or distance < corpse.distance then
-        print("Found loot to go to")
+        BotLogger.debug("AutoLoot: Found closest loot")
         corpse.distance = distance
         corpse.loot = loot
         corpse.creatureId = id
@@ -87,7 +89,7 @@ function AutoLoot.getClosestLoot()
 end
 
 function AutoLoot.startLooting()
-  print("AutoLoot.startLooting")
+  BotLogger.debug("AutoLoot.startLooting() called")
   AutoLoot.looting = true
 
   AutoLoot.lootNext()
@@ -140,7 +142,7 @@ function AutoLoot.pauseLooting()
 end
 
 function AutoLoot.stopLooting()
-  print("AutoLoot.stopLooting")
+  BotLogger.debug("AutoLoot.stopLooting() called")
   AutoLoot.looting = false
 
   if AutoLoot.lootProc then

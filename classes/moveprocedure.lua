@@ -18,9 +18,7 @@ MoveProcedure.create = function(thing, position, verify, timeoutTicks)
   end
   proc.position = position
 
-  print(proc:getTickoutTicks())
   if timeoutTicks then
-    print(timeoutTicks)
     proc:setTimeoutTicks(timeoutTicks)
   end
   proc.tryMoveEvent = nil
@@ -61,7 +59,7 @@ end
 -- logic
 
 function MoveProcedure:start()
-  print("MoveProcedure:start")
+  BotLogger.debug("MoveProcedure:start() called")
   Procedure.start(self)
 
   -- try move thing
@@ -96,7 +94,7 @@ function MoveProcedure:tryMove()
 end
 
 function MoveProcedure:verifyMoved()
-  print("MoveProcedure:verifyMoved()")
+  BotLogger.debug("MoveProcedure:verifyMoved() called")
   return true
 end
 
@@ -109,7 +107,7 @@ end
 
 function MoveProcedure:stop()
   Procedure.stop(self)
-  print("MoveProcedure:stop()")
+  BotLogger.debug("MoveProcedure:stop() called")
 
   self:clean()
 
@@ -118,7 +116,7 @@ end
 
 function MoveProcedure:cancel()
   Procedure.cancel(self)
-  print("MoveProcedure:cancel()")
+  BotLogger.debug("MoveProcedure:cancel() called")
 
   self:clean()
 
@@ -127,7 +125,7 @@ end
 
 function MoveProcedure:fail()
   Procedure.fail(self)
-  print("MoveProcedure:fail()")
+  BotLogger.debug("MoveProcedure:fail() called")
 
   self:clean()
 
@@ -136,7 +134,7 @@ end
 
 function MoveProcedure:timeout()
   Procedure.timeout(self)
-  print("MoveProcedure:timeout()")
+  BotLogger.debug("MoveProcedure:timeout() called")
 
   self:clean()
 
@@ -145,7 +143,7 @@ end
 
 function MoveProcedure:finish()
   Procedure.finish(self)
-  print("MoveProcedure:finish()")
+  BotLogger.debug("MoveProcedure:finish() called")
 
   self:clean()
 
@@ -154,7 +152,7 @@ end
 
 function MoveProcedure:clean()
   Procedure.clean(self)
-  print("MoveProcedure:clean()")
+  BotLogger.debug("MoveProcedure:clean() called")
 
   self:stopTryMove()
 

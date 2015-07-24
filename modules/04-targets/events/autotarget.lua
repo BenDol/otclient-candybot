@@ -22,6 +22,10 @@ function AutoTarget.terminate()
   disconnect(TargetsModule, { onAddTarget = AutoTarget.scan })
 end
 
+function AutoTarget.onStopped()
+
+end
+
 function AutoTarget.hasTargets()
   return AutoTarget.creatureData ~= nil and #AutoTarget.creatureData > 0
 end
@@ -31,7 +35,7 @@ function AutoTarget.getCreatureData()
 end
 
 function AutoTarget.scan()
-  print("scanning")
+  BotLogger.debug("AutoTarget.scan() called")
   local targetList = {}
   for k,v in pairs(TargetsModule.getTargets()) do
     table.insert(targetList, v:getName())
@@ -118,7 +122,7 @@ function AutoTarget.getBestTarget()
     if t and AutoTarget.isValidTarget(t) then
       local d = Position.distance(playerPos, t:getPosition())
       if not target or d < distance then
-        print("Found closest target")
+        BotLogger.debug("AutoTarget: Found closest target")
         target = t
         distance = d
       end

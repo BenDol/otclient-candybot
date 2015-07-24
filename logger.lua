@@ -14,13 +14,15 @@ BotLogTypes = {
 }
 BotLogger.logType = BotLogTypes.info
 
-local MAX_LINES = 35
+local MAX_LINES = 45
 
 local logBuffer
 local logWindow
+local printLogs
 
 function BotLogger.init()
   logWindow = CandyBot.getUI():recursiveGetChildById('logWindow')
+  printLogs = CandyBot.getUI():recursiveGetChildById('PrintLogs')
   logBuffer = logWindow:getChildById('logBuffer')
 end
 
@@ -45,7 +47,6 @@ function BotLogger.print(type, msg)
   local path = BotLogger.trimPath(trace.short_src:explode("/"))
 
   if BotLogger.logType then
-
     if type == BotLogTypes.info then
       if BotLogger.logType >= BotLogTypes.info then
         --g_logger.info(msg)
@@ -67,6 +68,10 @@ function BotLogger.print(type, msg)
         BotLogger.createLabel(msg, "green")
       end
     end
+  end
+
+  if printLogs:isChecked() then
+    print(msg)
   end
 end
 

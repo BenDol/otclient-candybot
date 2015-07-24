@@ -318,13 +318,13 @@ function TargetsModule.addTarget(target)
 
     connect(target, {
       onPriorityChange = function(target, priority, oldPriority)
-        print("["..target:getName().."] Priority Changed: " .. priority)
+        BotLogger.debug("["..target:getName().."] Priority Changed: " .. priority)
       end
     })
 
     connect(target, {
       onLootChange = function(target, loot)
-        print("["..target:getName().."] Loot Changed: " .. tostring(loot))
+        BotLogger.debug("["..target:getName().."] Loot Changed: " .. tostring(loot))
       end
     })
 
@@ -353,14 +353,14 @@ function TargetsModule.connectSetting(target, setting)
   connect(setting, {
     onMovementChange = function(setting, movement, oldMovement)
       local target = setting:getTarget()
-      print("["..target:getName().."]["..setting:getIndex().."] Movement Changed: " .. tostring(movement))
+      BotLogger.debug("["..target:getName().."]["..setting:getIndex().."] Movement Changed: " .. tostring(movement))
     end
   })
 
   connect(setting, {
     onStanceChange = function(setting, stance, oldStance)
       local target = setting:getTarget()
-      print("["..target:getName().."]["..setting:getIndex().."] Stance Changed: " .. tostring(stance))
+      BotLogger.debug("["..target:getName().."]["..setting:getIndex().."] Stance Changed: " .. tostring(stance))
       TargetsModule.syncStanceSetting(stance)
     end
   })
@@ -374,8 +374,8 @@ function TargetsModule.connectSetting(target, setting)
           TargetsModule.syncAttackSetting(attack)
         end
       })
-      print("["..target:getName().."]["..setting:getIndex().."] Attack Changed: " .. tostring(attack))
-      print("onAttackChange")
+      BotLogger.debug("["..target:getName().."]["..setting:getIndex().."] Attack Changed: " .. tostring(attack))
+      BotLogger.debug("TargetsModule: onAttackChange")
       TargetsModule.syncAttackSetting(attack)
     end
   })
@@ -383,7 +383,7 @@ function TargetsModule.connectSetting(target, setting)
   connect(setting, {
     onRangeChange = function(setting, range, oldRange, index)
       local target = setting:getTarget()
-      print("["..target:getName().."]["..setting:getIndex().."] Range"..(index and "["..index.."]" 
+      BotLogger.debug("["..target:getName().."]["..setting:getIndex().."] Range"..(index and "["..index.."]" 
         or "").." Changed: "..tostring(range))
     end
   })
@@ -391,27 +391,27 @@ function TargetsModule.connectSetting(target, setting)
   connect(setting, {
     onEquipChange = function(setting, equip, oldEquip)
       local target = setting:getTarget()
-      print("["..target:getName().."]["..setting:getIndex().."] Equip Changed: "..tostring(equip))
+      BotLogger.debug("["..target:getName().."]["..setting:getIndex().."] Equip Changed: "..tostring(equip))
     end
   })
 
   connect(setting, {
     onFollowChange = function(setting, follow, oldFollow)
-      print("["..target:getName().."]["..setting:getIndex().."] Follow Changed: " .. tostring(follow))
+      BotLogger.debug("["..target:getName().."]["..setting:getIndex().."] Follow Changed: " .. tostring(follow))
       AutoTarget.checkChaseMode(g_game.getAttackingCreature())
     end
   })
 
   connect(setting, {
     onTargetChange = function(setting, target, oldTarget)
-      print("["..target:getName().."] Target Changed: "..tostring(target:getName()))
+      BotLogger.debug("["..target:getName().."] Target Changed: "..tostring(target:getName()))
     end
   })
 
   connect(setting, {
     onIndexChange = function(setting, index, oldIndex)
       local target = setting:getTarget()
-      print("["..target:getName().."]["..setting:getIndex().."] Index Changed: "..tostring(index))
+      BotLogger.debug("["..target:getName().."]["..setting:getIndex().."] Index Changed: "..tostring(index))
     end
   })
 end
@@ -704,10 +704,10 @@ function TargetsModule.saveTargets(file)
 end
 
 function TargetsModule.loadTargets(file, force)
-  print("TargetsModule.loadTargets("..file..")")
+  BotLogger.debug("TargetsModule.loadTargets("..file..")")
   local path = targetsDir.."/"..file
   local config = g_configs.load(path)
-  print(tostring(config))
+  BotLogger.debug("TargetsModule"..tostring(config))
   if config then
     local loadFunc = function()
       TargetsModule.clearTargetList()
@@ -763,7 +763,7 @@ function writeTargets(config)
   config:setNode('Targets', targets)
   config:save()
 
-  print("Saved "..tostring(#targetObjs) .." targets to "..config:getFileName())
+  BotLogger.debug("Saved "..tostring(#targetObjs) .." targets to "..config:getFileName())
 end
 
 function parseTargets(config)
