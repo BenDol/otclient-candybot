@@ -100,8 +100,6 @@ function terminate()
     botButton = nil
   end
 
-  g_settings.setNode('Bot', CandyBot.options)
-
   CandyBot.window:destroy()
 end
 
@@ -237,5 +235,8 @@ function CandyBot.changeOption(key, state, loading)
     end
 
     CandyBot.options[char][key] = state
+    
+    -- Update the settings
+    g_settings.setNode('Bot', CandyBot.options)
   end
 end
