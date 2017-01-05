@@ -9,6 +9,7 @@ AutoTarget = TargetsModule.AutoTarget
 -- Variables
 
 AutoTarget.creatureData = {}
+AutoTarget.notValidTargetCount = 0
 
 -- Methods
 
@@ -144,30 +145,46 @@ function AutoTarget.Event(event)
   -- See: https://github.com/BenDol/otclient-candybot/issues/20
 
   -- Cannot continue if still attacking or is in pz
+
+  -- Find a valid target to attack
+  local bestTarget = AutoTarget.getBestTarget()
+
   local player = g_game.getLocalPlayer()
   if player:hasState(PlayerStates.Pz) then
+    AutoTarget.notValidTargetCount = 0;
     return Helper.safeDelay(600, 2000)
   elseif g_game.isAttacking() then
     local target = g_game.getAttackingCreature()
-    if not target or not AutoTarget.isValidTarget(target) then
-      g_game.cancelAttackAndFollow()
+    if not target or not player:canStandBy(creature) then
+      AutoTarget.notValidTargetCount = AutoTarget.notValidTargetCount + 1
+      if AutoTarget.notValidTargetCount > 5 then
+        g_game.cancelAttackAndFollow()
+        AutoTarget.notValidTargetCount = 0;
+      else
+        return Helper.safeDelay(600, 2000);
+      end
+    elseif not TargetsModule.hasTarget(creature:getName()) then
+      if bestTarget and bestTarget ~= target then
+        g_game.cancelAttackAndFollow()
+        AutoTarget.notValidTargetCount = 0;
+      end
     else
+      AutoTarget.notValidTargetCount = 0;
       return Helper.safeDelay(600, 2000)
     end
   end
+  AutoTarget.notValidTargetCount = 0;
 
-  -- Find a valid target to attack
-  local target = AutoTarget.getBestTarget()
-  if target then
+  if bestTarget then
     -- If looting pause to prioritize targeting
     if AutoLoot.isLooting() then
       AutoLoot.pauseLooting()
     end
 
-    AutoTarget.checkChaseMode(target)
-    AutoTarget.checkStance(target)
+    AutoTarget.checkChaseMode(bestTarget)
+    AutoTarget.checkStance(bestTarget)
 
-    g_game.attack(target)
+    g_game.attack(bestTarget, true)
   end
 
   -- Keep the event live
