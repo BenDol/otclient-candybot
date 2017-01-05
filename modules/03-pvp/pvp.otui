@@ -5,3 +5,11 @@ Panel
   anchors.top: parent.top
   padding-right: 8
   height: 540
+
+  BotOptionCheckBox
+    id: KeepTarget
+    width: 90
+    !text: tr('Keep Target')
+    !tooltip: tr('Automatically attack creature previously attacked.')
+    anchors.left: parent.left
+    anchors.top: parent.top

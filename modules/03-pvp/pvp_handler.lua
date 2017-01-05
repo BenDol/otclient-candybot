@@ -17,13 +17,12 @@ PvpModule.dependencies = {
 --[[ Default Options ]]
 
 PvpModule.options = {
-  --
+  ['KeepTarget'] = false
 }
 
 --[[ Register Events ]]
 
 table.merge(PvpModule, {
-  --
 })
 
 PvpModule.events = {
@@ -33,11 +32,16 @@ PvpModule.events = {
 --[[ Register Listeners ]]
 
 table.merge(PvpModule, {
+  keepTargetListener = 1
   --
 })
 
 PvpModule.listeners = {
-  --
+  [PvpModule.keepTargetListener] = {
+    option = "KeepTarget", 
+    connect = PvpModule.KeepTarget.connect, 
+    disconnect = PvpModule.KeepTarget.disconnect
+  },
 }
 
 --[[ Functions ]]

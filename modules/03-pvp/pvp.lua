@@ -28,6 +28,7 @@ function PvpModule.init()
 
   -- register module
   Modules.registerModule(PvpModule)
+  KeepTarget.init()
 end
 
 function PvpModule.terminate()
@@ -36,8 +37,18 @@ function PvpModule.terminate()
 
   Panel:destroy()
   Panel = nil
+  KeepTarget.terminate()
 end
 
+function PvpModule.loadUI(panel)
+  UI = {
+    KeepTarget = panel:recursiveGetChildById('KeepTarget'),
+  }
+end
+
+
+function PvpModule.onStopEvent(eventId)
+end
 -- Any global module functions here
 
 return PvpModule
