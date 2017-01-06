@@ -16,6 +16,28 @@ function Player:getFlaskItems()
   return count
 end
 
+
+function Player:countItems(itemId, subType)
+  local subType = subType or -1
+  local count = 0
+
+  local items = {}
+  for i=InventorySlotFirst,InventorySlotLast do
+    local item = self:getInventoryItem(i)
+    if item and item:getId() == itemId and (subType == -1 or item:getSubType() == subType) then
+      count = count + item:getCount()
+    end
+  end
+  local container = g_game.getContainers()[0]
+  if container then
+    for j, item in pairs(container:getItems()) do
+      if item:getId() == itemId and (subType == -1 or item:getSubType() == subType) then
+        count = count + item:getCount()
+      end
+    end
+  end
+  return count
+end
 --[[
 function Player:ShopSellAllItems(item)
     return self:ShopSellItem(item, self:ShopGetItemSaleCount(item))

@@ -9,7 +9,7 @@ end
 
 TargetSetting = extends(CandyConfig, "TargetSetting")
 
-TargetSetting.create = function(target, movement, stance, attack, range, equip, follow)
+TargetSetting.create = function(target, movement, stance, attack, range, equip, follow, priority)
   local setting = TargetSetting.internalCreate()
 
   setting.movement = movement or 0
@@ -19,9 +19,24 @@ TargetSetting.create = function(target, movement, stance, attack, range, equip, 
   setting.equip = equip or {}
   setting.target = target
   setting.follow = follow ~= nil and follow or true
+  setting.priority = priority or 0
   setting.index = 0
   
   return setting
+end
+
+
+function TargetSetting:getPriority()
+  return self.priority
+end
+
+function TargetSetting:setPriority(priority)
+  local oldPriority = self.priority
+  if priority ~= oldPriority then
+    self.priority = priority
+
+    signalcall(self.onPriorityChange, self, priority, oldPriority)
+  end
 end
 
 function TargetSetting:getMovement()
@@ -157,6 +172,7 @@ function TargetSetting:toNode()
 
   node.range = self.range
   node.equip = self.equip
+  node.priority = self.priority
 
   if self.attack then
     node.attack = self.attack:toNode()
@@ -177,6 +193,9 @@ function TargetSetting:parseNode(node)
   if node.equip then
     self.equip = node.equip
   end
+  if node.priority then
+  	self.priority = node.priority
+  end
   if node.attack then
     self.attack = Attack.create()
     self.attack:parseNode(node.attack)
@@ -187,11 +206,10 @@ end
 
 Target = extends(CandyConfig, "Target")
 
-Target.create = function(name, priority, settings, loot)
+Target.create = function(name, settings, loot)
   local target = Target.internalCreate()
   
   target.name = name or ""
-  target.priority = priority or 0
   target.settings = settings or {}
   target.loot = loot ~= nil and loot or true
   
@@ -210,19 +228,6 @@ function Target:setName(name)
     self.name = name
 
     signalcall(self.onNameChange, self, name, oldName)
-  end
-end
-
-function Target:getPriority()
-  return self.priority
-end
-
-function Target:setPriority(priority)
-  local oldPriority = self.priority
-  if priority ~= oldPriority then
-    self.priority = priority
-
-    signalcall(self.onPriorityChange, self, priority, oldPriority)
   end
 end
 

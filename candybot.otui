@@ -48,7 +48,7 @@ ListRowComplex < UIWidget
     font: verdana-11px-monochrome
     text-auto-resize: true
     background-color: alpha
-    text-offset: 2 0
+    text-offset: 2 2
 
     $on:
       color: #ffffff
@@ -62,6 +62,55 @@ ListRowComplex < UIWidget
     anchors.right: parent.right
     margin-right: 4
     margin-top: 1
+
+
+ItemListRow < UIWidget
+  height: 36
+  background-color: alpha
+  &updateOnStates: |
+    function(self)
+      local children = self:getChildren()
+      for i=1,#children do
+        children[i]:setOn(self:isFocused())
+      end
+    end
+  @onFocusChange: self:updateOnStates()
+  @onSetup: self:updateOnStates()
+
+  $focus:
+    background-color: #ffffff22
+
+  Label
+    id: details
+    color: #aaaaaa
+    anchors.top: parent.top
+    anchors.left: parent.left
+    font: verdana-11px-monochrome
+    text-auto-resize: true
+    background-color: alpha
+    text-offset: 2 2
+
+    $on:
+      color: #ffffff
+
+  Button
+    id: remove
+    text: x
+    width: 12
+    height: 12
+    anchors.top: parent.top
+    anchors.right: parent.right
+    margin-right: 4
+    margin-top: 1
+
+  Item
+    id: item
+    size: 36 36
+    offset: 2 2
+    margin-top: 2
+    margin-left: 2
+    focusable: false
+    virtual: true
 
 LogLabel < UILabel
   font: verdana-11px-antialised

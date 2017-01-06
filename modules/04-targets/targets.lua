@@ -16,6 +16,7 @@ local selectedTarget
 local currentSetting
 local refreshEvent
 local loadListIndex
+local lootListFocusId
 local currentFileLoaded
 
 local saveOverWindow
@@ -121,13 +122,15 @@ function TargetsModule.loadUI(panel)
     SettingDangerBox = panel:recursiveGetChildById('SettingDangerBox'),
     SettingStrategyLabel = panel:recursiveGetChildById('SettingStrategyLabel'),
     SettingStrategyList = panel:recursiveGetChildById('SettingStrategyList'),
+    LootItemsList = panel:recursiveGetChildById('LootItemsList'),
+    LootItemCountBox = panel:recursiveGetChildById('ItemCountBox')
   }
 
   -- Setting Mode List
   UI.SettingModeList:addOption(AttackModes.None)
   UI.SettingModeList:addOption(AttackModes.SpellMode)
   UI.SettingModeList:addOption(AttackModes.ItemMode)
-
+  
   -- Stance radio group
   UI.StanceRadioGroup = UIRadioGroup.create()
   UI.StanceRadioGroup:addWidget(UI.StanceOffensiveBox)
@@ -181,6 +184,28 @@ function TargetsModule.bindHandlers()
       end
     })
 
+  connect(UI.LootItemsList, {
+    onChildFocusChange = function(self, focusedChild, unfocusedChild, reason)
+        -- if reason == ActiveFocusReason then return end
+        if focusedChild == nil then 
+          UI.LootItemCountBox:setEnabled(false)
+        else
+          UI.LootItemCountBox:setEnabled(true)
+          UI.LootItemCountBox:setValue(TargetsModule.AutoLoot.itemsList[focusedChild:getId()] or 0)
+        end
+      end
+    })
+  connect(UI.LootItemCountBox, {
+    onValueChange = function(self, count) 
+      local child = UI.LootItemsList:getFocusedChild()
+      if child then
+        local id = child:getId()
+        if id then
+          TargetsModule.addLootItem(id, count)
+        end
+      end
+    end
+  })
   connect(UI.SettingNameEdit, {
     onTextChange = function(self, text, oldText)
       if not selectedTarget then
@@ -292,7 +317,7 @@ end
 
 function TargetsModule.addNewTarget(name)
   if not TargetsModule.hasTarget(name) then
-    local target = Target.create(name, 1, {})
+    local target = Target.create(name, {})
 
     TargetsModule.addTarget(target)
 
@@ -317,14 +342,16 @@ function TargetsModule.addTarget(target)
     })
 
     connect(target, {
-      onPriorityChange = function(target, priority, oldPriority)
-        BotLogger.debug("["..target:getName().."] Priority Changed: " .. priority)
+      onLootChange = function(target, loot)
+        BotLogger.debug("["..target:getName().."] Loot Changed: " .. tostring(loot))
       end
     })
 
     connect(target, {
-      onLootChange = function(target, loot)
-        BotLogger.debug("["..target:getName().."] Loot Changed: " .. tostring(loot))
+      onAddSetting = function(target, setting)
+        if selectedTarget == target then
+          TargetsModule.setCurrentSetting(setting)
+        end
       end
     })
 
@@ -385,6 +412,15 @@ function TargetsModule.connectSetting(target, setting)
       local target = setting:getTarget()
       BotLogger.debug("["..target:getName().."]["..setting:getIndex().."] Range"..(index and "["..index.."]" 
         or "").." Changed: "..tostring(range))
+    end
+  })
+
+
+  connect(setting, {
+    onPriorityChange = function(setting, priority, oldPriority, index)
+      local priority = setting:getPriority()
+      BotLogger.debug("["..setting:getTarget():getName().."]["..setting:getIndex().."] Priority"..(index and "["..index.."]" 
+        or "").." Changed: "..tostring(priority))
     end
   })
 
@@ -478,9 +514,11 @@ function TargetsModule.syncSetting()
     UI.SettingLoot:setChecked(selectedTarget:getLoot())
 
     if currentSetting then
+      UI.TargetSettingNumber:setText('#'..currentSetting:getIndex()..' of ' .. #selectedTarget:getSettings());
       UI.SettingHpRange1:setText(currentSetting:getRange(1), true)
       UI.SettingHpRange2:setText(currentSetting:getRange(2), true)
       UI.SettingFollow:setChecked(currentSetting:getFollow())
+      UI.SettingDangerBox:setValue(currentSetting:getPriority())
 
       UI.SettingLoot:setEnabled(true)
       UI.SettingFollow:setEnabled(true)
@@ -508,9 +546,11 @@ function TargetsModule.syncSetting()
       end
     end
   else
+    UI.TargetSettingNumber:setText('#1 of 1');
     UI.SettingNameEdit:setText("", true)
     UI.SettingHpRange1:setText("100", true)
     UI.SettingHpRange2:setText("0", true)
+    UI.SettingDangerBox:setValue(0)
     UI.SettingLoot:setChecked(false)
     UI.SettingFollow:setChecked(false)
     UI.SettingModeText:setHeight(1)
@@ -599,6 +639,13 @@ function TargetsModule.getTarget(name)
   for _,child in pairs(UI.TargetList:getChildren()) do
     local t = child.target
     if t and t:getName() == name then return t end
+  end
+end
+
+function TargetsModule.getTargetIndex(name)
+  for key,child in pairs(UI.TargetList:getChildren()) do
+    local t = child.target
+    if t and t:getName() == name then return key end
   end
 end
 
@@ -749,8 +796,49 @@ function TargetsModule.loadTargets(file, force)
   end
 end
 
--- local functions
 
+function TargetsModule.getItemListEntry(id)
+  local item = UI.LootItemsList:getChildById(id)
+  if item then 
+    return item
+  end
+  local item = g_ui.createWidget('ItemListRow', UI.LootItemsList)
+  item:setId(id)
+  local itemBox = item:getChildById('item')
+  itemBox:setItemId(id)
+  local removeButton = item:getChildById('remove')
+  connect(removeButton, {
+    onClick = function(button)
+      local row = button:getParent()
+      local id = row:getId()
+      TargetsModule.deleteLootItem(id)
+    end
+  })
+  return item
+end
+
+function TargetsModule.addLootItem(id, count) 
+  if count == nil then
+    count = TargetsModule.AutoLoot.itemsList[id] or 0
+  else
+    TargetsModule.AutoLoot.itemsList[id] = count
+  end
+
+  BotLogger.debug("Item "..tostring(id) .." is refilled to " .. tostring(count) .. " by AutoLoot.")
+
+  TargetsModule.getItemListEntry(id):setText((count > 0 and 'Refill (' .. count .. '): ' or 'Ignore: ') .. id)
+end
+
+function TargetsModule.deleteLootItem(id)
+  local oldItem = UI.LootItemsList:getChildById(id)
+  if oldItem then
+    UI.LootItemsList:removeChild(oldItem)
+  end
+
+  TargetsModule.AutoLoot.itemsList[id] = nil
+end
+
+-- local functions
 function writeTargets(config)
   if not config then return end
 
@@ -761,6 +849,9 @@ function writeTargets(config)
     targets[v:getName()] = v:toNode()
   end
   config:setNode('Targets', targets)
+  if TargetsModule.AutoLoot then
+    config:setNode('Loot', TargetsModule.AutoLoot.itemsList)
+  end
   config:save()
 
   BotLogger.debug("Saved "..tostring(#targetObjs) .." targets to "..config:getFileName())
@@ -778,6 +869,12 @@ function parseTargets(config)
     target:parseNode(v)
     targets[index] = target
     index = index + 1
+  end
+
+  if TargetsModule.AutoLoot then
+    for k, v in pairs(config:getNode("Loot")) do
+      TargetsModule.addLootItem(k, v)
+    end
   end
 
   return targets

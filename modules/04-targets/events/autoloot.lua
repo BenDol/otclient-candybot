@@ -11,6 +11,16 @@ AutoLoot = TargetsModule.AutoLoot
 AutoLoot.lootList = {}
 AutoLoot.looting = false
 AutoLoot.lootProc = nil
+AutoLoot.itemsList = {}
+
+
+modules.game_interface.addMenuHook("Looter", tr("Set loot count"), 
+function(menuPosition, lookThing, useThing, creatureThing)
+  TargetsModule.addLootItem(lookThing:getId())
+end,
+function(menuPosition, lookThing, useThing, creatureThing)
+  return lookThing ~= nil and creatureThing == nil
+end)
 
 -- Methods
 
@@ -22,6 +32,7 @@ end
 
 function AutoLoot.terminate()
   AutoLoot.onStopped()
+  modules.game_interface.removeMenuHook("Looter")
 end
 
 function AutoLoot.onStopped()
@@ -74,9 +85,7 @@ function AutoLoot.getClosestLoot()
   local corpse = {distance=nil, loot = nil, creatureId=nil}
   for id,loot in pairs(AutoLoot.lootList) do
     if loot then
-      BotLogger.debug("AutoLoot: "..postostring(loot.position))
       local distance = Position.distance(playerPos, loot.position)
-      BotLogger.debug("AutoLoot: "..tostring(distance))
       if not corpse.loot or distance < corpse.distance then
         BotLogger.debug("AutoLoot: Found closest loot")
         corpse.distance = distance
@@ -84,6 +93,11 @@ function AutoLoot.getClosestLoot()
         corpse.creatureId = id
       end
     end
+  end
+  if corpse.loot then
+    BotLogger.debug("AutoLoot: Found closest loot at distance "..tostring(corpse.distance))
+  else
+    BotLogger.debug("AutoLoot: nothing to loot.")
   end
   return corpse
 end
@@ -99,7 +113,7 @@ function AutoLoot.lootNext()
   local player = g_game.getLocalPlayer()
   local data = AutoLoot.getClosestLoot()
 
-  if data.loot and player:getFreeCapacity() > 0 then
+  if data.loot and player:getFreeCapacity() > 0 and (not g_game.isAttacking() or data.distance < 2) then
     AutoLoot.lootProc = LootProcedure.create(data.creatureId, 
       data.loot.position, data.loot.corpse)
     
@@ -167,13 +181,8 @@ function AutoLoot.onStopped()
 end
 
 function AutoLoot.Event(event)
-  -- Cannot continue if still attacking or looting
-  if g_game.isAttacking() or AutoLoot.isLooting() then
-    return Helper.safeDelay(500, 800)
-  end
-
-  -- Try loot if not attacking still
-  if not g_game.isAttacking() and AutoLoot.hasUncheckedLoot() then
+  -- Try loot if has unchecked loot
+  if not AutoLoot.isLooting() and AutoLoot.hasUncheckedLoot() then
     AutoLoot.startLooting()
   end
 

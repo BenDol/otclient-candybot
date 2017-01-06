@@ -25,6 +25,7 @@ LootProcedure.create = function(id, position, corpse, timeoutTicks)
   proc.looted = false
   proc.hook = nil
   proc.openEvent = nil
+  proc.bodyEvent = nil
   proc.attempting = false
   proc.container = nil
   proc.items = nil
@@ -57,8 +58,18 @@ function LootProcedure:start()
   BotLogger.debug("LootProcedure:start called")
   Procedure.start(self)
 
-  -- Ensure there is a corpse
+  self:openBody()
+
+  signalcall(self.onStarted, self.id)
+end
+
+function LootProcedure:openBody()
+   -- Ensure there is a corpse
   if self:findCorpse() then
+    if self.bodyEvent then
+      self.bodyEvent:cancel()
+      self.bodyEvent = nil
+    end
     BotLogger.debug("LootProcedure: corpse exists at "..postostring(self.position))
     -- Disconnect existing looting hook
     if self.hook and type(self.hook) == "function" then
@@ -84,18 +95,21 @@ function LootProcedure:start()
     -- Run to corpse for looting
     local openFunc = function()
       local player = g_game.getLocalPlayer()
-      BotLogger.debug("LootProcedure: open function called")
-      if Position.isInRange(self.position, player:getPosition(), 6, 6) then
+      local openCorpseDistance = 6
+      if g_game.isAttacking() then
+        openCorpseDistance = 1
+      end
+      BotLogger.debug("LootProcedure: open function called, max open distance: " .. tostring(openCorpseDistance))
+      if Position.isInRange(self.position, player:getPosition(), openCorpseDistance, openCorpseDistance) then
         if not self.attempting then
           self.attempting = true
           
           BotLogger.debug("LootProcedure: try open corpse")
-          g_game.cancelAttackAndFollow()
           g_game.open(self:findCorpse())
 
           scheduleEvent(function() self.attempting = false end, 3000)
         end
-      elseif not self.attempting and not player:isAutoWalking() and not player:isServerWalking() then
+      elseif not g_game.isAttacking() and not self.attempting and not player:isAutoWalking() and not player:isServerWalking() then
         BotLogger.debug("LootProcedure: try walk to corpse")
         player:autoWalk(self.position)
       end
@@ -103,9 +117,9 @@ function LootProcedure:start()
 
     self:stopOpenCheck()
     self.openEvent = cycleEvent(openFunc, 1000)
+  elseif not self.bodyEvent then
+    self.bodyEvent = cycleEvent(function() self:openBody() end, 100)
   end
-
-  signalcall(self.onStarted, self.id)
 end
 
 function LootProcedure:findCorpse()
@@ -183,7 +197,9 @@ end
 function LootProcedure:getBestItem()
   local data = {item=nil, z=nil}
   for k,i in pairs(self.items) do
-    if not data.item or (i and i:getPosition().z < data.z) then
+    local refillCount = TargetsModule.AutoLoot.itemsList[tostring(i:getId())]
+    BotLogger.debug('Refill count: ' .. tostring(refillCount) .. ' we have: ' .. g_game.getLocalPlayer():countItems(i:getId()))
+    if (refillCount == nil or g_game.getLocalPlayer():countItems(i:getId()) < refillCount) and (not data.item or (i and i:getPosition().z < data.z)) then
       data.item = i
       data.z = i:getPosition().z
       BotLogger.debug("Found best item: ".. i:getId())
