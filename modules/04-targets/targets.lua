@@ -638,6 +638,20 @@ function TargetsModule.getSelectedTarget()
   return selectedTarget
 end
 
+function TargetsModule.getTargetSettingCreature(creature)
+  local target = TargetsModule.getTarget(creature:getName())
+  if not target then
+    return nil
+  end
+  for _, setting in pairs(target:getSettings()) do
+    BotLogger.debug('setting ' .. tostring(setting:getRange(1)) .. '-' .. tostring(setting:getRange(2)))
+    if setting:getRange(2) <= creature:getHealthPercent() and setting:getRange(1) >= creature:getHealthPercent() then
+      return setting
+    end
+  end
+  return nil
+end
+
 function TargetsModule.getTarget(name)
   for _,child in pairs(UI.TargetList:getChildren()) do
     local t = child.target

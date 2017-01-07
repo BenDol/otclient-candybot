@@ -83,11 +83,11 @@ function MoveProcedure:tryMove()
   
   -- the move has been called schedule finish
   local wait = g_game.getPing()*1.5
-  if self.fast and wait > 100 then
-    wait = 100
+  if self.fast and wait > 400 then
+    wait = 400
   end
-  if wait < 50 then
-    wait = 50
+  if wait < 275 then
+    wait = 275
   end
   if wait > 0 then
     self.tryMoveEvent = scheduleEvent(function() 

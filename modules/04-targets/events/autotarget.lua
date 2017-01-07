@@ -117,19 +117,26 @@ end
 function AutoTarget.getBestTarget()
   local player = g_game.getLocalPlayer()
   local playerPos = player:getPosition()
-  local target, distance = nil, nil
+  local target, distance, priority = nil, nil, nil
 
   for id,t in pairs(AutoTarget.creatureData) do
     if t and AutoTarget.isValidTarget(t) then
       local d = Position.distance(playerPos, t:getPosition())
-      if not target or d < distance then
-        BotLogger.debug("AutoTarget: Found closest target")
-        target = t
-        distance = d
+      local setting = TargetsModule.getTargetSettingCreature(t)
+      if not setting then
+        BotLogger.debug("No target setting found. No range for hp% ?" .. tostring(t:getHealthPercent()))
+      else
+        BotLogger.debug("Found target setting: " .. tostring(setting))
+        if not target or (d < distance and setting:getPriority() >= priority) then
+          BotLogger.debug("AutoTarget: Found best target")
+          target = t
+          distance = d
+          priority = setting:getPriority()
+        end
       end
     end
   end
-  return target
+  return target, priority
 end
 
 function AutoTarget.onStopped()
@@ -147,7 +154,7 @@ function AutoTarget.Event(event)
   -- Cannot continue if still attacking or is in pz
 
   -- Find a valid target to attack
-  local bestTarget = AutoTarget.getBestTarget()
+  local bestTarget, priority = AutoTarget.getBestTarget()
 
   local player = g_game.getLocalPlayer()
   if player:hasState(PlayerStates.Pz) then
@@ -155,7 +162,7 @@ function AutoTarget.Event(event)
     return Helper.safeDelay(600, 2000)
   elseif g_game.isAttacking() then
     local target = g_game.getAttackingCreature()
-    if not target or not player:canStandBy(creature) then
+    if not target or not player:canStandBy(bestTarget) then
       AutoTarget.notValidTargetCount = AutoTarget.notValidTargetCount + 1
       if AutoTarget.notValidTargetCount > 5 then
         g_game.cancelAttackAndFollow()
@@ -163,24 +170,22 @@ function AutoTarget.Event(event)
       else
         return Helper.safeDelay(600, 2000);
       end
-    elseif not TargetsModule.hasTarget(creature:getName()) then
+    elseif not TargetsModule.hasTarget(bestTarget:getName()) then
       if bestTarget and bestTarget ~= target then
-        g_game.cancelAttackAndFollow()
+        -- g_game.cancelAttackAndFollow()
         AutoTarget.notValidTargetCount = 0;
       end
     else
-      AutoTarget.notValidTargetCount = 0;
-      return Helper.safeDelay(600, 2000)
+      local currentPriority = TargetsModule.getTargetSettingCreature(target):getPriority()
+      if not bestTarget or priority <= currentPriority then
+        AutoTarget.notValidTargetCount = 0;
+        return Helper.safeDelay(600, 2000)
+      end
     end
   end
   AutoTarget.notValidTargetCount = 0;
 
   if bestTarget then
-    -- If looting pause to prioritize targeting
-    if AutoLoot.isLooting() then
-      AutoLoot.pauseLooting()
-    end
-
     AutoTarget.checkChaseMode(bestTarget)
     AutoTarget.checkStance(bestTarget)
 

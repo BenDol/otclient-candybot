@@ -99,7 +99,7 @@ function LootProcedure:openBody()
     local openFunc = function()
       local player = g_game.getLocalPlayer()
       local maxDistance = 6
-      if g_game.isAttacking() then
+      if g_game.isAttacking() then -- TODO: it often opens body just when killed and targeting hasn't had yet a chance to attack next mob, 
         maxDistance = 1
       end
       BotLogger.debug("LootProcedure: open function called, max open distance: " .. tostring(maxDistance))
@@ -133,6 +133,7 @@ function LootProcedure:findCorpse()
   local corpse = nil
   if tile then
     local topThing = tile:getTopThing()
+    local topUseThing = tile:getTopUseThing() -- check for ladders etc
     if topThing and topThing:isContainer() --[[and topThing:isLyingCorpse()]] then
       corpse = topThing
     end
@@ -293,6 +294,11 @@ function LootProcedure:clean()
   if self.moveProc then
     self.moveProc:cancel()
     self.moveProc = nil
+  end
+
+  if self.bodyEvent then
+    self.bodyEvent:cancel()
+    self.bodyEvent = nil
   end
 
   if self.hook then
