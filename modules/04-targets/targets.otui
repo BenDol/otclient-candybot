@@ -403,7 +403,7 @@ Panel
         !text: tr('Count:')
         anchors.top: parent.top
         anchors.left: parent.left
-        margin-left: 5
+        margin-left: 10
         margin-top: 5
 
       SpinBox
@@ -418,6 +418,15 @@ Panel
         focusable: true
         minimum: 0
         maximum: 10000
+
+      BotOptionCheckBox
+        id: FastLooter
+        width: 90
+        !text: tr('Fast Looter')
+        !tooltip: tr('Speedup looting process a lot (unsafe)')
+        anchors.left: parent.left
+        anchors.top: prev.bottom
+        margin-left: 10
 
   HorizontalSeparator
     anchors.left: parent.left

@@ -62,6 +62,7 @@ function TargetsModule.init()
   -- Event inits
   AutoTarget.init()
   AttackMode.init()
+  AutoLoot.init()
 end
 
 function TargetsModule.terminate()
@@ -80,6 +81,7 @@ function TargetsModule.terminate()
   -- Event terminates
   AutoTarget.terminate()
   AttackMode.terminate()
+  AutoLoot.terminate()
 end
 
 function TargetsModule.loadUI(panel)
@@ -123,7 +125,8 @@ function TargetsModule.loadUI(panel)
     SettingStrategyLabel = panel:recursiveGetChildById('SettingStrategyLabel'),
     SettingStrategyList = panel:recursiveGetChildById('SettingStrategyList'),
     LootItemsList = panel:recursiveGetChildById('LootItemsList'),
-    LootItemCountBox = panel:recursiveGetChildById('ItemCountBox')
+    LootItemCountBox = panel:recursiveGetChildById('ItemCountBox'),
+    FastLooter = panel:recursiveGetChildById('FastLooter')
   }
 
   -- Setting Mode List
@@ -201,7 +204,7 @@ function TargetsModule.bindHandlers()
       if child then
         local id = child:getId()
         if id then
-          TargetsModule.addLootItem(id, count)
+          TargetsModule.AutoLoot.addLootItem(id, count)
         end
       end
     end
@@ -796,48 +799,6 @@ function TargetsModule.loadTargets(file, force)
   end
 end
 
-
-function TargetsModule.getItemListEntry(id)
-  local item = UI.LootItemsList:getChildById(id)
-  if item then 
-    return item
-  end
-  local item = g_ui.createWidget('ItemListRow', UI.LootItemsList)
-  item:setId(id)
-  local itemBox = item:getChildById('item')
-  itemBox:setItemId(id)
-  local removeButton = item:getChildById('remove')
-  connect(removeButton, {
-    onClick = function(button)
-      local row = button:getParent()
-      local id = row:getId()
-      TargetsModule.deleteLootItem(id)
-    end
-  })
-  return item
-end
-
-function TargetsModule.addLootItem(id, count) 
-  if count == nil then
-    count = TargetsModule.AutoLoot.itemsList[id] or 0
-  else
-    TargetsModule.AutoLoot.itemsList[id] = count
-  end
-
-  BotLogger.debug("Item "..tostring(id) .." is refilled to " .. tostring(count) .. " by AutoLoot.")
-
-  TargetsModule.getItemListEntry(id):setText((count > 0 and 'Refill (' .. count .. '): ' or 'Ignore: ') .. id)
-end
-
-function TargetsModule.deleteLootItem(id)
-  local oldItem = UI.LootItemsList:getChildById(id)
-  if oldItem then
-    UI.LootItemsList:removeChild(oldItem)
-  end
-
-  TargetsModule.AutoLoot.itemsList[id] = nil
-end
-
 -- local functions
 function writeTargets(config)
   if not config then return end
@@ -873,7 +834,7 @@ function parseTargets(config)
 
   if TargetsModule.AutoLoot then
     for k, v in pairs(config:getNode("Loot")) do
-      TargetsModule.addLootItem(k, v)
+      TargetsModule.AutoLoot.addLootItem(k, v)
     end
   end
 

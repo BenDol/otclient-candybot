@@ -104,7 +104,7 @@ function terminate()
 end
 
 function CandyBot.online()
-  addEvent(CandyBot.loadOptions)
+  CandyBot.loadOptions()
 
   -- bind keys
   g_keyboard.bindKeyDown('Ctrl+Shift+B', CandyBot.toggle)

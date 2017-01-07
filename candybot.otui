@@ -111,6 +111,8 @@ ItemListRow < UIWidget
     margin-left: 2
     focusable: false
     virtual: true
+    anchors.top: parent.top
+    anchors.left: parent.left
 
 LogLabel < UILabel
   font: verdana-11px-antialised

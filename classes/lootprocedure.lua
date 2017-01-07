@@ -8,7 +8,7 @@ end
 
 LootProcedure = extends(Procedure, "LootProcedure")
 
-LootProcedure.create = function(id, position, corpse, timeoutTicks)
+LootProcedure.create = function(id, position, corpse, timeoutTicks, itemsList, containersList, fastLooting)
   local proc = LootProcedure.internalCreate()
 
   proc:setId(id) -- used for creature id
@@ -30,6 +30,9 @@ LootProcedure.create = function(id, position, corpse, timeoutTicks)
   proc.container = nil
   proc.items = nil
   proc.moveProc = nil
+  proc.itemsList = itemsList
+  proc.containersList = containersList
+  proc.fast = fastLooting
   
   return proc
 end
@@ -95,12 +98,12 @@ function LootProcedure:openBody()
     -- Run to corpse for looting
     local openFunc = function()
       local player = g_game.getLocalPlayer()
-      local openCorpseDistance = 6
+      local maxDistance = 6
       if g_game.isAttacking() then
-        openCorpseDistance = 1
+        maxDistance = 1
       end
-      BotLogger.debug("LootProcedure: open function called, max open distance: " .. tostring(openCorpseDistance))
-      if Position.isInRange(self.position, player:getPosition(), openCorpseDistance, openCorpseDistance) then
+      BotLogger.debug("LootProcedure: open function called, max open distance: " .. tostring(maxDistance))
+      if Position.isInRange(self.position, player:getPosition(), maxDistance, maxDistance) then
         if not self.attempting then
           self.attempting = true
           
@@ -116,7 +119,7 @@ function LootProcedure:openBody()
     end
 
     self:stopOpenCheck()
-    self.openEvent = cycleEvent(openFunc, 1000)
+    self.openEvent = cycleEvent(openFunc, self.fast and 100 or 1000)
   elseif not self.bodyEvent then
     self.bodyEvent = cycleEvent(function() self:openBody() end, 100)
   end
@@ -174,8 +177,14 @@ end
 function LootProcedure:takeNextItem()
   local item = self:getBestItem()
   if item then
-    local toPos = {x=65535, y=64, z=0} -- TODO: get container with free space
-    self.moveProc = MoveProcedure.create(item, toPos, true, 8000)
+    local toPos = self:getBestContainer(item)
+    if not toPos then
+      BotLogger.error("LootProcedure: no loot containers selected")
+      self:removeItem(item)
+      self:takeNextItem()
+      return
+    end
+    self.moveProc = MoveProcedure.create(item, toPos, true, 8000, self.fast)
     connect(self.moveProc, { onFinished = function(id)
       BotLogger.debug("connection: MoveProcedure.onFinished")
       self:removeItem(id)
@@ -199,13 +208,34 @@ function LootProcedure:getBestItem()
   for k,i in pairs(self.items) do
     local refillCount = TargetsModule.AutoLoot.itemsList[tostring(i:getId())]
     BotLogger.debug('Refill count: ' .. tostring(refillCount) .. ' we have: ' .. g_game.getLocalPlayer():countItems(i:getId()))
-    if (refillCount == nil or g_game.getLocalPlayer():countItems(i:getId()) < refillCount) and (not data.item or (i and i:getPosition().z < data.z)) then
+    if (refillCount == nil or g_game.getLocalPlayer():countItems(i:getId()) < refillCount) and (not data.item or (i and i:getPosition().z > data.z)) then
       data.item = i
       data.z = i:getPosition().z
       BotLogger.debug("Found best item: ".. i:getId())
     end
   end
   return data.item
+end
+
+function LootProcedure:getBestContainer(item)
+  -- TODO: check equipment first
+  for k = 0, #self.containersList do
+    local container = self.containersList[k]
+    if container then
+      g_logger.info('container ' .. tostring(k) .. ' ' .. tostring(container))
+      -- TODO: check if maybe this item is stackable and will fit here
+      local existingItem = container:findItemById(item:getId(), item:getSubType())
+      if existingItem then 
+        g_logger.info('found existingItem in bp ' .. existingItem:getId() .. ' ' .. existingItem:getCount())
+      else
+        g_logger.info('existingItem in bp not found')
+      end
+      if container:getCapacity() > container:getItemsCount() then
+        return {x=65535, y=64+container:getId(), z=container:getCapacity()-1}
+      end
+    end
+  end
+  return nil
 end
 
 function LootProcedure:fail()

@@ -8,7 +8,7 @@ end
 
 MoveProcedure = extends(Procedure, "MoveProcedure")
 
-MoveProcedure.create = function(thing, position, verify, timeoutTicks)
+MoveProcedure.create = function(thing, position, verify, timeoutTicks, fast, count)
   local proc = MoveProcedure.internalCreate()
 
   proc:setId(thing)
@@ -23,6 +23,8 @@ MoveProcedure.create = function(thing, position, verify, timeoutTicks)
   end
   proc.tryMoveEvent = nil
   proc.verify = verify
+  proc.fast = fast
+  proc.count = 999 or count
 
   if thing then
     local class = thing:getClassName()
@@ -63,7 +65,11 @@ function MoveProcedure:start()
   Procedure.start(self)
 
   -- try move thing
-  scheduleEvent(function() self:tryMove() end, Helper.safeDelay(800, 1200))
+  if self.fast then
+    addEvent(function() self:tryMove() end)
+  else
+    scheduleEvent(function() self:tryMove() end, Helper.safeDelay(800, 1200))
+  end
 
   signalcall(self.onStarted, self.id)
 end
@@ -73,10 +79,16 @@ function MoveProcedure:tryMove()
   self:stopTryMove()
   
   if self:isTimedOut() then return end
-  g_game.move(self.thing, self.position, self.thing:getCount())
+  g_game.move(self.thing, self.position, math.min(self.thing:getCount(), self.count))
   
   -- the move has been called schedule finish
-  local wait = (g_game.getPing()*1.5)
+  local wait = g_game.getPing()*1.5
+  if self.fast and wait > 100 then
+    wait = 100
+  end
+  if wait < 50 then
+    wait = 50
+  end
   if wait > 0 then
     self.tryMoveEvent = scheduleEvent(function() 
       if self:isTimedOut() then return end

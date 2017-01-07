@@ -12,11 +12,12 @@ AutoLoot.lootList = {}
 AutoLoot.looting = false
 AutoLoot.lootProc = nil
 AutoLoot.itemsList = {}
+AutoLoot.containersList = {}
 
 
 modules.game_interface.addMenuHook("Looter", tr("Set loot count"), 
 function(menuPosition, lookThing, useThing, creatureThing)
-  TargetsModule.addLootItem(lookThing:getId())
+  AutoLoot.addLootItem(lookThing:getId())
 end,
 function(menuPosition, lookThing, useThing, creatureThing)
   return lookThing ~= nil and creatureThing == nil
@@ -28,11 +29,13 @@ function AutoLoot.init()
   AutoLoot.lootList = {}
   AutoLoot.looting = false
   AutoLoot.lootProc = nil
+  g_logger.info("AutoLoot.init")
 end
 
 function AutoLoot.terminate()
   AutoLoot.onStopped()
   modules.game_interface.removeMenuHook("Looter")
+  g_logger.info("AutoLoot.terminate")
 end
 
 function AutoLoot.onStopped()
@@ -114,8 +117,10 @@ function AutoLoot.lootNext()
   local data = AutoLoot.getClosestLoot()
 
   if data.loot and player:getFreeCapacity() > 0 and (not g_game.isAttacking() or data.distance < 2) then
+    
     AutoLoot.lootProc = LootProcedure.create(data.creatureId, 
-      data.loot.position, data.loot.corpse)
+      data.loot.position, data.loot.corpse, false, AutoLoot.itemsList, 
+      g_game.getContainers(), TargetsModule.getUI().FastLooter:isChecked())
     
     -- Loot procedure finished
     connect(AutoLoot.lootProc, { onFinished = function(id)
@@ -189,3 +194,46 @@ function AutoLoot.Event(event)
   -- Keep the event live
   return Helper.safeDelay(500, 800)
 end
+
+-- GUI
+function AutoLoot.getItemListEntry(id)
+  local item = TargetsModule.getUI().LootItemsList:getChildById(id)
+  if item then 
+    return item
+  end
+  local item = g_ui.createWidget('ItemListRow', TargetsModule.getUI().LootItemsList)
+  item:setId(id)
+  local itemBox = item:getChildById('item')
+  itemBox:setItemId(id)
+  local removeButton = item:getChildById('remove')
+  connect(removeButton, {
+    onClick = function(button)
+      local row = button:getParent()
+      local id = row:getId()
+      AutoLoot.deleteLootItem(id)
+    end
+  })
+  return item
+end
+
+function AutoLoot.addLootItem(id, count) 
+  if count == nil then
+    count = AutoLoot.itemsList[id] or 0
+  else
+    AutoLoot.itemsList[id] = count
+  end
+
+  BotLogger.debug("Item "..tostring(id) .." is refilled to " .. tostring(count) .. " by AutoLoot.")
+
+  AutoLoot.getItemListEntry(id):setText((count > 0 and 'Refill (' .. count .. '): ' or 'Ignore: ') .. id)
+end
+
+function AutoLoot.deleteLootItem(id)
+  local oldItem = TargetsModule.getUI().LootItemsList:getChildById(id)
+  if oldItem then
+    TargetsModule.getUI().LootItemsList:removeChild(oldItem)
+  end
+
+  AutoLoot.itemsList[id] = nil
+end
+
