@@ -19,7 +19,8 @@ TargetsModule.dependencies = {
 
 TargetsModule.options = {
   ['AutoTarget'] = false,
-  ['LoadList'] = ''
+  ['LoadList'] = '',
+  ['FastLooter'] = false,
 }
 
 --[[ Register Events ]]

@@ -741,8 +741,6 @@ function TargetsModule.saveTargets(file)
       
       saveOverWindow:destroy()
       saveOverWindow=nil
-
-      UI.SaveNameEdit:setText("")
     end
 
     local noCallback = function()
@@ -757,8 +755,6 @@ function TargetsModule.saveTargets(file)
   else
     config = g_configs.create(path)
     writeTargets(config)
-
-    UI.SaveNameEdit:setText("")
   end
 
   local formatedFile = file..".otml"
