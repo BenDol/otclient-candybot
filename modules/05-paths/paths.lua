@@ -10,6 +10,7 @@ dofiles('events')
 
 local Panel = {}
 local UI = {}
+local nodes = {}
 
 local NodeTypes = {
   Action = "action",
@@ -27,7 +28,6 @@ local pathsDir = CandyBot.getWriteDir().."/paths"
 function PathsModule.getPanel() return Panel end
 function PathsModule.setPanel(panel) Panel = panel end
 function PathsModule.getUI() return UI end
-
 function PathsModule.init()
   -- create tab
   local botTabBar = CandyBot.window:getChildById('botTabBar')
@@ -53,12 +53,6 @@ function PathsModule.init()
   -- register module
   Modules.registerModule(PathsModule)
 
-  --[[local gameRootPanel = modules.game_interface.getRootPanel()
-  g_keyboard.bindKeyPress('Alt+Left', function() UI.PathMap:move(1,0) end, gameRootPanel)
-  g_keyboard.bindKeyPress('Alt+Right', function() UI.PathMap:move(-1,0) end, gameRootPanel)
-  g_keyboard.bindKeyPress('Alt+Up', function() UI.PathMap:move(0,1) end, gameRootPanel)
-  g_keyboard.bindKeyPress('Alt+Down', function() UI.PathMap:move(0,-1) end, gameRootPanel)]]
-
   connect(g_game, {
     onGameStart = PathsModule.online,
     onGameEnd = PathsModule.offline,
@@ -68,22 +62,16 @@ function PathsModule.init()
     onPositionChange = PathsModule.updateCameraPosition
   })
 
+  connect(UI.PathMap, {
+      onAddWalkNode = PathsModule.onAddWalkNode,
+      onNodeClicked = PathsModule.onNodeClicked
+    })
+
   if g_game.isOnline() then
     PathsModule.online()
   end
 
-  modules.game_interface.addMenuHook("pathing", tr("Add Path"), 
-    function(menuPosition, lookThing, useThing, creatureThing)
-      local gamemap = gameRootPanel:recursiveGetChildByPos(mousePosition, false)
-      if gamemap:getClassName() == 'UIGameMap' then
-        PathsModule.createPath(gamemap:getPosition(menuPosition))
-      end
-    end,
-    function(menuPosition, lookThing, useThing, creatureThing)
-      return lookThing ~= nil and lookThing:getTile() ~= nil
-    end)
-
-  -- event inits
+  -- event inits  
   SmartPath.init()
 end
 
@@ -94,8 +82,6 @@ function PathsModule.terminate()
     --save here
   end
 
-  modules.game_interface.removeMenuHook("pathing", tr("Add Path"))
-
   disconnect(g_game, {
     onGameStart = PathsModule.online,
     onGameEnd = PathsModule.offline,
@@ -105,11 +91,12 @@ function PathsModule.terminate()
     onPositionChange = PathsModule.updateCameraPosition
   })
 
-  --[[local gameRootPanel = modules.game_interface.getRootPanel()
-  g_keyboard.unbindKeyPress('Alt+Left', gameRootPanel)
-  g_keyboard.unbindKeyPress('Alt+Right', gameRootPanel)
-  g_keyboard.unbindKeyPress('Alt+Up', gameRootPanel)
-  g_keyboard.unbindKeyPress('Alt+Down', gameRootPanel)]]
+
+  disconnect(UI.PathMap, {
+      onAddWalkNode = PathsModule.onAddWalkNode,
+      -- onAddAvoidNode = PathsModule.onAddAvoidNode,
+      onNodeClicked = PathsModule.onNodeClicked
+    })
 
   -- event terminates
   SmartPath.terminate()
@@ -120,12 +107,12 @@ end
 function PathsModule.loadUI(panel)
   UI = {
     AutoExplore = panel:recursiveGetChildById('AutoExplore'),
-    PathMap = panel:recursiveGetChildById('PathMap')
+    PathMap = panel:recursiveGetChildById('PathMap'),
+    PathList = panel:recursiveGetChildById('PathList')
   }
 
   -- Load image resources
   UI.Images = {
-    g_ui.createWidget("NodeImage", UI.PathMap)
   }
 end
 
@@ -166,6 +153,69 @@ function PathsModule.onStopEvent(eventId)
   if eventId == PathsModule.smartPath then
     PathsModule.SmartPath.onStopped()
   end
+end
+
+function PathsModule.getNode(pos)
+  local index = PathsModule.getNodeIndex(pos)
+  return index ~= nil and nodes[index] or nil
+end
+
+function PathsModule.getNodeIndex(pos)
+  for k, v in pairs(nodes) do
+    if v and v.pos.x == pos.x and v.pos.y == pos.y and v.pos.z == pos.z then
+      return k
+    end
+  end
+  return nil
+end
+
+function PathsModule.getNodes()
+  return nodes
+end
+
+function PathsModule.hasNode(pos)
+  return PathsModule.getNodeIndex(pos) ~= nil
+end
+
+function PathsModule.onNodeClicked(node, pos, button)
+  printContents("nodeClicked", node, pos, button)
+  if button == MouseLeftButton then
+    PathsModule.selectNode(node)
+  elseif button == MouseRightButton then
+    local menu = g_ui.createWidget('PopupMenu')
+    menu:addOption(tr('Remove node'), function() PathsModule.removeNode(node) end)
+    menu:display(pos)
+  else
+    return false
+  end
+  return true
+end
+
+function PathsModule.onAddWalkNode(map, pos)
+  if PathsModule.hasNode(pos) then return true end
+  local node = Node.create(pos)
+
+  if node.__class ~= "Node" or node:getName() == '' then return end
+
+  local item = g_ui.createWidget('ListRowComplex', UI.PathList)
+  item:setText(node:getName())
+  item:setTextAlign(AlignLeft)
+  item:setId(#UI.PathList:getChildren()+1)
+  item.node = node
+  node.list = item
+
+  node.map = map:addNode(pos, g_resources.resolvePath('images/walk2'), node:getName())
+
+  local removeButton = item:getChildById('remove')
+  connect(removeButton, {
+    onClick = function(button)
+      local row = button:getParent()
+      local targetPos = row.node:getPosition()
+      local nodeName = row.node:getName()
+      row:destroy()
+      PathsModule.removeNode(targetPos)
+    end
+  })
 end
 
 return PathsModule

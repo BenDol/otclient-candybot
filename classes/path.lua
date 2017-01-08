@@ -6,44 +6,32 @@ if not CandyConfig then
   dofile("candyconfig.lua")
 end
 
-Path = extends(CandyConfig, "Path")
+Node = extends(CandyConfig, "Node")
 
-Path.create = function(--[[TODO: path settings]])
-  local path = Path.internalCreate()
+Node.create = function(pos)
+  local node = Node.internalCreate()
 
-  path.nodes = {}
-
-  return path
-end
-
--- gets/sets
-
-function Path:addNode(node)
-  if not table.contains(self.nodes, node) then
-    node:setPath(self)
-    node:setIndex(#self.nodes + 1)
-    table.insert(self.nodes, node)
-    
-    signalcall(self.onAddNode, self, node)
-  end
-end
-
-function Path:getNodes()
-  return self.nodes
-end
-
--- methods
-
-function Path:toNode()
-  local node = CandyConfig.toNode(self)
-
-  -- complex nodes
-
+  node.pos = pos or {}
   return node
 end
 
-function Path:parseNode(node)
+function Node:getName() 
+  return 'Node #' .. tostring(self.pos.x) .. ':' .. tostring(self.pos.y) .. ':' .. tostring(self.pos.z)
+end
+
+function Node:toNode()
+  local node = CandyConfig.toNode(self)
+  
+  node.pos = self.pos
+  return node
+end
+
+function Node:parseNode(node)
   CandyConfig.parseNode(self, node)
 
-  -- complex parse
+  if node.pos then
+    for k,v in pairs(node.pos) do
+      self.pos[k] = tonumber(v)
+    end
+  end
 end
