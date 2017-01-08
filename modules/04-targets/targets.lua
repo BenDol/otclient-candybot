@@ -418,7 +418,6 @@ function TargetsModule.connectSetting(target, setting)
     end
   })
 
-
   connect(setting, {
     onPriorityChange = function(setting, priority, oldPriority, index)
       local priority = setting:getPriority()
@@ -644,7 +643,6 @@ function TargetsModule.getTargetSettingCreature(creature)
     return nil
   end
   for _, setting in pairs(target:getSettings()) do
-    BotLogger.debug('setting ' .. tostring(setting:getRange(1)) .. '-' .. tostring(setting:getRange(2)))
     if setting:getRange(2) <= creature:getHealthPercent() and setting:getRange(1) >= creature:getHealthPercent() then
       return setting
     end
@@ -767,7 +765,6 @@ function TargetsModule.loadTargets(file, force)
   BotLogger.debug("TargetsModule.loadTargets("..file..")")
   local path = targetsDir.."/"..file
   local config = g_configs.load(path)
-  BotLogger.debug("TargetsModule"..tostring(config))
   if config then
     local loadFunc = function()
       TargetsModule.clearTargetList()

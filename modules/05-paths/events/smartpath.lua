@@ -100,6 +100,11 @@ function SmartPath.checkPathing(dirs, override, dontChange)
     if player:autoWalk(destPos) then
       SmartPath.lastDest.pos = destPos
       SmartPath.lastDest.time = currentTime
+
+      local staticText = StaticText.create()
+      staticText:setColor('#00FF00')
+      staticText:addMessage("", 44, "SmartPath")
+      g_map.addThing(staticText, destPos, -1)
     end
   elseif not dontChange then
     SmartPath.changeDirection(PathFindResults.NoWay)

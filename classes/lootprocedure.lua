@@ -134,8 +134,9 @@ function LootProcedure:findCorpse()
   if tile then
     local topThing = tile:getTopThing()
     local topUseThing = tile:getTopUseThing() -- check for ladders etc
-    if topThing and topThing:isContainer() --[[and topThing:isLyingCorpse()]] then
-      corpse = topThing
+    -- TODO: move body somewhere near if topThing ~= topUseThing
+    if topUseThing and topUseThing:isContainer() --[[and topUseThing:isLyingCorpse()]] then
+      corpse = topUseThing
     end
   end
   return corpse
@@ -219,7 +220,16 @@ function LootProcedure:getBestItem()
 end
 
 function LootProcedure:getBestContainer(item)
-  -- TODO: check equipment first
+  local player = g_game.getLocalPlayer()
+  for i=InventorySlotFirst,InventorySlotLast do
+    local invItem = player:getInventoryItem(i)
+    if invItem and invItem:getId() == item:getId() and item:getSubType() == invItem:getSubType() and 
+      (100-invItem:getCount() >= item:getCount()) then
+      
+      return invItem:getPosition()
+    end
+  end
+
   for k = 0, #self.containersList do
     local container = self.containersList[k]
     if container then
@@ -227,6 +237,9 @@ function LootProcedure:getBestContainer(item)
       local existingItem = container:findItemById(item:getId(), item:getSubType())
       if existingItem then 
         BotLogger.debug('found existingItem in bp ' .. existingItem:getId() .. ' ' .. existingItem:getCount())
+        if (100-existingItem:getCount() >= item:getCount()) then
+          return existingItem:getPosition()
+        end
       else
         BotLogger.debug('existingItem ' .. item:getId() .. ' in bp not found')
       end

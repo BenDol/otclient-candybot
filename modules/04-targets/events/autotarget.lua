@@ -120,15 +120,13 @@ function AutoTarget.getBestTarget()
   local target, distance, priority = nil, nil, nil
 
   for id,t in pairs(AutoTarget.creatureData) do
-    if t and AutoTarget.isValidTarget(t) then
+    if t and AutoTarget.isValidTarget(t) and Position.isInRange(playerPos, t:getPosition(), 7, 5) then
       local d = Position.distance(playerPos, t:getPosition())
       local setting = TargetsModule.getTargetSettingCreature(t)
       if not setting then
-        BotLogger.debug("No target setting found. No range for hp% ?" .. tostring(t:getHealthPercent()))
+        BotLogger.debug("No target setting found for monster " .. t:getName() .. ". No range for hp% ?" .. tostring(t:getHealthPercent()))
       else
-        BotLogger.debug("Found target setting: " .. tostring(setting))
         if not target or (d < distance and setting:getPriority() >= priority) then
-          BotLogger.debug("AutoTarget: Found best target")
           target = t
           distance = d
           priority = setting:getPriority()
