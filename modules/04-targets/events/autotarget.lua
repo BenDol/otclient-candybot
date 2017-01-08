@@ -172,7 +172,6 @@ function AutoTarget.Event(event)
       end
     elseif not TargetsModule.hasTarget(bestTarget:getName()) then
       if bestTarget and bestTarget ~= target then
-        -- g_game.cancelAttackAndFollow()
         AutoTarget.notValidTargetCount = 0;
       end
     else

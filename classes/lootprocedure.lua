@@ -223,13 +223,12 @@ function LootProcedure:getBestContainer(item)
   for k = 0, #self.containersList do
     local container = self.containersList[k]
     if container then
-      g_logger.info('container ' .. tostring(k) .. ' ' .. tostring(container))
       -- TODO: check if maybe this item is stackable and will fit here
       local existingItem = container:findItemById(item:getId(), item:getSubType())
       if existingItem then 
-        g_logger.info('found existingItem in bp ' .. existingItem:getId() .. ' ' .. existingItem:getCount())
+        BotLogger.debug('found existingItem in bp ' .. existingItem:getId() .. ' ' .. existingItem:getCount())
       else
-        g_logger.info('existingItem in bp not found')
+        BotLogger.debug('existingItem ' .. item:getId() .. ' in bp not found')
       end
       if container:getCapacity() > container:getItemsCount() then
         return {x=65535, y=64+container:getId(), z=container:getCapacity()-1}

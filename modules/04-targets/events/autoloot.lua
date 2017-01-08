@@ -29,13 +29,11 @@ function AutoLoot.init()
   AutoLoot.lootList = {}
   AutoLoot.looting = false
   AutoLoot.lootProc = nil
-  g_logger.info("AutoLoot.init")
 end
 
 function AutoLoot.terminate()
   AutoLoot.onStopped()
   modules.game_interface.removeMenuHook("Looter")
-  g_logger.info("AutoLoot.terminate")
 end
 
 function AutoLoot.onStopped()
