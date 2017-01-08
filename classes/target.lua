@@ -187,14 +187,14 @@ function TargetSetting:parseNode(node)
 
   if node.range then
     for k,v in pairs(node.range) do
-      self.range[tonumber(k)] = v
+      self.range[tonumber(k)] = tonumber(v)
     end
   end
   if node.equip then
     self.equip = node.equip
   end
   if node.priority then
-  	self.priority = node.priority
+  	self.priority = tonumber(node.priority)
   end
   if node.attack then
     self.attack = Attack.create()

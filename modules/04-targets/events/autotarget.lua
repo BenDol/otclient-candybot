@@ -163,7 +163,6 @@ function AutoTarget.Event(event)
     if not target or not player:canStandBy(bestTarget) then
       AutoTarget.notValidTargetCount = AutoTarget.notValidTargetCount + 1
       if AutoTarget.notValidTargetCount > 5 then
-        g_game.cancelAttackAndFollow()
         AutoTarget.notValidTargetCount = 0;
       else
         return Helper.safeDelay(600, 2000);
@@ -176,6 +175,8 @@ function AutoTarget.Event(event)
       local currentPriority = TargetsModule.getTargetSettingCreature(target):getPriority()
       if not bestTarget or priority <= currentPriority then
         AutoTarget.notValidTargetCount = 0;
+        AutoTarget.checkChaseMode(target)
+        AutoTarget.checkStance(target)
         return Helper.safeDelay(600, 2000)
       end
     end

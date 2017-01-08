@@ -841,7 +841,7 @@ function parseTargets(config)
 
   if TargetsModule.AutoLoot then
     for k, v in pairs(config:getNode("Loot")) do
-      TargetsModule.AutoLoot.addLootItem(k, v)
+      TargetsModule.AutoLoot.addLootItem(k, tonumber(v))
     end
   end
 
