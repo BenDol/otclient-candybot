@@ -215,11 +215,11 @@ function AutoLoot.getItemListEntry(id)
 end
 
 function AutoLoot.addLootItem(id, count) 
+  id=tonumber(id)
   if count == nil then
     count = AutoLoot.itemsList[id] or 0
-  else
-    AutoLoot.itemsList[id] = count
   end
+  AutoLoot.itemsList[id] = count
 
   BotLogger.debug("Item "..tostring(id) .." is refilled to " .. tostring(count) .. " by AutoLoot.")
 
@@ -227,6 +227,7 @@ function AutoLoot.addLootItem(id, count)
 end
 
 function AutoLoot.deleteLootItem(id)
+  id=tonumber(id)
   local oldItem = TargetsModule.getUI().LootItemsList:getChildById(id)
   if oldItem then
     TargetsModule.getUI().LootItemsList:removeChild(oldItem)
