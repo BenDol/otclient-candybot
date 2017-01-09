@@ -41,38 +41,33 @@ function AutoPath.nextNodeFailed(player, code)
 end
 
 function AutoPath.Event(event)
-  if AutoLoot.isLooting() then
-    BotLogger.debug("AutoPath: AutoLoot is working.")
-    return false
-  end
-
   local player = g_game.getLocalPlayer()
   local playerPos = player:getPosition()
-  
-  if not player:canWalk() or player:isAutoWalking() or player:isServerWalking() then
-    BotLogger.debug("AutoPath: player is moving")
-    return false
-  end
-
   local node = AutoPath.getNode()
-  if not node then
-    return Helper.safeDelay(1200, 2400)
-  end
-  if Position.isInRange(playerPos, node:getPosition(), 1, 1) then
+
+  if AutoLoot.isLooting() then
+    BotLogger.debug("AutoPath: AutoLoot is working.")
+  elseif g_game.isAttacking() then
+    BotLogger.debug("AutoPath: Attacking someone.")
+  elseif not player:canWalk() or player:isAutoWalking() or player:isServerWalking() then
+    BotLogger.debug("AutoPath: Already walking.")
+  elseif not node then
+    BotLogger.error("AutoPath: No nodes to walk.")
+  elseif Position.isInRange(playerPos, node:getPosition(), 1, 1) then
     currentNode = currentNode + 1
     return Helper.safeDelay(100, 500)
+  else
+    connect(player, {
+      onAutoWalkFail = AutoPath.nextNodeFailed
+    })
+    
+    player:autoWalk(node:getPosition())
+
+    disconnect(player, {
+      onAutoWalkFail = AutoPath.nextNodeFailed
+    })
   end
 
-  connect(player, {
-    onAutoWalkFail = AutoPath.nextNodeFailed
-  })
-  
-  player:autoWalk(node:getPosition())
-
-  disconnect(player, {
-    onAutoWalkFail = AutoPath.nextNodeFailed
-  })
-
   -- Keep the event live
-  return Helper.safeDelay(600, 1400)
+  return Helper.safeDelay(1000, 1400)
 end
