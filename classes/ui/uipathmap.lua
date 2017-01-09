@@ -31,8 +31,8 @@ local function onNodeMouseRelease(widget, pos, button)
   return true
 end
 
-function UIPathMap:addNode(pos, icon, description, node)
-  if not pos or not icon then return end
+function UIPathMap:addNode(pos, icon, description)
+  if not pos or not icon then return nil end
   local node = self:getNode(pos)
   if node or not icon then
     return

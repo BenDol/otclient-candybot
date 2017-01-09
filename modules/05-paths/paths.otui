@@ -9,7 +9,7 @@ Panel
   anchors.right: parent.right
   anchors.top: parent.top
   padding-right: 8
-  height: 310
+  height: 450
 
   BotOptionCheckBox
     id: AutoPath
@@ -75,3 +75,88 @@ Panel
     anchors.left: PathList.left
     anchors.top: PathList.bottom
     margin-top: 4
+
+    
+  HorizontalSeparator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 10
+
+  Panel
+    id: SaveLoadPanel
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    anchors.bottom: parent.bottom
+
+    Label
+      text: Save & Load:
+      anchors.left: parent.left
+      anchors.top: parent.top
+      margin-top: 4
+      width: 130
+
+    TextList
+      id: LoadList
+      anchors.top: prev.bottom
+      anchors.left: prev.left
+      margin-bottom: 5
+      margin-top: 5
+      padding: 1
+      focusable: false
+      phantom: true
+      vertical-scrollbar: LoadSettingScrollBar
+      width: 190
+      height: 80
+
+    VerticalScrollBar
+      id: LoadSettingScrollBar
+      anchors.top: LoadList.top
+      anchors.bottom: LoadList.bottom
+      anchors.left: LoadList.right
+      step: 14
+      pixels-scroll: true
+
+    Button
+      id: LoadButton
+      !text: tr('Load Selected')
+      anchors.top: LoadList.bottom
+      anchors.left: LoadList.left
+      anchors.right: LoadSettingScrollBar.right
+      margin-top: 3
+      enabled: false
+      @onClick: |
+        local parent = self:getParent()
+        local focusedChild = parent:getChildById('LoadList'):getFocusedChild()
+        if focusedChild then
+          PathsModule.loadPaths(focusedChild:getText())
+        end
+
+    Label
+      id: NewLabel
+      !text: tr('Name:')
+      anchors.top: LoadSettingScrollBar.top
+      anchors.left: LoadSettingScrollBar.right
+      width: 35 
+      margin-top: 2
+      margin-left: 6
+
+    TextEdit
+      id: SaveNameEdit
+      anchors.top: LoadSettingScrollBar.top
+      anchors.left: prev.right
+      anchors.right: parent.right
+      margin-left: 6
+
+    Button
+      id: SaveButton
+      !text: tr('Save Paths')
+      anchors.top: prev.bottom
+      anchors.left: NewLabel.left
+      anchors.right: parent.right
+      margin-top: 8
+      @onClick: |
+        local parent = self:getParent()
+        local file = parent:getChildById('SaveNameEdit'):getText()
+        PathsModule.savePaths(file)

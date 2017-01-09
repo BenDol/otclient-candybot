@@ -16,7 +16,11 @@ Node.create = function(pos)
 end
 
 function Node:getName() 
-  return 'Node #' .. tostring(self.pos.x) .. ':' .. tostring(self.pos.y) .. ':' .. tostring(self.pos.z)
+  return tostring(self.pos.x) .. ':' .. tostring(self.pos.y) .. ':' .. tostring(self.pos.z)
+end
+
+function Node:getPosition()
+	return self.pos
 end
 
 function Node:toNode()

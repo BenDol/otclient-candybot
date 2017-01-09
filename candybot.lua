@@ -104,6 +104,7 @@ function terminate()
 end
 
 function CandyBot.online()
+  g_game.enableFeature(GameKeepUnawareTiles)
   CandyBot.loadOptions()
 
   -- bind keys

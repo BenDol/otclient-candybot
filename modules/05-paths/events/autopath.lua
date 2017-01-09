@@ -5,6 +5,7 @@
 
 PathsModule.AutoPath = {}
 AutoPath = PathsModule.AutoPath
+local currentNode = 1
 
 -- Variables
 
@@ -22,11 +23,21 @@ function AutoPath.onStopped()
   --
 end
 
-function AutoPath.getNextNode()
+function AutoPath.getNode()
+  local nodes = PathsModule.getNodes()
+  if #nodes == 0 then
+    BotLogger.error("AutoPath: no nodes specified.");
+    return nil
+  end
+  if currentNode > #nodes then
+    currentNode = 1
+  end
+  return nodes[currentNode]
 end
 
-function AutoPath.nextNodeFailed(code)
-
+function AutoPath.nextNodeFailed(player, code)
+  local node = AutoPath.getNode()
+  BotLogger.error("AutoPath: autoWalk to node " .. node:getName() .. " failed (" .. tostring(code) .. ") ")
 end
 
 function AutoPath.Event(event)
@@ -43,21 +54,24 @@ function AutoPath.Event(event)
     return false
   end
 
-  local node = AutoPath.getNextNode()
+  local node = AutoPath.getNode()
   if not node then
-    BotLogger.error("No next autopath node found.")
-    return false
+    return Helper.safeDelay(1200, 2400)
   end
+  if Position.isInRange(playerPos, node:getPosition(), 1, 1) then
+    currentNode = currentNode + 1
+    return Helper.safeDelay(100, 500)
+  end
+
   connect(player, {
     onAutoWalkFail = AutoPath.nextNodeFailed
   })
   
-  player:autoWalk(node.pos)
+  player:autoWalk(node:getPosition())
 
   disconnect(player, {
     onAutoWalkFail = AutoPath.nextNodeFailed
   })
-  -- connect to event localPlayer.onAutoWalkFail
 
   -- Keep the event live
   return Helper.safeDelay(600, 1400)

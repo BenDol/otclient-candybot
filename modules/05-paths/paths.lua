@@ -8,6 +8,11 @@ PathsModule = {}
 -- load module events
 dofiles('events')
 
+local pathsDir = CandyBot.getWriteDir().."/paths"
+local refreshEvent
+local loadListIndex
+local removeFileWindow
+
 local Panel = {}
 local UI = {}
 local nodes = {}
@@ -47,6 +52,10 @@ function PathsModule.init()
   if not g_resources.directoryExists(pathsDir) then
     g_resources.makeDir(pathsDir)
   end
+  -- setup refresh event
+  PathsModule.refresh()
+  refreshEvent = cycleEvent(PathsModule.refresh, 8000)
+
 
   g_resources.addSearchPath(g_resources.getRealDir()..g_resources.resolvePath("images"))
 
@@ -94,7 +103,6 @@ function PathsModule.terminate()
 
   disconnect(UI.PathMap, {
       onAddWalkNode = PathsModule.onAddWalkNode,
-      -- onAddAvoidNode = PathsModule.onAddAvoidNode,
       onNodeClicked = PathsModule.onNodeClicked
     })
 
@@ -108,12 +116,13 @@ function PathsModule.loadUI(panel)
   UI = {
     AutoExplore = panel:recursiveGetChildById('AutoExplore'),
     PathMap = panel:recursiveGetChildById('PathMap'),
-    PathList = panel:recursiveGetChildById('PathList')
+    PathList = panel:recursiveGetChildById('PathList'),
+    SaveNameEdit = panel:recursiveGetChildById('SaveNameEdit'),
+    SaveButton = panel:recursiveGetChildById('SaveButton'),
+    LoadList = panel:recursiveGetChildById('LoadList'),
+    LoadButton = panel:recursiveGetChildById('LoadButton')
   }
 
-  -- Load image resources
-  UI.Images = {
-  }
 end
 
 function PathsModule.unloadUI()
@@ -126,6 +135,26 @@ function PathsModule.unloadUI()
 end
 
 function PathsModule.bindHandlers()
+  connect(UI.LoadList, {
+    onChildFocusChange = function(self, focusedChild, unfocusedChild, reason)
+        if reason == ActiveFocusReason then return end
+        if focusedChild == nil then 
+          UI.LoadButton:setEnabled(false)
+          loadListIndex = nil
+        else
+          UI.LoadButton:setEnabled(true)
+          UI.SaveNameEdit:setText(string.gsub(focusedChild:getText(), ".otml", ""))
+          loadListIndex = UI.LoadList:getChildIndex(focusedChild)
+        end
+      end
+    })
+
+  connect(UI.PathList, {
+    onChildFocusChange = function(self, focusedChild)
+      if focusedChild == nil then return end
+      UI.PathMap:setCameraPosition(focusedChild.node:getPosition())
+    end
+  })
 
 end
 
@@ -191,31 +220,214 @@ function PathsModule.onNodeClicked(node, pos, button)
   return true
 end
 
-function PathsModule.onAddWalkNode(map, pos)
-  if PathsModule.hasNode(pos) then return true end
-  local node = Node.create(pos)
-
-  if node.__class ~= "Node" or node:getName() == '' then return end
-
+function PathsModule.addWalkNode(node)
+  if PathsModule.hasNode(node:getPosition()) then return true end
   local item = g_ui.createWidget('ListRowComplex', UI.PathList)
   item:setText(node:getName())
   item:setTextAlign(AlignLeft)
   item:setId(#UI.PathList:getChildren()+1)
   item.node = node
   node.list = item
-
-  node.map = map:addNode(pos, g_resources.resolvePath('images/walk2'), node:getName())
-
+  node.map = UI.PathMap:addNode(node:getPosition(), g_resources.resolvePath('images/walk2'), node:getName())
   local removeButton = item:getChildById('remove')
   connect(removeButton, {
     onClick = function(button)
       local row = button:getParent()
-      local targetPos = row.node:getPosition()
+      local nodePos = row.node:getPosition()
       local nodeName = row.node:getName()
       row:destroy()
-      PathsModule.removeNode(targetPos)
+      PathsModule.removeNode(nodePos)
+    end
+  })
+  table.insert(nodes, node)
+end
+
+function PathsModule.onAddWalkNode(map, pos)
+  if PathsModule.hasNode(pos) then return true end
+  local node = Node.create(pos)
+
+  if node.__class ~= "Node" or node:getName() == '' then return end
+
+  PathsModule.addWalkNode(node)
+end
+
+function PathsModule.removeNode(node)
+  table.remove(nodes, node)
+  node.list:destroy()
+  node.map:destroy()
+end
+
+function PathsModule.clearNodes()
+  for _, node in pairs(nodes) do
+    node.list:destroy()
+    node.map:destroy()
+  end
+  nodes = {}
+end
+
+function PathsModule.addFile(file)
+  local item = g_ui.createWidget('ListRowComplex', UI.LoadList)
+  item:setText(file)
+  item:setTextAlign(AlignLeft)
+  item:setId(file)
+
+  local removeButton = item:getChildById('remove')
+  connect(removeButton, {
+    onClick = function(button)
+      if removeFileWindow then return end
+
+      local row = button:getParent()
+      local fileName = row:getText()
+
+      local yesCallback = function()
+        g_resources.deleteFile(pathsDir..'/'..fileName)
+        row:destroy()
+
+        removeFileWindow:destroy()
+        removeFileWindow=nil
+      end
+      local noCallback = function()
+        removeFileWindow:destroy()
+        removeFileWindow=nil
+      end
+
+      removeFileWindow = displayGeneralBox(tr('Delete'), 
+        tr('Delete '..fileName..'?'), {
+        { text=tr('Yes'), callback=yesCallback },
+        { text=tr('No'), callback=noCallback },
+        anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
     end
   })
 end
+
+function PathsModule.refresh()
+  -- refresh the files
+  UI.LoadList:destroyChildren()
+
+  local files = g_resources.listDirectoryFiles(pathsDir)
+  for _,file in pairs(files) do
+    PathsModule.addFile(file)
+  end
+  UI.LoadList:focusChild(UI.LoadList:getChildByIndex(loadListIndex), ActiveFocusReason)
+end
+
+
+function PathsModule.onNotify(key, state)
+  if key == "LoadList" then
+    PathsModule.loadPaths(state, true)
+  end
+end
+
+
+function PathsModule.savePaths(file)
+  local path = pathsDir.."/"..file..".otml"
+  local config = g_configs.load(path)
+  if config then
+    local msg = "Are you sure you would like to save over "..file.."?"
+
+    local yesCallback = function()
+      writePath(config)
+      
+      saveOverWindow:destroy()
+      saveOverWindow=nil
+    end
+
+    local noCallback = function()
+      saveOverWindow:destroy()
+      saveOverWindow=nil
+    end
+
+    saveOverWindow = displayGeneralBox(tr('Overwite Save'), tr(msg), {
+      { text=tr('Yes'), callback = yesCallback},
+      { text=tr('No'), callback = noCallback},
+      anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
+  else
+    config = g_configs.create(path)
+    writePath(config)
+  end
+
+  local formatedFile = file..".otml"
+  if not UI.LoadList:getChildById(formatedFile) then
+    PathsModule.addFile(formatedFile)
+  end
+end
+
+function PathsModule.loadPaths(file, force)
+  BotLogger.debug("PathsModule.loadPaths("..file..")")
+  local path = pathsDir.."/"..file
+  local config = g_configs.load(path)
+  if config then
+    local loadFunc = function()
+      PathsModule.clearNodes()
+
+      local nodes = parsePath(config)
+      for _,node in ipairs(nodes) do
+        if node then PathsModule.addWalkNode(node) end
+      end
+      
+      if not force then
+        currentFileLoaded = file
+        CandyBot.changeOption(UI.LoadList:getId(), file)
+      end
+    end
+
+    if force then
+      loadFunc()
+    elseif not loadWindow then
+      local msg = "Would you like to load "..file.."?"
+
+      local yesCallback = function()
+        loadFunc()
+
+        loadWindow:destroy()
+        loadWindow=nil
+      end
+
+      local noCallback = function()
+        loadWindow:destroy()
+        loadWindow=nil
+      end
+
+      loadWindow = displayGeneralBox(tr('Load Paths'), tr(msg), {
+        { text=tr('Yes'), callback = yesCallback},
+        { text=tr('No'), callback = noCallback},
+        anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
+    end
+  end
+end
+
+-- local functions
+function writePath(config)
+  if not config then return end
+
+  local path = PathsModule.getNodes()
+  local nodes = {}
+
+  for k,v in pairs(path) do
+    nodes[k] = v:toNode()
+  end
+  config:setNode('Path', nodes)
+  config:save()
+
+  BotLogger.debug("Saved "..tostring(#path) .." nodes to "..config:getFileName())
+end
+
+function parsePath(config)
+  if not config then return end
+
+  local nodes = {}
+
+  -- loop each target node
+  local index = 1
+  for k,v in pairs(config:getNode("Path")) do
+    local node = Node.create()
+    node:parseNode(v)
+    nodes[index] = node
+    index = index + 1
+  end
+
+  return nodes
+end
+
 
 return PathsModule
