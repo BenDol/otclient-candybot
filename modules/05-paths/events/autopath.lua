@@ -66,6 +66,7 @@ function AutoPath.Event(event)
     disconnect(player, {
       onAutoWalkFail = AutoPath.nextNodeFailed
     })
+    return Helper.safeDelay(5000, 10000)
   end
 
   -- Keep the event live

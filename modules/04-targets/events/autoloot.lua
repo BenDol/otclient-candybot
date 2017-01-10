@@ -172,11 +172,16 @@ function AutoLoot.stopLooting()
 end
 
 function AutoLoot.canLoot(creature)
+  local player = g_game.getLocalPlayer()
+  local attacking = g_game.getAttackingCreature()
+  if not Position.isInRange(player:getPosition(), creature:getPosition(), 3, 3) and (not attacking or attacking ~= creature) then
+    return false
+  end
   local target = TargetsModule.getTarget(creature:getName())
   if target then
     return target:getLoot()
   end
-  return false
+  return true 
 end
 
 function AutoLoot.onStopped()
