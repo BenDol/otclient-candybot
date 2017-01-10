@@ -268,20 +268,22 @@ end
 
 function LootProcedure:getBestContainer(item)
   local player = g_game.getLocalPlayer()
-  for i=InventorySlotFirst,InventorySlotLast do
-    local invItem = player:getInventoryItem(i)
-    if invItem and invItem:getId() == item:getId() and item:getSubType() == invItem:getSubType() and 
-      (100-invItem:getCount() >= item:getCount()) then
-      return invItem:getPosition()
+  if item:isStackable() then
+    for i=InventorySlotFirst,InventorySlotLast do
+      local invItem = player:getInventoryItem(i)
+      if invItem and invItem:getId() == item:getId() and item:getSubType() == invItem:getSubType() and 
+        (100-invItem:getCount() >= item:getCount()) then
+        return invItem:getPosition()
+      end
     end
   end
 
   for k = 0, #self.containersList do
     local container = self.containersList[k]
     if container then
-      -- TODO: check if maybe this item is stackable and will fit here
+      -- TODO: if #items + #existing items > 100 then try to fit part of items
       local existingItem = container:findItemById(item:getId(), item:getSubType())
-      if existingItem then 
+      if existingItem and item:isStackable() then 
         BotLogger.debug('found existingItem in bp ' .. existingItem:getId() .. ' ' .. existingItem:getCount())
         if (100-existingItem:getCount() >= item:getCount()) then
           return existingItem:getPosition()
