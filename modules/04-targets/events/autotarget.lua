@@ -23,6 +23,7 @@ function AutoTarget.terminate()
   disconnect(TargetsModule, { onAddTarget = AutoTarget.scan })
 end
 
+
 function AutoTarget.onStopped()
 
 end
@@ -160,16 +161,15 @@ function AutoTarget.Event(event)
     return Helper.safeDelay(600, 2000)
   elseif g_game.isAttacking() then
     local target = g_game.getAttackingCreature()
-    if not target or not player:canStandBy(bestTarget) then
+    if not player:canStandBy(target) then
       AutoTarget.notValidTargetCount = AutoTarget.notValidTargetCount + 1
-      if AutoTarget.notValidTargetCount > 5 then
-        AutoTarget.notValidTargetCount = 0;
-      else
+      if not bestTarget and AutoTarget.notValidTargetCount <= 5 then
         return Helper.safeDelay(600, 2000);
       end
-    elseif not TargetsModule.hasTarget(bestTarget:getName()) then
-      if bestTarget and bestTarget ~= target then
+    elseif not TargetsModule.hasTarget(target:getName()) then
+      if not bestTarget then
         AutoTarget.notValidTargetCount = 0;
+        return Helper.safeDelay(600, 2000)
       end
     else
       local currentPriority = TargetsModule.getTargetSettingCreature(target):getPriority()

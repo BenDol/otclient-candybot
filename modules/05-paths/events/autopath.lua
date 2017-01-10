@@ -45,23 +45,23 @@ function AutoPath.Event(event)
   local playerPos = player:getPosition()
   local node = AutoPath.getNode()
 
-  if AutoLoot.isLooting() then
+  if not node then
+    BotLogger.error("AutoPath: No nodes to walk.")
+  elseif Position.isInRange(playerPos, node:getPosition(), 1, 1) then
+    currentNode = currentNode + 1
+    return Helper.safeDelay(100, 500)
+  elseif AutoLoot.isLooting() then
     BotLogger.debug("AutoPath: AutoLoot is working.")
   elseif g_game.isAttacking() then
     BotLogger.debug("AutoPath: Attacking someone.")
   elseif not player:canWalk() or player:isAutoWalking() or player:isServerWalking() then
     BotLogger.debug("AutoPath: Already walking.")
-  elseif not node then
-    BotLogger.error("AutoPath: No nodes to walk.")
-  elseif Position.isInRange(playerPos, node:getPosition(), 1, 1) then
-    currentNode = currentNode + 1
-    return Helper.safeDelay(100, 500)
   else
     connect(player, {
       onAutoWalkFail = AutoPath.nextNodeFailed
     })
     
-    player:autoWalk(node:getPosition())
+    player:autoWalk(node:getPosition(), PathFindFlags.AllowNonPathable + PathFindFlags.MultiFloor)
 
     disconnect(player, {
       onAutoWalkFail = AutoPath.nextNodeFailed

@@ -48,6 +48,8 @@ function PathsModule.init()
 
   PathsModule.parentUI = CandyBot.window
 
+  g_keyboard.bindKeyPress('Shift+Escape', PathsModule.disable, gameRootPanel)
+
   -- setup resources
   if not g_resources.directoryExists(pathsDir) then
     g_resources.makeDir(pathsDir)
@@ -73,7 +75,7 @@ function PathsModule.init()
 
   connect(UI.PathMap, {
       onAddWalkNode = PathsModule.onAddWalkNode,
-      onNodeClicked = PathsModule.onNodeClicked
+      onNodeClick = PathsModule.onNodeClick
     })
 
   if g_game.isOnline() then
@@ -86,6 +88,8 @@ end
 
 function PathsModule.terminate()
   PathsModule.stop()
+
+  g_keyboard.unbindKeyPress('Shift+Escape', PathsModule.disable, gameRootPanel)
 
   if g_game.isOnline() then
     --save here
@@ -103,7 +107,7 @@ function PathsModule.terminate()
 
   disconnect(UI.PathMap, {
       onAddWalkNode = PathsModule.onAddWalkNode,
-      onNodeClicked = PathsModule.onNodeClicked
+      onNodeClick = PathsModule.onNodeClick
     })
 
   -- event terminates
@@ -112,9 +116,20 @@ function PathsModule.terminate()
   PathsModule.unloadUI()
 end
 
+
+
+function PathsModule.disable()
+  
+  UI.AutoPath:setChecked(false)
+  UI.SmartPath:setChecked(false)
+
+  modules.game_textmessage.displayBroadcastMessage("AutoPath disabled.")
+end
+
 function PathsModule.loadUI(panel)
   UI = {
-    AutoExplore = panel:recursiveGetChildById('AutoExplore'),
+    SmartPath = panel:recursiveGetChildById('SmartPath'),
+    AutoPath = panel:recursiveGetChildById('AutoPath'),
     PathMap = panel:recursiveGetChildById('PathMap'),
     PathList = panel:recursiveGetChildById('PathList'),
     SaveNameEdit = panel:recursiveGetChildById('SaveNameEdit'),
@@ -206,7 +221,7 @@ function PathsModule.hasNode(pos)
   return PathsModule.getNodeIndex(pos) ~= nil
 end
 
-function PathsModule.onNodeClicked(node, pos, button)
+function PathsModule.onNodeClick(node, pos, button)
   printContents("nodeClicked", node, pos, button)
   if button == MouseLeftButton then
     PathsModule.selectNode(node)
@@ -251,10 +266,15 @@ function PathsModule.onAddWalkNode(map, pos)
   PathsModule.addWalkNode(node)
 end
 
-function PathsModule.removeNode(node)
-  table.remove(nodes, node)
-  node.list:destroy()
-  node.map:destroy()
+function PathsModule.removeNode(pos)
+  local node = PathsModule.getNode(pos)
+  if node then
+    local index = PathsModule.getNodeIndex(node:getPosition())
+    node.list:destroy()
+    node.map:destroy()
+    table.remove(nodes, index)
+    node:destroy()
+  end
 end
 
 function PathsModule.clearNodes()

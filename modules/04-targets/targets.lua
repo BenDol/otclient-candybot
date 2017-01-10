@@ -45,6 +45,8 @@ function TargetsModule.init()
   
   TargetsModule.bindHandlers()
 
+  g_keyboard.bindKeyPress('Shift+Escape', TargetsModule.disable, gameRootPanel)
+
   TargetsModule.parentUI = CandyBot.window
 
   -- setup resources
@@ -68,6 +70,8 @@ end
 function TargetsModule.terminate()
   TargetsModule.stop()
 
+  g_keyboard.unbindKeyPress('Shift+Escape', TargetsModule.disable, gameRootPanel)
+
   g_keyboard.unbindKeyPress('Up', UI.TargetsPanel)
   g_keyboard.unbindKeyPress('Down', UI.TargetsPanel)
 
@@ -82,6 +86,11 @@ function TargetsModule.terminate()
   AutoTarget.terminate()
   AttackMode.terminate()
   AutoLoot.terminate()
+end
+
+function TargetsModule.disable()
+  UI.AutoTarget:setChecked(false)
+  modules.game_textmessage.displayBroadcastMessage("AutoTarget disabled.")
 end
 
 function TargetsModule.loadUI(panel)

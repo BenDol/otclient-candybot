@@ -27,7 +27,7 @@ function UIPathMap:onCameraPositionChange(cameraPos)
 end
 
 local function onNodeMouseRelease(widget, pos, button)
-  signalcall(widget:getParent().onNodeClick, widget, pos, button)
+  signalcall(widget:getParent().onNodeClick, widget.pos, pos, button)
   return true
 end
 

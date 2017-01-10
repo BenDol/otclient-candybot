@@ -208,3 +208,12 @@ Panel
     anchors.top: prev.bottom
     width: 180
     margin-top: 10
+
+  BotOptionCheckBox
+    id: AutoGold
+    !text: tr('Change Gold')
+    !tooltip: tr('Changes 100 gold coins to platinum coin, etc.')
+    anchors.left: prev.left
+    anchors.top: prev.top
+    width: 180
+    margin-top: 10

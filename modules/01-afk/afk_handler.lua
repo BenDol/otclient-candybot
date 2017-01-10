@@ -39,7 +39,8 @@ AfkModule.options = {
   ['MagicTrain'] = false,
   ['MagicTrainSpellText'] = 'utana vid',
   ['MagicTrainManaRequired'] = 50,
-  ['AntiKick'] = false
+  ['AntiKick'] = false,
+  ['AutoGold'] = false
 }
 
 --[[ Register Events ]]
@@ -51,7 +52,8 @@ table.merge(AfkModule, {
   autoEatEvent = 4,
   runeMakeEvent = 5,
   autoReplaceWeaponEvent = 6,
-  magicTrainEvent = 7
+  magicTrainEvent = 7,
+  autoGoldEvent = 8,
 })
 
 AfkModule.events = {
@@ -82,7 +84,11 @@ AfkModule.events = {
   [AfkModule.magicTrainEvent] = {
     option = "MagicTrain", 
     callback = AfkModule.MagicTrain.Event
-  }
+  },
+  [AfkModule.autoGoldEvent] = {
+    option = "AutoGold", 
+    callback = AfkModule.AutoGold.Event
+  },
 }
 
 --[[ Register Listeners ]]

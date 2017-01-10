@@ -114,8 +114,9 @@ function AutoLoot.lootNext()
   local player = g_game.getLocalPlayer()
   local data = AutoLoot.getClosestLoot()
 
-  if data.loot and player:getFreeCapacity() > 0 and (not g_game.isAttacking() or data.distance < 2) then
-    
+  if not data.loot or player:getFreeCapacity() <= 0 then
+    AutoLoot.stopLooting()
+  elseif (not g_game.isAttacking() or data.distance < 2) then
     AutoLoot.lootProc = LootProcedure.create(data.creatureId, 
       data.loot.position, data.loot.corpse, false, AutoLoot.itemsList, 
       g_game.getContainers(), TargetsModule.getUI().FastLooter:isChecked())
@@ -143,8 +144,6 @@ function AutoLoot.lootNext()
     end })
 
     AutoLoot.lootProc:start()
-  else
-    AutoLoot.stopLooting()
   end
 end
 
