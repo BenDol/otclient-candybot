@@ -47,7 +47,6 @@ end
 
 function OpenProcedure:tryOpen()
   self.containerId = g_game.open(self.thing)
-  BotLogger.debug("OpenProcedure: tryOpen container to id " .. self.containerId)
   if self.containerId ~= -1 and not self.hook then
     self.hook = function(c, p) self:onOpen(c, p) end
     connect(Container, {onOpen = self.hook})
@@ -55,7 +54,6 @@ function OpenProcedure:tryOpen()
 end
 function OpenProcedure:onOpen(container, previousContainer)
   if container:getId() == self.containerId then
-    BotLogger.debug("OpenProcedure: Found container " .. container:getId() .. " opened!")
 
     if self.event then
       self.event:cancel()
@@ -115,7 +113,6 @@ end
 
 function OpenProcedure:clean()
   Procedure.clean(self)
-  BotLogger.debug("OpenProcedure:clean() called")
 
   if self.hook then
     disconnect(Container, {onOpen = self.hook})

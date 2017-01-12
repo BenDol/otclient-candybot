@@ -56,7 +56,6 @@ end
 -- logic
 
 function Procedure:start()
-  BotLogger.debug("Procedure:start() called")
   signalcall(self.onStart, self.id)
 
   -- start timeout event
@@ -64,34 +63,28 @@ function Procedure:start()
 end
 
 function Procedure:stop()
-  BotLogger.debug("Procedure:stop() called")
   signalcall(self.onStop, self.id)
 end
 
 function Procedure:cancel()
-  BotLogger.debug("Procedure:cancel() called")
   signalcall(self.onCancel, self.id)
 end
 
 function Procedure:fail()
-  BotLogger.debug("Procedure:fail() called")
   signalcall(self.onFail, self.id)
 end
 
 function Procedure:timeout()
-  BotLogger.debug("Procedure:timeout() called")
   signalcall(self.onTimeOut, self.id)
 
   self.timedOut = true
 end
 
 function Procedure:finish()
-  BotLogger.debug("Procedure:finish() called")
   signalcall(self.onFinish, self.id)
 end
 
 function Procedure:clean()
-  BotLogger.debug("Procedure:clean() called")
   signalcall(self.onClean, self.id)
 
   self:stopTimeout()
@@ -99,8 +92,6 @@ end
 
 function Procedure:startTimeout()
   self:stopTimeout()
-
-  BotLogger.debug("Procedure timeout ticks: ".. tostring(self.timeoutTicks))
   self.timeoutEvent = scheduleEvent(function() 
     self:timeout() end, self.timeoutTicks)
 end

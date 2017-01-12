@@ -105,9 +105,6 @@ function LootProcedure:openBody()
         end
       elseif isAttacking then
         self:fail()
-      elseif not player:isAutoWalking() and not player:isServerWalking() then
-        BotLogger.debug("LootProcedure: try walk to corpse")
-        player:autoWalk(self.position)
       end
     end
 
@@ -153,7 +150,6 @@ function LootProcedure:freeContainer(cid)
 end
 
 function LootProcedure:loot(container) -- it is most probably this container
-
   if not self.hookOnClose then
     self.hookOnClose = function(container) self:onCloseContainer(container) end
     connect(Container, {onClose = self.hookOnClose})
@@ -193,10 +189,8 @@ function LootProcedure:onCloseContainer(container)
   local id = container:getId()
   local i = self.containerThingsToDo[id]
   if i ~= nil and i ~= 0 then
-    if self.containerThingsToDo[id] < 0 then
-      BotLogger.error('Negative amount of container things to do [' .. tostring(id) .. '] = ' .. tostring(self.containerThingsToDo[id]))
-    else
-      BotLogger.debug('Positive amount of container things to do [' .. tostring(id) .. '] = ' .. tostring(self.containerThingsToDo[id]))
+    if self.containerThingsToDo[id] ~= 0 then
+      BotLogger.debug('Non-zero amount of container things to do [' .. tostring(id) .. '] = ' .. tostring(self.containerThingsToDo[id]))
     end
     self:fail()
   end
@@ -210,42 +204,66 @@ function LootProcedure:stopOpenCheck()
   end
 end
 
-function LootProcedure:removeItem(item)
+function LootProcedure:removeItem(id, pos)
+  if type(id) ~= "number" then
+    pos = id:getPosition()
+    id = id:getId()
+  end
   for k,i in pairs(self.items) do
-    if i:getId() == item:getId() and Position.equals(i:getPosition(), item:getPosition()) then
+    if i:getId() == id and Position.equals(i:getPosition(), pos) then
       table.remove(self.items, k)
     end
   end
 end
 
-function LootProcedure:takeNextItem()
+function LootProcedure:takeNextItem(itemCount)
   local item = self.items[1]
   if item then
-    local toPos = self:getBestContainer(item)
+    if not itemCount then 
+      itemCount = item:getCount()
+    end
+    local toPos, count = self:getBestContainer(item)
+    if count == nil or count > itemCount then 
+      count = itemCount 
+    end
+    local isAll = itemCount == count
     if not toPos then
       BotLogger.error("LootProcedure: no loot containers selected")
       self:removeItem(item)
       self:takeNextItem()
       return
     end
-    local cid = item:getPosition().y - 64
-    if item:getPosition().x ~= 65535 then
+    local itemPos = item:getPosition()
+    local itemId = item:getId()
+    local cid = itemPos.y - 64
+    if itemPos.x ~= 65535 or cid < 0 or cid > 16 then
       cid = nil
     end
-    self.moveProc = MoveProcedure.create(item, toPos, true, 8000, self.fast)
+
+     -- thing, position, verify, timeoutTicks, fast, count
+    self.moveProc = MoveProcedure.create(item, toPos, true, self.fast and 2000 or 8000, self.fast, count)
+
     connect(self.moveProc, { onFinished = function(id)
-      BotLogger.debug("connection: MoveProcedure.onFinished")
-      self:removeItem(id)
-      if cid then 
-        self:freeContainer(cid)
+      if isAll then
+        self:removeItem(itemId, itemPos)
+        if cid then 
+          self:freeContainer(cid)
+        end
+        -- addEvent waits for packets in queue, first is Continer:onRemoveItem, then is dest Container:onAddItem
+        -- we want to wait for them so that in self:getBestContainer we have actual items information
+        addEvent(function() self:takeNextItem() end)
+      else
+        addEvent(function() self:takeNextItem(itemCount - count) end)
       end
-      self:takeNextItem()
     end })
 
-    -- TODO: add configuration to say what to do when timed out
+    connect(self.moveProc, { onFailed = function(id)
+      addEvent(function() self:takeNextItem(itemCount) end)
+    end })
+
     connect(self.moveProc, { onTimedOut = function(id)
       BotLogger.debug("connection: MoveProcedure.onTimedOut")
-      self:removeItem(id)
+      self:removeItem(itemId, itemPos)
       if cid then
         self:freeContainer(cid)
       end
@@ -272,8 +290,8 @@ function LootProcedure:getBestContainer(item)
     for i=InventorySlotFirst,InventorySlotLast do
       local invItem = player:getInventoryItem(i)
       if invItem and invItem:getId() == item:getId() and item:getSubType() == invItem:getSubType() and 
-        (100-invItem:getCount() >= item:getCount()) then
-        return invItem:getPosition()
+        invItem:getCount() < 100 then
+        return invItem:getPosition(), 100-invItem:getCount()
       end
     end
   end
@@ -281,18 +299,14 @@ function LootProcedure:getBestContainer(item)
   for k = 0, #self.containersList do
     local container = self.containersList[k]
     if container then
-      -- TODO: if #items + #existing items > 100 then try to fit part of items
-      local existingItem = container:findItemById(item:getId(), item:getSubType())
-      if existingItem and item:isStackable() then 
-        BotLogger.debug('found existingItem in bp ' .. existingItem:getId() .. ' ' .. existingItem:getCount())
-        if (100-existingItem:getCount() >= item:getCount()) then
-          return existingItem:getPosition()
+      for _, existingItem in pairs(container:getItems()) do
+        if existingItem:getId() == item:getId() and existingItem:getSubType() == item:getSubType() and 
+          item:isStackable() and existingItem:getCount() < 100 then 
+          return existingItem:getPosition(), 100-existingItem:getCount()
         end
-      else
-        BotLogger.debug('existingItem ' .. item:getId() .. ' in bp not found')
       end
       if container:getCapacity() > container:getItemsCount() then
-        return {x=65535, y=64+container:getId(), z=container:getCapacity()-1}
+        return {x=65535, y=64+container:getId(), z=container:getCapacity()-1}, 100
       end
     end
   end
@@ -347,7 +361,6 @@ end
 
 function LootProcedure:clean()
   Procedure.clean(self)
-  BotLogger.debug("LootProcedure:clean() called")
 
   self:stopOpenCheck()
 

@@ -85,7 +85,7 @@ function AutoLoot.getClosestLoot()
 
   local corpse = {distance=nil, loot = nil, creatureId=nil}
   for id,loot in pairs(AutoLoot.lootList) do
-    if loot then
+    if loot and loot.position.z == playerPos.z then
       local distance = Position.distance(playerPos, loot.position)
       if not corpse.loot or distance < corpse.distance then
         BotLogger.debug("AutoLoot: Found closest loot")
@@ -113,10 +113,15 @@ end
 function AutoLoot.lootNext()
   local player = g_game.getLocalPlayer()
   local data = AutoLoot.getClosestLoot()
+  local isAttacking = g_game.isAttacking() or TargetsModule.AutoTarget.getBestTarget() ~= nil
 
   if not data.loot or player:getFreeCapacity() <= 0 then
     AutoLoot.stopLooting()
-  elseif (not g_game.isAttacking() or data.distance < 2) then
+  elseif (not isAttacking and not player:isAutoWalking() and not player:isServerWalking()) or data.distance < 2 then
+    if data.distance > 6 then
+      BotLogger.debug("LootProcedure: try walk to corpse")
+      player:autoWalk(data.loot.position)
+    end
     AutoLoot.lootProc = LootProcedure.create(data.creatureId, 
       data.loot.position, data.loot.corpse, false, AutoLoot.itemsList, 
       g_game.getContainers(), TargetsModule.getUI().FastLooter:isChecked())
@@ -144,6 +149,8 @@ function AutoLoot.lootNext()
     end })
 
     AutoLoot.lootProc:start()
+  else
+    AutoLoot.pauseLooting()
   end
 end
 

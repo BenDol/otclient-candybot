@@ -4,7 +4,7 @@ Panel
   anchors.right: parent.right
   anchors.top: parent.top
   padding-right: 8
-  height: 340
+  height: 360
 
   BotOptionCheckBox
     id: CreatureAlert
@@ -213,7 +213,14 @@ Panel
     id: AutoGold
     !text: tr('Change Gold')
     !tooltip: tr('Changes 100 gold coins to platinum coin, etc.')
-    anchors.left: prev.left
+    anchors.right: parent.right
     anchors.top: prev.top
     width: 180
-    margin-top: 10
+
+  BotOptionCheckBox
+    id: AutoStack
+    !text: tr('Auto stack items')
+    anchors.left: parent.left
+    anchors.top: prev.bottom
+    width: 180
+    margin-top: 5
