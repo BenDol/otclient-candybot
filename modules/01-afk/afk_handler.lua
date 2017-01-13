@@ -23,7 +23,7 @@ AfkModule.options = {
   ['WhiteList'] = '',
 
   ['AutoEat'] = false,
-  ['AutoEatSelect'] = 'Meat',
+  ['AutoEatSelect'] = 'Any',
 
   ['AutoFishingCheckCap'] = false,
   ['AutoFishing'] = false,

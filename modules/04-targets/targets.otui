@@ -159,10 +159,10 @@ Panel
         buttons: false
         focusable: true
         mouse-scroll: false
-        @onTextChange: |
+        @onValueChange: |
           local setting = TargetsModule.getCurrentSetting()
           if setting then
-            setting:setRange(self:getText(), 1)
+            setting:setRange(self:getValue(), 1)
           end
 
       Label
@@ -184,10 +184,10 @@ Panel
         focusable: true
         buttons: false
         mouse-scroll: false
-        @onTextChange: |
+        @onValueChange: |
           local setting = TargetsModule.getCurrentSetting()
           if setting then
-            setting:setRange(self:getText(), 2)
+            setting:setRange(self:getValue(), 2)
           end
 
       Label
@@ -225,10 +225,10 @@ Panel
         focusable: true
         mouse-scroll: false
         height: 22
-        @onTextChange: |
+        @onValueChange: |
           local setting = TargetsModule.getCurrentSetting()
           if setting then
-            setting:setPriority(self:getText())
+            setting:setPriority(self:getValue())
           end
 
       Label
