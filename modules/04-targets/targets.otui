@@ -191,15 +191,15 @@ Panel
           end
 
       Label
-        id: SettingMovementLabel
-        !text: tr('Movement')
-        !tooltip: tr('The movement desired for this target.')
+        id: SettingStrategyLabel
+        !text: tr('Strategy')
+        !tooltip: tr('The strategy desired for this target.')
         anchors.top: SettingNameEdit.bottom
         anchors.left: SettingNameEdit.left
         margin-top: 5
 
       ComboBox
-        id: SettingMovementList
+        id: SettingStrategyList
         anchors.left: prev.left
         anchors.top: prev.bottom
         width: 145
@@ -216,8 +216,8 @@ Panel
 
       SpinBox
         id: SettingDangerBox
-        anchors.top: SettingMovementList.top
-        anchors.left: SettingMovementList.right
+        anchors.top: SettingStrategyList.top
+        anchors.left: SettingStrategyList.right
         anchors.right: parent.right
         margin-left: 6
         minimum: -1000000
@@ -232,27 +232,53 @@ Panel
           end
 
       Label
-        id: SettingStrategyLabel
-        !text: tr('Strategy')
-        !tooltip: tr('The strategy desired for this target.')
-        anchors.top: SettingMovementList.bottom
-        anchors.left: SettingMovementList.left
+        id: SettingMovementLabel
+        !text: tr('Movement')
+        !tooltip: tr('The movement desired for this target.')
+        anchors.top: SettingStrategyList.bottom
+        anchors.left: SettingStrategyList.left
         margin-top: 5
 
       ComboBox
-        id: SettingStrategyList
+        id: SettingMovementList
         anchors.left: prev.left
         anchors.top: prev.bottom
-        anchors.right: parent.right
+        width: 145
         margin-top: 3
         mouse-scroll: false
+
+      Label
+        id: SettingDistanceLabel
+        !text: tr('Distance')
+        !tooltip: tr('The distance to keep from monster.')
+        anchors.bottom: SettingDistanceBox.top
+        anchors.left: SettingDistanceBox.left
+        margin-bottom: 3
+
+      SpinBox
+        id: SettingDistanceBox
+        anchors.top: SettingMovementList.top
+        anchors.left: SettingMovementList.right
+        anchors.right: parent.right
+        margin-left: 6
+        minimum: 0
+        maximum: 10
+        focusable: true
+        mouse-scroll: false
+        height: 22
+        @onValueChange: |
+          local setting = TargetsModule.getCurrentSetting()
+          if setting then
+            setting:setMovementRange(self:getValue())
+            TargetsModule.Movement.update()
+          end
 
       Label
         id: SettingModeLabel
         !text: tr('Attack')
         !tooltip: tr('Set how we will attack the target.')
-        anchors.top: SettingStrategyList.bottom
-        anchors.left: SettingStrategyList.left
+        anchors.top: SettingMovementList.bottom
+        anchors.left: SettingMovementList.left
         margin-top: 5
 
       ComboBox
@@ -313,19 +339,6 @@ Panel
           local target = TargetsModule.getSelectedTarget()
           if target then
             target:setLoot(self:isChecked())
-          end
-
-      CheckBox
-        id: SettingFollow
-        !text: tr('Follow')
-        !tooltip: tr('Follow this creature when targeting.')
-        anchors.left: SettingLoot.right
-        anchors.bottom: SettingLoot.bottom
-        width: 55
-        @onCheckChange: |
-          local setting = TargetsModule.getCurrentSetting()
-          if setting then
-            setting:setFollow(self:isChecked())
           end
 
       FightOffensiveBox

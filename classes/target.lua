@@ -12,7 +12,7 @@ TargetSetting = extends(CandyConfig, "TargetSetting")
 TargetSetting.create = function(target, movement, stance, attack, range, equip, follow, priority)
   local setting = TargetSetting.internalCreate()
 
-  setting.movement = movement or 0
+  setting.movement = MovementSetting.create()
   setting.stance = stance or FightOffensive
   setting.attack = attack
   setting.range = range or {100, 0}
@@ -43,13 +43,14 @@ function TargetSetting:getMovement()
   return self.movement
 end
 
-function TargetSetting:setMovement(movement)
-  local oldMovement = self.movement
-  if movement ~= oldMovement then
-    self.movement = movement
+function TargetSetting:setMovementType(type)
+  self:getMovement().type = type
+  signalcall(self.onMovementChange, self, self:getMovement())
+end
 
-    signalcall(self.onMovementChange, self, movement, oldMovement)
-  end
+function TargetSetting:setMovementRange(range)
+  self:getMovement().range = range
+  signalcall(self.onMovementChange, self, self:getMovement())
 end
 
 function TargetSetting:getStance()
@@ -177,6 +178,10 @@ function TargetSetting:toNode()
   if self.attack then
     node.attack = self.attack:toNode()
   end
+  
+  if self.movement then
+    node.movement = self.movement:toNode()
+  end
   return node
 end
 
@@ -199,6 +204,9 @@ function TargetSetting:parseNode(node)
   if node.attack then
     self.attack = Attack.create()
     self.attack:parseNode(node.attack)
+  end
+  if node.movement then
+    self.movement:parseNode(node.movement)
   end
 end
 
@@ -302,4 +310,37 @@ function Target:parseNode(node)
       self.settings[tonumber(k)] = setting
     end
   end
+end
+
+MovementSetting = extends(CandyConfig, "MovementSetting")
+
+MovementSetting.create = function(movementType, range)
+  local movement = MovementSetting.internalCreate()
+
+  movement.type = tonumber(movementType) or MovementSetting.Distance
+  movement.range = tonumber(range) or 5
+  
+  return movement
+end
+
+function MovementSetting:toNode()
+  return CandyConfig.toNode(self)
+end
+
+
+function MovementSetting:parseNode(node)
+  CandyConfig.parseNode(self, node)
+
+  -- complex parse
+
+  self.type = tonumber(self.type)
+  self.range = tonumber(self.range)
+end
+
+function MovementSetting:getRange()
+  return self.range
+end
+
+function MovementSetting:getType() 
+  return self.type
 end

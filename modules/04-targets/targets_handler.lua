@@ -49,10 +49,15 @@ TargetsModule.events = {
 --[[ Register Listeners ]]
 
 table.merge(TargetsModule, {
-  --
+  movement = 1
 })
 
 TargetsModule.listeners = {
+  [TargetsModule.movement] = {
+    option = "AutoTarget",
+    connect = TargetsModule.Movement.ConnectListener, 
+    disconnect = TargetsModule.Movement.DisconnectListener
+  }
   --
 }
 

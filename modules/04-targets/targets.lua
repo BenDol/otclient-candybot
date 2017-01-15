@@ -65,6 +65,7 @@ function TargetsModule.init()
   AutoTarget.init()
   AttackMode.init()
   AutoLoot.init()
+  Movement.init()
 end
 
 function TargetsModule.terminate()
@@ -86,6 +87,7 @@ function TargetsModule.terminate()
   AutoTarget.terminate()
   AttackMode.terminate()
   AutoLoot.terminate()
+  Movement.terminate()
 end
 
 function TargetsModule.disable()
@@ -114,7 +116,7 @@ function TargetsModule.loadUI(panel)
     SettingModeList = panel:recursiveGetChildById('SettingModeList'),
     SettingModeText = panel:recursiveGetChildById('SettingModeText'),
     SettingLoot = panel:recursiveGetChildById('SettingLoot'),
-    SettingFollow = panel:recursiveGetChildById('SettingFollow'),
+    SettingDistanceBox = panel:recursiveGetChildById('SettingDistanceBox'),
     AddTargetText = panel:recursiveGetChildById('AddTargetText'),
     AddTargetButton = panel:recursiveGetChildById('AddTargetButton'),
     SaveNameEdit = panel:recursiveGetChildById('SaveNameEdit'),
@@ -149,6 +151,10 @@ function TargetsModule.loadUI(panel)
   UI.StanceRadioGroup:addWidget(UI.StanceBalancedBox)
   UI.StanceRadioGroup:addWidget(UI.StanceDefensiveBox)
   UI.StanceRadioGroup:selectWidget(UI.StanceOffensiveBox)
+
+
+  UI.SettingMovementList:addOption("Distance")
+  UI.SettingMovementList:addOption("Approach")
 end
 
 function TargetsModule.unloadUI()
@@ -390,9 +396,9 @@ end
 
 function TargetsModule.connectSetting(target, setting)
   connect(setting, {
-    onMovementChange = function(setting, movement, oldMovement)
-      local target = setting:getTarget()
-      BotLogger.debug("["..target:getName().."]["..setting:getIndex().."] Movement Changed: " .. tostring(movement))
+    onMovementChange = function(setting, movement)
+      local setting = TargetsModule.getCurrentSetting()
+      BotLogger.debug("["..target:getName().."]["..setting:getIndex().."] Movement Changed: " .. (movement.type == Movement.Approach and 'Approach' or 'Distance'))
     end
   })
 
@@ -445,7 +451,6 @@ function TargetsModule.connectSetting(target, setting)
   connect(setting, {
     onFollowChange = function(setting, follow, oldFollow)
       BotLogger.debug("["..target:getName().."]["..setting:getIndex().."] Follow Changed: " .. tostring(follow))
-      AutoTarget.checkChaseMode(g_game.getAttackingCreature())
     end
   })
 
@@ -528,11 +533,11 @@ function TargetsModule.syncSetting()
       UI.TargetSettingNumber:setText('#'..currentSetting:getIndex()..' of ' .. #selectedTarget:getSettings());
       UI.SettingHpRange1:setText(currentSetting:getRange(1), true)
       UI.SettingHpRange2:setText(currentSetting:getRange(2), true)
-      UI.SettingFollow:setChecked(currentSetting:getFollow())
       UI.SettingDangerBox:setValue(currentSetting:getPriority())
+      UI.SettingDistanceBox:setValue(currentSetting:getMovement().range)
 
       UI.SettingLoot:setEnabled(true)
-      UI.SettingFollow:setEnabled(true)
+      UI.SettingDistanceBox:setEnabled(true)
       UI.SettingModeList:setEnabled(true)
       UI.SettingStrategyList:setEnabled(true)
       UI.SettingMovementList:setEnabled(true)
@@ -563,7 +568,7 @@ function TargetsModule.syncSetting()
     UI.SettingHpRange2:setText("0", true)
     UI.SettingDangerBox:setValue(0)
     UI.SettingLoot:setChecked(false)
-    UI.SettingFollow:setChecked(false)
+    UI.SettingDistanceBox:setValue(1)
     UI.SettingModeText:setHeight(1)
     UI.SettingModeText:setVisible(false)
     UI.SettingModeItem:setHeight(1)
@@ -573,7 +578,7 @@ function TargetsModule.syncSetting()
     UI.SettingModeList:setCurrentOption("No Mode", true)
 
     UI.SettingLoot:setEnabled(false)
-    UI.SettingFollow:setEnabled(false)
+    UI.SettingDistanceBox:setEnabled(false)
     UI.SettingModeList:setEnabled(false)
     UI.SettingStrategyList:setEnabled(false)
     UI.SettingMovementList:setEnabled(false)
@@ -644,6 +649,11 @@ end
 
 function TargetsModule.getSelectedTarget()
   return selectedTarget
+end
+
+function TargetsModule.getAttackingCreatureSetting()
+  local creature = g_game.getAttackingCreature()
+  return creature and TargetsModule.getTargetSettingCreature(creature) or nil
 end
 
 function TargetsModule.getTargetSettingCreature(creature)

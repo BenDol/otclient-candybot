@@ -82,19 +82,6 @@ function AutoTarget.removeCreature(creature)
   end
 end
 
-function AutoTarget.checkChaseMode(target)
-  if not target then return end
-  local t = TargetsModule.getTarget(target:getName())
-  if t then
-    local setting = t:getSetting(1)
-    if setting:getFollow() then
-      g_game.setChaseMode(ChaseOpponent)
-    else
-      g_game.setChaseMode(DontChase)
-    end
-  end
-end
-
 function AutoTarget.checkStance(target)
   if not target then return end
   local t = TargetsModule.getTarget(target:getName())
@@ -175,7 +162,6 @@ function AutoTarget.Event(event)
       local currentPriority = TargetsModule.getTargetSettingCreature(target):getPriority()
       if not bestTarget or priority <= currentPriority then
         AutoTarget.notValidTargetCount = 0;
-        AutoTarget.checkChaseMode(target)
         AutoTarget.checkStance(target)
         return Helper.safeDelay(600, 2000)
       end
@@ -184,7 +170,6 @@ function AutoTarget.Event(event)
   AutoTarget.notValidTargetCount = 0;
 
   if bestTarget then
-    AutoTarget.checkChaseMode(bestTarget)
     AutoTarget.checkStance(bestTarget)
 
     g_game.attack(bestTarget, true)
