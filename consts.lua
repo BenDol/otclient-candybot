@@ -27,11 +27,11 @@ Foods = {
   ['Marlin'] = 901,
   ['Cream Cake'] = 904,
   ['Carrot'] = 3595,
-  ['Meat'] = 3577,
+  ['Meat'] = 2666, -- raretibia
   ['Fish'] = 3578,
   ['Salmon'] = 3579,
   ['Shrimp'] = 3581,
-  ['Ham'] = 3582,
+  ['Ham'] = 2671, -- raretibia
   ['Dragon Ham'] = 3583,
   ['Pears'] = 3584,
   ['Bread'] = 3600,
@@ -145,7 +145,7 @@ Fishing = {
 }
 
 Runes = {
-  blank = 3147
+  blank = 2260 -- raretibia
 }
 
 Water = { 4597,4598,4599,4600,4601,4602,4635,4639,4640 }

@@ -112,7 +112,7 @@ function LootProcedure:openBody()
     self.openEvent = cycleEvent(openFunc, self.fast and 100 or 1000)
   elseif not self.bodyEvent then
     self.bodyEvent = cycleEvent(function() self:openBody() end, 100)
-    self:setTimeoutTicks(550)
+    self:setTimeoutTicks(1500)
     self:startTimeout()
   end
 end
@@ -147,7 +147,7 @@ end
 function LootProcedure:freeContainer(cid) 
   self.containerThingsToDo[cid] = self.containerThingsToDo[cid] - 1
   if self.containerThingsToDo[cid] == 0 then
-    g_game.close(g_game.getContainers()[cid])
+    -- g_game.close(g_game.getContainers()[cid])
   end
 end
 
@@ -167,9 +167,11 @@ function LootProcedure:loot(container) -- it is most probably this container
       self:useContainer(cid)
     end
     if item:isContainer() then
+      print('opening bp...')
       local proc = OpenProcedure.create(item, 5000)
       self:useContainer(cid)
       connect(proc, { onFinished = function(container)
+        print('opening bp... success!')
         table.removevalue(self.openProc, proc)
         self:freeContainer(cid)
         self:loot(container)
@@ -297,8 +299,13 @@ function LootProcedure:getBestContainer(item)
       end
     end
   end
-
-  for k = 0, #self.containersList do
+  local maxCid = -1
+  for k, v in pairs(self.containersList) do
+    if maxCid < k then
+      maxCid = k
+    end
+  end
+  for k = 0, maxCid do
     local container = self.containersList[k]
     if container then
       for _, existingItem in pairs(container:getItems()) do
