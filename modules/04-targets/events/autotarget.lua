@@ -150,7 +150,7 @@ function AutoTarget.Event(event)
     local target = g_game.getAttackingCreature()
     if not player:canStandBy(target) then
       AutoTarget.notValidTargetCount = AutoTarget.notValidTargetCount + 1
-      if not bestTarget and AutoTarget.notValidTargetCount <= 5 then
+      if not bestTarget or AutoTarget.notValidTargetCount <= 5 then
         return Helper.safeDelay(600, 2000);
       end
     elseif not TargetsModule.hasTarget(target:getName()) then

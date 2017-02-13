@@ -29,7 +29,6 @@ function Movement.onPositionChange(creature)
 end
 
 function Movement.update()
-  g_logger.info("UPDATE")
   addEvent(Movement.applySettings)
 end
 
@@ -42,7 +41,7 @@ function Movement.applySettings()
     g_game.setChaseMode(ChaseOpponent)
   else
     g_game.setChaseMode(DontChase)
-    local tile = g_map.getBestDistanceTile(g_game.getAttackingCreature(), range, movementType == Movement.Approach, true)
+    local tile = g_map.getBestDistanceTile(g_game.getAttackingCreature(), range, movementType == Movement.Approach, true, true)
 
     local staticText = StaticText.create()
     staticText:setColor('#00FF00')

@@ -12,15 +12,36 @@ local currentNode = 1
 -- Methods
 
 function AutoPath.init()
-  --
 end
 
 function AutoPath.terminate()
-  --
 end
 
 function AutoPath.onStopped()
   --
+end
+
+function AutoPath.onAutoWalkAction(player, position, floorChange)
+  -- printContents('autowalkaction ', player, position, floorChange)
+  local tile = g_map.getTile(position)
+  local topThing = tile:getTopThing()
+  local topUseThing = tile:getTopUseThing()
+
+  if Bit.hasBit(floorChange, FloorChange.Up) then
+    if topUseThing:isGround() then 
+      -- use rope on rope spot
+      Helper.safeUseInventoryItemWith(3003, topUseThing, false) 
+    else
+      -- use ladder
+      g_game.use(topUseThing)
+    end
+  else
+    -- use shovel on stone pile
+    Helper.safeUseInventoryItemWith(3457, topUseThing, false) 
+
+  end
+  g_game.stop()
+  scheduleEvent(function() if g_game.isOnline() then AutoPath.Event() end end, 500)
 end
 
 function AutoPath.getNode()
@@ -42,6 +63,11 @@ end
 
 function AutoPath.Event(event)
   local player = g_game.getLocalPlayer()
+  if not player then 
+    BotLogger.error("AutoPath: Logged out?")
+    return Helper.safeDelay(5000,10000)
+  end
+
   local playerPos = player:getPosition()
   local node = AutoPath.getNode()
 
@@ -71,4 +97,12 @@ function AutoPath.Event(event)
 
   -- Keep the event live
   return Helper.safeDelay(1000, 1400)
+end
+
+function AutoPath.ConnectListener(listener)
+  connect(LocalPlayer, {onAutoWalkAction = AutoPath.onAutoWalkAction})
+end
+
+function AutoPath.DisconnectListener(listener)
+  disconnect(LocalPlayer, {onAutoWalkAction = AutoPath.onAutoWalkAction})
 end

@@ -19,9 +19,7 @@ LootProcedure.create = function(id, position, corpse, timeoutTicks, itemsList, c
   proc.position = position
   proc.corpse = corpse
 
-  if timeoutTicks then
-    proc:setTimeoutTicks(timeoutTicks)
-  end
+  proc.timeoutTicks = timeoutTicks or 10000
   proc.looted = false
   proc.bodyEvent = nil
   proc.attempting = false
@@ -80,6 +78,8 @@ function LootProcedure:openBody()
     if self.bodyEvent then
       self.bodyEvent:cancel()
       self.bodyEvent = nil
+      self:setTimeoutTicks(self.timeoutTicks)
+      self:startTimeout()
     end
     BotLogger.debug("LootProcedure: corpse exists at "..postostring(self.position))
 
@@ -111,7 +111,9 @@ function LootProcedure:openBody()
     self:stopOpenCheck()
     self.openEvent = cycleEvent(openFunc, self.fast and 100 or 1000)
   elseif not self.bodyEvent then
-    self.bodyEvent = cycleEvent(function() self:openBody() end, 200)
+    self.bodyEvent = cycleEvent(function() self:openBody() end, 100)
+    self:setTimeoutTicks(550)
+    self:startTimeout()
   end
 end
 
