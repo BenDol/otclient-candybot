@@ -5,7 +5,7 @@
 
 AfkModule.AutoGold = {}
 AutoGold = AfkModule.AutoGold
-local gold = {3031, 3035}
+local gold = {3031, 3035, 2148, 2152}
 
 function AutoGold.Event(event)
   local player = g_game.getLocalPlayer()
