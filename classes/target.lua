@@ -44,13 +44,19 @@ function TargetSetting:getMovement()
 end
 
 function TargetSetting:setMovementType(type)
-  self:getMovement().type = type
-  signalcall(self.onMovementChange, self, self:getMovement())
+  if self.movement.type ~= type then 
+    self.movement.type = type
+
+    signalcall(self.onMovementChange, self, self.movement)
+  end
 end
 
 function TargetSetting:setMovementRange(range)
-  self:getMovement().range = range
-  signalcall(self.onMovementChange, self, self:getMovement())
+  if self.movement.range ~= range then 
+    self.movement.range = range
+
+    signalcall(self.onMovementChange, self, self.movement)
+  end
 end
 
 function TargetSetting:getStance()
@@ -317,7 +323,7 @@ MovementSetting = extends(CandyConfig, "MovementSetting")
 MovementSetting.create = function(movementType, range)
   local movement = MovementSetting.internalCreate()
 
-  movement.type = tonumber(movementType) or MovementSetting.Distance
+  movement.type = tonumber(movementType) or Movement.Distance
   movement.range = tonumber(range) or 5
   
   return movement

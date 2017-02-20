@@ -123,7 +123,7 @@ function AutoLoot.lootNext()
       player:autoWalk(data.loot.position)
     end
     AutoLoot.lootProc = LootProcedure.create(data.creatureId, 
-      data.loot.position, data.loot.corpse, false, AutoLoot.itemsList, 
+      data.loot.position, data.loot.corpse, isAttacking and 30000, AutoLoot.itemsList, 
       g_game.getContainers(), TargetsModule.getUI().FastLooter:isChecked())
     
     -- Loot procedure finished
@@ -134,13 +134,21 @@ function AutoLoot.lootNext()
 
     -- Loot procedure timed out
     connect(AutoLoot.lootProc, { onTimedOut = function(id)
-      AutoLoot.removeLoot(id)
-      AutoLoot.lootNext()
+      if g_game.isAttacking() or TargetsModule.AutoTarget.getBestTarget() ~= nil then
+        scheduleEvent(function()
+          AutoLoot.lootNext()
+        end, 333)
+      else
+        AutoLoot.removeLoot(id)
+        AutoLoot.lootNext()
+      end
     end })
 
     -- Loot procedure failed
     connect(AutoLoot.lootProc, { onFailed = function(id)
-      AutoLoot.lootNext()
+      scheduleEvent(function()
+        AutoLoot.lootNext()
+      end, 333)
     end })
 
     -- Loot procedure cancelled

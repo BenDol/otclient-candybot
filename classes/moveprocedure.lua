@@ -72,9 +72,9 @@ function MoveProcedure:start()
   if pos.x == 65535 and pos.y >= 64 and self.verify then
     self.container = g_game.getContainers()[pos.y-64]
     self.hooks = {
-      onUpdateItem = function(container, slot, item, oldItem) self:onUpdateItem(container, slot, item, oldItem) end,
-      onRemoveItem = function(container, slot, item) self:onRemoveItem(container, slot, item) end,
-      onClose = function(container) self:onClose(container) end 
+      onUpdateItem = function(container, slot, item, oldItem) if not container then print('no cont!') end self:onUpdateItem(container, slot, item, oldItem) end,
+      onRemoveItem = function(container, slot, item) if not container then print('no cont!') end  self:onRemoveItem(container, slot, item) end,
+      onClose = function(container) if not container then print('no cont!') end self:onClose(container) end 
     }
     connect(Container, self.hooks)
   elseif self.verify then

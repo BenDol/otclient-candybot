@@ -89,6 +89,11 @@ end
 function PathsModule.terminate()
   PathsModule.stop()
 
+  if refreshEvent then
+    refreshEvent:cancel()
+    refreshEvent = nil
+  end
+
   g_keyboard.unbindKeyPress('Shift+Escape', PathsModule.disable, gameRootPanel)
 
   if g_game.isOnline() then
@@ -137,7 +142,6 @@ function PathsModule.loadUI(panel)
     LoadList = panel:recursiveGetChildById('LoadList'),
     LoadButton = panel:recursiveGetChildById('LoadButton')
   }
-
 end
 
 function PathsModule.unloadUI()

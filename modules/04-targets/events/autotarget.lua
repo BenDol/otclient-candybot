@@ -109,15 +109,18 @@ function AutoTarget.getBestTarget()
 
   for id,t in pairs(AutoTarget.creatureData) do
     if t and AutoTarget.isValidTarget(t) and Position.isInRange(playerPos, t:getPosition(), 7, 5) then
-      local d = Position.distance(playerPos, t:getPosition())
-      local setting = TargetsModule.getTargetSettingCreature(t)
-      if not setting then
-        BotLogger.debug("No target setting found for monster " .. t:getName() .. ". No range for hp% ?" .. tostring(t:getHealthPercent()))
-      else
-        if not target or (d < distance and setting:getPriority() >= priority) then
-          target = t
-          distance = d
-          priority = setting:getPriority()
+      local steps, result = g_map.findPath(playerPos, t:getPosition(), 200, PathFindFlags.AllowCreatures)
+      if result == PathFindResults.Ok then
+        local d = #steps
+        local setting = TargetsModule.getTargetSettingCreature(t)
+        if not setting then
+          BotLogger.debug("No target setting found for monster " .. t:getName() .. ". No range for hp% ?" .. tostring(t:getHealthPercent()))
+        else
+          if not target or (d < distance and setting:getPriority() >= priority) then
+            target = t
+            distance = d
+            priority = setting:getPriority()
+          end
         end
       end
     end

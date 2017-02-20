@@ -152,9 +152,9 @@ function TargetsModule.loadUI(panel)
   UI.StanceRadioGroup:addWidget(UI.StanceDefensiveBox)
   UI.StanceRadioGroup:selectWidget(UI.StanceOffensiveBox)
 
-
-  UI.SettingMovementList:addOption("Distance")
-  UI.SettingMovementList:addOption("Approach")
+  for k, v in ipairs(TargetsModule.Movement.List) do
+    UI.SettingMovementList:addOption(v)
+  end
 end
 
 function TargetsModule.unloadUI()
@@ -213,6 +213,7 @@ function TargetsModule.bindHandlers()
         end
       end
     })
+
   connect(UI.LootItemCountBox, {
     onValueChange = function(self, count) 
       local child = UI.LootItemsList:getFocusedChild()
@@ -235,23 +236,13 @@ function TargetsModule.bindHandlers()
     end
   })
 
-  connect(UI.SettingModeList, {
+  connect(UI.SettingMovementList, {
     onOptionChange = function(self, text, data)
       if selectedTarget then
         local setting = TargetsModule.getCurrentSetting()
         if setting then
-          local attack = Attack.create(text, nil, nil, 100)
-          if text == AttackModes.SpellMode then
-            local spell = Helper.getRandomVocationSpell(1, {1,4})
-            if spell then
-              attack:setWords(spell.words)
-            else
-              attack:setWords("<add spell>")
-            end
-          elseif text == AttackModes.ItemMode then
-            attack:setItem(3155)
-          end
-          setting:setAttack(attack)
+          setting:setMovementType(TargetsModule.Movement.Type[text])
+          UI.SettingDistanceBox:setEnabled(text ~= "None")
         end
       end
     end
@@ -274,6 +265,29 @@ function TargetsModule.bindHandlers()
         currentSetting:setStance(stanceMode)
       end
     end 
+  })
+
+
+  connect(UI.SettingModeList, {
+    onOptionChange = function(self, text, data)
+      if selectedTarget then
+        local setting = TargetsModule.getCurrentSetting()
+        if setting then
+          local attack = Attack.create(text, nil, nil, 100)
+          if text == AttackModes.SpellMode then
+            local spell = Helper.getRandomVocationSpell(1, {1,4})
+            if spell then
+              attack:setWords(spell.words)
+            else
+              attack:setWords("<add spell>")
+            end
+          elseif text == AttackModes.ItemMode then
+            attack:setItem(3155)
+          end
+          setting:setAttack(attack)
+        end
+      end
+    end
   })
 
   g_keyboard.bindKeyPress('Up', function() 
@@ -398,7 +412,7 @@ function TargetsModule.connectSetting(target, setting)
   connect(setting, {
     onMovementChange = function(setting, movement)
       local setting = TargetsModule.getCurrentSetting()
-      BotLogger.debug("["..target:getName().."]["..setting:getIndex().."] Movement Changed: " .. (movement.type == Movement.Approach and 'Approach' or 'Distance'))
+      BotLogger.info("["..target:getName().."]["..setting:getIndex().."] Movement Changed: " .. (Movement.List[movement.type]) .. ' #' .. tostring(movement.range))
     end
   })
 
@@ -428,7 +442,7 @@ function TargetsModule.connectSetting(target, setting)
   connect(setting, {
     onRangeChange = function(setting, range, oldRange, index)
       local target = setting:getTarget()
-      BotLogger.debug("["..target:getName().."]["..setting:getIndex().."] Range"..(index and "["..index.."]" 
+      BotLogger.info("["..target:getName().."]["..setting:getIndex().."] Range"..(index and "["..index.."]" 
         or "").." Changed: "..tostring(range))
     end
   })
@@ -541,6 +555,7 @@ function TargetsModule.syncSetting()
       UI.SettingModeList:setEnabled(true)
       UI.SettingStrategyList:setEnabled(true)
       UI.SettingMovementList:setEnabled(true)
+      UI.SettingMovementList:setCurrentIndex(currentSetting:getMovement().type, true)
       UI.SettingDangerBox:setEnabled(true)
       UI.SettingHpRange1:setEnabled(true)
       UI.SettingHpRange2:setEnabled(true)
@@ -581,7 +596,10 @@ function TargetsModule.syncSetting()
     UI.SettingDistanceBox:setEnabled(false)
     UI.SettingModeList:setEnabled(false)
     UI.SettingStrategyList:setEnabled(false)
+
     UI.SettingMovementList:setEnabled(false)
+    UI.SettingMovementList:setCurrentIndex(1, true)
+
     UI.SettingDangerBox:setEnabled(false)
     UI.SettingHpRange1:setEnabled(false)
     UI.SettingHpRange2:setEnabled(false)

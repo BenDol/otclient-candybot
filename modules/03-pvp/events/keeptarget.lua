@@ -22,13 +22,13 @@ end
 
 function KeepTarget.connect()
   connect(Creature, { onAppear = KeepTarget.addCreature })
-  connect(Creature, { onWalk = KeepTarget.onPositionChange })
+  connect(Creature, { onWalk = KeepTarget.onPositionChange, onPositionChange = KeepTarget.onPositionChange })
   g_keyboard.bindKeyPress('Escape', KeepTarget.forgetTarget, gameRootPanel)
 end
 
 function KeepTarget.disconnect()
   disconnect(Creature, { onAppear = KeepTarget.addCreature })
-  disconnect(Creature, { onWalk = KeepTarget.onPositionChange })
+  disconnect(Creature, { onWalk = KeepTarget.onPositionChange, onPositionChange = KeepTarget.onPositionChange })
   g_keyboard.unbindKeyPress('Escape', KeepTarget.forgetTarget, gameRootPanel)
 end
 

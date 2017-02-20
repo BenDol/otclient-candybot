@@ -59,6 +59,7 @@ end
 function AutoPath.nextNodeFailed(player, code)
   local node = AutoPath.getNode()
   BotLogger.error("AutoPath: autoWalk to node " .. node:getName() .. " failed (" .. tostring(code) .. ") ")
+  currentNode = currentNode + 1
 end
 
 function AutoPath.Event(event)

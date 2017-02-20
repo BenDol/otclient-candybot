@@ -6,7 +6,6 @@
 
 CandyBot = extends(UIWidget, "CandyBot")
 CandyBot.window = nil
-CandyBot.options = {}
 CandyBot.defaultOptions = {
   ["LoggerType"] = 1,
   ["PrintLogs"] = false
@@ -185,7 +184,11 @@ function CandyBot.changeOption(key, state, loading)
   if state == nil then
     return
   end
-  
+
+  if not CandyBot.options then -- bug with setting bot node to empty on loading
+    return
+  end
+
   if CandyBot.defaultOptions[key] == nil then
     CandyBot.options[key] = nil
     return

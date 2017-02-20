@@ -72,6 +72,10 @@ function LootProcedure:start()
   signalcall(self.onStarted, self.id)
 end
 
+function LootProcedure:isAttacking()
+  return g_game.isAttacking() or TargetsModule.AutoTarget.getBestTarget() ~= nil
+end
+
 function LootProcedure:openBody()
    -- Ensure there is a corpse
   if self:findCorpse() then
@@ -86,8 +90,7 @@ function LootProcedure:openBody()
     -- Run to corpse for looting
     local openFunc = function()
       local player = g_game.getLocalPlayer()
-      local isAttacking = g_game.isAttacking() or TargetsModule.AutoTarget.getBestTarget() ~= nil
-      local maxDistance = isAttacking and 1 or 6
+      local maxDistance = LootProcedure:isAttacking() and 1 or 6
 
       -- BotLogger.debug("LootProcedure: open function called, max open distance: " .. tostring(maxDistance))
       if Position.isInRange(self.position, player:getPosition(), maxDistance, maxDistance) then
@@ -99,11 +102,15 @@ function LootProcedure:openBody()
             table.remove(self.openProc, 1)
             self:stopOpenCheck()
             self:loot(container)
+          end, onFail = function() 
+            if LootProcedure:isAttacking() then
+              self:fail()
+            end
           end })
           self.openProc[1] = proc
           proc:start()
         end
-      elseif isAttacking then
+      elseif LootProcedure:isAttacking() then
         self:fail()
       end
     end
@@ -147,7 +154,7 @@ end
 function LootProcedure:freeContainer(cid) 
   self.containerThingsToDo[cid] = self.containerThingsToDo[cid] - 1
   if self.containerThingsToDo[cid] == 0 then
-    -- g_game.close(g_game.getContainers()[cid])
+    g_game.close(g_game.getContainers()[cid])
   end
 end
 
@@ -167,15 +174,18 @@ function LootProcedure:loot(container) -- it is most probably this container
       self:useContainer(cid)
     end
     if item:isContainer() then
-      print('opening bp...')
-      local proc = OpenProcedure.create(item, 5000)
+      print('opening bp... from container ' .. tostring(cid))
+      local proc = OpenProcedure.create(item, 10000)
       self:useContainer(cid)
       connect(proc, { onFinished = function(container)
-        print('opening bp... success!')
+        print('opening bp... success! from container ' .. tostring(cid))
         table.removevalue(self.openProc, proc)
         self:freeContainer(cid)
         self:loot(container)
-      end })
+      end, onFail = function(container)
+
+        self:fail()
+      end})
       table.insert(self.openProc, proc)
       proc:start()
     end
@@ -247,32 +257,40 @@ function LootProcedure:takeNextItem(itemCount)
      -- thing, position, verify, timeoutTicks, fast, count
     self.moveProc = MoveProcedure.create(item, toPos, true, self.fast and 2000 or 8000, self.fast, count)
 
-    connect(self.moveProc, { onFinished = function(id)
-      if isAll then
+    connect(self.moveProc, { 
+      onFinished = function(id)
+        if isAll then
+          self:removeItem(itemId, itemPos)
+          if cid then 
+            self:freeContainer(cid)
+          end
+          -- addEvent waits for packets in queue, first is Continer:onRemoveItem, then is dest Container:onAddItem
+          -- we want to wait for them so that in self:getBestContainer we have actual items information
+          addEvent(function() self:takeNextItem() end)
+        else
+          addEvent(function() self:takeNextItem(itemCount - count) end)
+        end
+      end,
+      onFailed = function(id)
+        -- maybe when fighting it failed to move, wait for danger-free situation
+        if LootProcedure:isAttacking() then 
+          BotLogger.debug("connection: MoveProcedure.onFailed, rescheduling")
+          self:fail()
+        else
+          addEvent(function() 
+            self:takeNextItem(itemCount) 
+          end)
+        end
+      end,
+      onTimedOut = function(id)
+        BotLogger.debug("connection: MoveProcedure.onTimedOut")
         self:removeItem(itemId, itemPos)
-        if cid then 
+        if cid then
           self:freeContainer(cid)
         end
-        -- addEvent waits for packets in queue, first is Continer:onRemoveItem, then is dest Container:onAddItem
-        -- we want to wait for them so that in self:getBestContainer we have actual items information
-        addEvent(function() self:takeNextItem() end)
-      else
-        addEvent(function() self:takeNextItem(itemCount - count) end)
+        self:takeNextItem()
       end
-    end })
-
-    connect(self.moveProc, { onFailed = function(id)
-      addEvent(function() self:takeNextItem(itemCount) end)
-    end })
-
-    connect(self.moveProc, { onTimedOut = function(id)
-      BotLogger.debug("connection: MoveProcedure.onTimedOut")
-      self:removeItem(itemId, itemPos)
-      if cid then
-        self:freeContainer(cid)
-      end
-      self:takeNextItem()
-    end })
+    })
     self.moveProc:start()
   elseif #self.openProc > 0 then
     self.isLooting = false
