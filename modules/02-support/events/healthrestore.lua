@@ -26,7 +26,9 @@ function AutoHeal.onHealthChange(player, health, maxHealth, oldHealth, restoreTy
       g_game.talk(spellText)
       delay = Helper.getSpellDelay(spellText)
     end
-
+    if nextHeal[RestoreType.cast] ~= nil then
+    	removeEvent(nextHeal[RestoreType.cast])
+    end
     nextHeal[RestoreType.cast] = scheduleEvent(function()
       local player = g_game.getLocalPlayer()
       if not player then return end
@@ -34,9 +36,11 @@ function AutoHeal.onHealthChange(player, health, maxHealth, oldHealth, restoreTy
       health, maxHealth = player:getHealth(), player:getMaxHealth()
       if player:getHealthPercent() < healthValue and tries > 0 then
         tries = tries - 1
+        nextHeal[RestoreType.cast] = nil
         AutoHeal.onHealthChange(player, health, maxHealth, health, restoreType, tries) 
       else
         removeEvent(nextHeal[RestoreType.cast])
+        nextHeal[RestoreType.cast] = nil
       end
     end, delay)
 
@@ -54,16 +58,20 @@ function AutoHeal.onHealthChange(player, health, maxHealth, oldHealth, restoreTy
     if player:getHealthPercent() < healthValue then
       Helper.safeUseInventoryItemWith(item:getId(), player, BotModule.isPrecisionMode())
     end
-
-    nextHeal[RestoreType.item] = scheduleEvent(function()
+    if nextHeal[RestoreType.item] ~= nil then
+    	removeEvent(nextHeal[RestoreType.item])
+    end
+	nextHeal[RestoreType.item] = scheduleEvent(function()
       local player = g_game.getLocalPlayer()
       if not player then return end
       health, maxHealth = player:getHealth(), player:getMaxHealth()
       if player:getHealthPercent() < healthValue and tries > 0 then
         tries = tries - 1
+        nextHeal[RestoreType.item] = nil
         AutoHeal.onHealthChange(player, health, maxHealth, health, restoreType, tries) 
       else
         removeEvent(nextHeal[RestoreType.item])
+        nextHeal[RestoreType.item] = nil
       end
     end, delay)
   end
