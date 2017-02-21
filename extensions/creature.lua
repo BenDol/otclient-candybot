@@ -64,12 +64,18 @@ function Creature:getTargetsInArea(targetList, pathableOnly)
   return targets
 end
 
-function Creature:canStandBy(creature)
+function Creature:canStandBy(creature, complexity)
   if not creature then
     return false
   end
+  if not complexity then
+  	complexity = 40000
+  end
   local myPos = self:getPosition()
   local otherPos = creature:getPosition()
+  if not otherPos then
+  	return false
+  end
 
   local neighbours = {
     {x = 0, y = -1, z = 0},
@@ -89,7 +95,7 @@ function Creature:canStandBy(creature)
     end
 
     -- Check if there is a path
-    local steps, result = g_map.findPath(otherPos, checkPos, 40000, 0)
+    local steps, result = g_map.findPath(otherPos, checkPos, complexity, 0)
     if result == PathFindResults.Ok then
         return true
     end

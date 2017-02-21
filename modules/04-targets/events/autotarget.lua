@@ -99,16 +99,18 @@ end
 
 function AutoTarget.isValidTarget(creature)
   local player = g_game.getLocalPlayer()
-  return TargetsModule.hasTarget(creature:getName()) and player:canStandBy(creature)
+  return Position.isInRange(player:getPosition(), creature:getPosition(), 7, 5) and 
+    TargetsModule.hasTarget(creature:getName()) and 
+    player:canStandBy(creature, 200)
 end
 
 function AutoTarget.getBestTarget()
   local player = g_game.getLocalPlayer()
   local playerPos = player:getPosition()
-  local target, distance, priority = nil, nil, nil
+  local targets, distance, priority = nil, nil, nil
 
   for id,t in pairs(AutoTarget.creatureData) do
-    if t and AutoTarget.isValidTarget(t) and Position.isInRange(playerPos, t:getPosition(), 7, 5) then
+    if t and AutoTarget.isValidTarget(t) then
       local steps, result = g_map.findPath(playerPos, t:getPosition(), 200, PathFindFlags.AllowCreatures)
       if result == PathFindResults.Ok then
         local d = #steps
@@ -116,16 +118,23 @@ function AutoTarget.getBestTarget()
         if not setting then
           BotLogger.debug("No target setting found for monster " .. t:getName() .. ". No range for hp% ?" .. tostring(t:getHealthPercent()))
         else
-          if not target or (d < distance and setting:getPriority() >= priority) then
-            target = t
+          if not priority or setting:getPriority() > priority then
+            targets = {t}
             distance = d
             priority = setting:getPriority()
+          elseif setting:getPriority() == priority then
+            if d < distance then
+              distance = d
+              table.insert(targets, 1, t)
+            else
+              table.insert(targets, t)
+            end
           end
         end
       end
     end
   end
-  return target, priority
+  return targets, priority
 end
 
 function AutoTarget.onStopped()
@@ -143,39 +152,39 @@ function AutoTarget.Event(event)
   -- Cannot continue if still attacking or is in pz
 
   -- Find a valid target to attack
-  local bestTarget, priority = AutoTarget.getBestTarget()
-
+  local targets, priority = AutoTarget.getBestTarget()
+  if not targets then 
+    return Helper.safeDelay(200, 1000)
+  end
   local player = g_game.getLocalPlayer()
+  local target = g_game.getAttackingCreature()
   if player:hasState(PlayerStates.Pz) then
-    AutoTarget.notValidTargetCount = 0;
+    AutoTarget.notValidTargetCount = 0
     return Helper.safeDelay(600, 2000)
-  elseif g_game.isAttacking() then
-    local target = g_game.getAttackingCreature()
-    if not player:canStandBy(target) then
+  elseif target and target:isCreature() then
+    if not player:canStandBy(target, 200) then
       AutoTarget.notValidTargetCount = AutoTarget.notValidTargetCount + 1
-      if not bestTarget or AutoTarget.notValidTargetCount <= 5 then
-        return Helper.safeDelay(600, 2000);
-      end
-    elseif not TargetsModule.hasTarget(target:getName()) then
-      if not bestTarget then
-        AutoTarget.notValidTargetCount = 0;
+      if not targets or AutoTarget.notValidTargetCount <= 5 then
         return Helper.safeDelay(600, 2000)
       end
-    else
-      local currentPriority = TargetsModule.getTargetSettingCreature(target):getPriority()
-      if not bestTarget or priority <= currentPriority then
-        AutoTarget.notValidTargetCount = 0;
-        AutoTarget.checkStance(target)
-        return Helper.safeDelay(600, 2000)
-      end
+    elseif not TargetsModule.hasTarget(target:getName()) and not targets then
+      AutoTarget.notValidTargetCount = 0
+      return Helper.safeDelay(600, 2000)
     end
   end
-  AutoTarget.notValidTargetCount = 0;
-
-  if bestTarget then
-    AutoTarget.checkStance(bestTarget)
-
-    g_game.attack(bestTarget, true)
+  local playerPos = player:getPosition()
+  local shouldChangeTarget = not target or not table.contains(targets, target) or Position.manhattanDistance(target:getPosition(), playerPos) > TargetsModule.getTargetSettingCreature(target):getMovement().range + 1
+  AutoTarget.notValidTargetCount = 0
+  if shouldChangeTarget and targets then
+    for _, t in pairs(targets) do
+      if Position.manhattanDistance(t:getPosition(), playerPos) <= TargetsModule.getTargetSettingCreature(t):getMovement().range + 1 then
+        AutoTarget.checkStance(t)
+        g_game.attack(t, true) -- second argument: ignore if it is already current target and attack it anyway
+        return Helper.safeDelay(600, 1400)
+      end
+    end
+    AutoTarget.checkStance(targets[1])
+    g_game.attack(targets[1], true)
   end
 
   -- Keep the event live

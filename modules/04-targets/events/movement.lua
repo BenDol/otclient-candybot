@@ -2,8 +2,7 @@ TargetsModule.Movement = {}
 Movement = TargetsModule.Movement
 Movement.Type = {
   None = 1,
-  Approach = 2,
-  Distance = 3
+  Distance = 2
 }
 Movement.List = {}
 for k, v in pairs(Movement.Type) do
@@ -50,15 +49,13 @@ function Movement.applySettings()
   else
     g_game.setChaseMode(DontChase)
     local target = g_game.getAttackingCreature()
-    if movementType == Movement.Approach then
-      local playerPos = g_game.getLocalPlayer():getPosition()
-      local steps, result = g_map.findPath(playerPos, target:getPosition(), 50, PathFindFlags.AllowCreatures)
-      if result == PathFindResults.Ok and #steps <= 2*range-2 and Position.manhattanDistance(target:getPosition(), playerPos) <= range-1 then
-        g_game.stop()
-        return
-      end
+    local targets, priority = TargetsModule.AutoTarget.getBestTarget()
+    if not targets then return end
+    if target and table.contains(targets, target) then
+      table.removevalue(targets, target)
+      table.insert(targets,1,target) -- make sure current target is first in table
     end
-    local tile = g_map.getBestDistanceTile(target, range, movementType == Movement.Approach, true, true)
+    local tile = g_map.getBestDistanceTile(targets, range, true, true)
     if tile and false then
       local staticText = StaticText.create()
       staticText:setColor('#00FF00')
