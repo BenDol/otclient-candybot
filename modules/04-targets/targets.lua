@@ -643,6 +643,7 @@ end
 function TargetsModule.syncAttackSetting(attack)
   UI.SettingModeList:setCurrentOption(attack:getType(), true)
   UI.SettingRadiusBox:setEnabled(attack:getType() ~= AttackModes.None)
+  UI.SettingRadiusBox:setValue(attack:getRadius())
 
   -- spell mode setup
   if attack:getWords() ~= "" then
@@ -694,7 +695,7 @@ function TargetsModule.getAttackingCreatureSetting()
 end
 
 function TargetsModule.getTargetSettingCreature(creature)
-  local target = TargetsModule.getTarget(creature:getName())
+  local target = creature and TargetsModule.getTarget(creature:getName())
   if not target then
     return nil
   end
