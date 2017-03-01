@@ -298,9 +298,9 @@ Panel
 
       ComboBox
         id: SettingModeList
-        anchors.left: SettingModeLabel.left
-        anchors.right: parent.right
-        anchors.top: SettingModeLabel.bottom
+        anchors.left: prev.left
+        anchors.top: prev.bottom
+        width: 145
         margin-top: 3
         mouse-scroll: false
 
@@ -341,6 +341,36 @@ Panel
         anchors.top: prev.top
         margin-left: 10
         @onClick: Helper.startChooseItem(TargetsModule.onChooseSettingItem)
+
+
+      Label
+        id: SettingRadiusLabel
+        !text: tr('Radius')
+        !tooltip: tr('The radius of attack method (from self for spell or from target for item)')
+        anchors.bottom: SettingRadiusBox.top
+        anchors.left: SettingRadiusBox.left
+        anchors.right: parent.right
+        margin-bottom: 3
+
+      SpinBox
+        id: SettingRadiusBox
+        anchors.top: SettingModeList.top
+        anchors.left: SettingModeList.right
+        anchors.right: parent.right
+        margin-left: 6
+        minimum: 0
+        maximum: 9
+        focusable: true
+        mouse-scroll: false
+        height: 22
+        @onValueChange: |
+          local setting = TargetsModule.getCurrentSetting()
+          if setting then
+            local attack = setting:getAttack()
+            if attack then
+              attack:setRadius(self:getValue())
+            end
+          end
 
       CheckBox
         id: SettingLoot

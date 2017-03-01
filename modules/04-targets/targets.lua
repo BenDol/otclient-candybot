@@ -137,7 +137,8 @@ function TargetsModule.loadUI(panel)
     SettingStrategyList = panel:recursiveGetChildById('SettingStrategyList'),
     LootItemsList = panel:recursiveGetChildById('LootItemsList'),
     LootItemCountBox = panel:recursiveGetChildById('ItemCountBox'),
-    FastLooter = panel:recursiveGetChildById('FastLooter')
+    FastLooter = panel:recursiveGetChildById('FastLooter'),
+    SettingRadiusBox = panel:recursiveGetChildById('SettingRadiusBox')
   }
 
   -- Setting Mode List
@@ -285,6 +286,7 @@ function TargetsModule.bindHandlers()
             attack:setItem(3155)
           end
           setting:setAttack(attack)
+          UI.SettingRadiusBox:setEnabled(text ~= AttackModes.None)
         end
       end
     end
@@ -588,6 +590,7 @@ function TargetsModule.syncSetting()
       else
         UI.SettingModeText:setVisible(false)
         UI.SettingModeList:setCurrentIndex(1, true)
+        UI.SettingRadiusBox:setEnabled(false)
       end
     end
   else
@@ -623,6 +626,7 @@ function TargetsModule.syncSetting()
     UI.NewSettingButton:setEnabled(false)
     UI.NextSettingButton:setEnabled(false)
     UI.PrevSettingButton:setEnabled(false)
+    UI.SettingRadiusBox:setEnabled(false)
   end
 end
 
@@ -638,6 +642,7 @@ end
 
 function TargetsModule.syncAttackSetting(attack)
   UI.SettingModeList:setCurrentOption(attack:getType(), true)
+  UI.SettingRadiusBox:setEnabled(attack:getType() ~= AttackModes.None)
 
   -- spell mode setup
   if attack:getWords() ~= "" then

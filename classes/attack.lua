@@ -8,13 +8,14 @@ end
 
 Attack = extends(CandyConfig, "Attack")
 
-Attack.create = function(type, words, item, ticks)
+Attack.create = function(type, words, item, ticks, radius)
   local atk = Attack.internalCreate()
 
   atk.type = type or AttackModes.None
   atk.words = words or ''
   atk.item = item or 0
   atk.ticks = ticks or 100
+  atk.radius = radius or 0
 
   return atk
 end
@@ -22,7 +23,7 @@ end
 -- gets/sets
 
 function Attack:clone()
-	return Attack.create(self.type, self.words, self.item, self.ticks)
+	return Attack.create(self.type, self.words, self.item, self.ticks, self.radius)
 end
 
 function Attack:getType()
@@ -48,6 +49,19 @@ function Attack:setWords(words)
     self.words = words
 
     signalcall(self.onWordsChange, self, words, oldWords)
+  end
+end
+
+function Attack:getRadius()
+  return self.radius
+end
+
+function Attack:setRadius(radius)
+  local oldRadius = self.radius
+  if radius ~= oldRadius then
+    self.radius = radius
+
+    signalcall(self.onRadiusChange, self, radius, oldRadius)
   end
 end
 
