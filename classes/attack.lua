@@ -11,7 +11,7 @@ Attack = extends(CandyConfig, "Attack")
 Attack.create = function(type, words, item, ticks)
   local atk = Attack.internalCreate()
 
-  atk.type = type
+  atk.type = type or AttackModes.None
   atk.words = words or ''
   atk.item = item or 0
   atk.ticks = ticks or 100
@@ -20,6 +20,10 @@ Attack.create = function(type, words, item, ticks)
 end
 
 -- gets/sets
+
+function Attack:clone()
+	return Attack.create(self.type, self.words, self.item, self.ticks)
+end
 
 function Attack:getType()
   return self.type

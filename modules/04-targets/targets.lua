@@ -387,6 +387,19 @@ function TargetsModule.addTarget(target)
       end
     })
 
+    connect(target, {
+      onRemoveSetting = function(target, setting)
+        if selectedTarget == target then
+          local newSetting = target:getSetting(setting:getIndex()) or target:getSetting(setting:getIndex() - 1)
+          if not newSetting then
+            newSetting = TargetSetting.create()
+            TargetsModule.addTargetSetting(target, newSetting)
+          end
+          TargetsModule.setCurrentSetting(newSetting)
+        end
+      end
+    })
+
     -- ensure the settings are connected
     for k,setting in pairs(target:getSettings()) do
       TargetsModule.connectSetting(target, setting)
@@ -549,6 +562,7 @@ function TargetsModule.syncSetting()
       UI.SettingHpRange2:setText(currentSetting:getRange(2), true)
       UI.SettingDangerBox:setValue(currentSetting:getPriority())
       UI.SettingDistanceBox:setValue(currentSetting:getMovement().range)
+      UI.SettingDistanceBox:setEnabled(currentSetting:getMovement().type ~= Movement.None)
 
       UI.SettingLoot:setEnabled(true)
       UI.SettingDistanceBox:setEnabled(true)
@@ -573,7 +587,7 @@ function TargetsModule.syncSetting()
         TargetsModule.syncAttackSetting(attack)
       else
         UI.SettingModeText:setVisible(false)
-        UI.SettingModeList:setCurrentOption("No Mode", true)
+        UI.SettingModeList:setCurrentIndex(1, true)
       end
     end
   else

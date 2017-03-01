@@ -14,7 +14,7 @@ TargetSetting.create = function(target, movement, stance, attack, range, equip, 
 
   setting.movement = MovementSetting.create()
   setting.stance = stance or FightOffensive
-  setting.attack = attack
+  setting.attack = attack or Attack.create()
   setting.range = range or {100, 0}
   setting.equip = equip or {}
   setting.target = target
@@ -25,6 +25,18 @@ TargetSetting.create = function(target, movement, stance, attack, range, equip, 
   return setting
 end
 
+
+function TargetSetting:clone() 
+  local setting = TargetSetting.internalCreate()
+  table.merge(setting, self)
+  setting.range = {self.range[2], 0}
+  setting.movement = self.movement:clone()
+
+  if self.attack then
+    setting.attack = self.attack:clone()
+  end
+  return setting
+end
 
 function TargetSetting:getPriority()
   return self.priority
@@ -272,6 +284,17 @@ function Target:addSetting(setting)
   end
 end
 
+function Target:removeSetting(setting)
+  if table.contains(self.settings, setting) then
+    local index = setting:getIndex()
+    table.remove(self.settings, index)
+    for k, v in pairs(self.settings) do
+      v:setIndex(k)
+    end
+    signalcall(self.onRemoveSetting, self, setting)
+  end
+end
+
 function Target:getLoot()
   return self.loot
 end
@@ -322,11 +345,14 @@ MovementSetting = extends(CandyConfig, "MovementSetting")
 
 MovementSetting.create = function(movementType, range)
   local movement = MovementSetting.internalCreate()
-
-  movement.type = tonumber(movementType) or Movement.Distance
-  movement.range = tonumber(range) or 5
+  movement.type = tonumber(movementType) or Movement.None
+  movement.range = tonumber(range) or 4
   
   return movement
+end
+
+function MovementSetting:clone()
+  return MovementSetting.create(self.type, self.range)
 end
 
 function MovementSetting:toNode()

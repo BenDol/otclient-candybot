@@ -59,7 +59,7 @@ Panel
       anchors.left: parent.left
       anchors.top: parent.top
       margin-bottom: 5
-      width: 18
+      width: 30
       height: 19
       @onClick: |
           local setting = TargetsModule.getCurrentSetting()
@@ -80,18 +80,20 @@ Panel
       margin-left: 4
       margin-right: 4
       @onClick: |
-          local target = TargetsModule.getSelectedTarget()
-          if target then
-            TargetsModule.addTargetSetting(target, TargetSetting.create())
+          local target, setting = TargetsModule.getSelectedTarget(), TargetsModule.getCurrentSetting()
+          if target and setting then
+            TargetsModule.addTargetSetting(target, setting:clone())
           end
 
     Button
       id: NextSettingButton
       !text: tr('>')
-      anchors.right: parent.right
+      anchors.right: RemoveSettingButton.left
       anchors.top: PrevSettingButton.top
       anchors.bottom: PrevSettingButton.bottom
-      width: 18
+      width: 30
+      margin-left: 4
+      margin-right: 4
       @onClick: |
           local setting = TargetsModule.getCurrentSetting()
           if setting then
@@ -99,6 +101,19 @@ Panel
             if newSetting then
               TargetsModule.setCurrentSetting(newSetting)
             end
+          end
+
+    Button
+      id: RemoveSettingButton
+      text: x
+      anchors.right: parent.right
+      anchors.top: PrevSettingButton.top
+      anchors.bottom: PrevSettingButton.bottom
+      width: 30
+      @onClick: |
+          local setting = TargetsModule.getCurrentSetting()
+          if setting then
+          	setting:getTarget():removeSetting(setting)
           end
 
     Panel
