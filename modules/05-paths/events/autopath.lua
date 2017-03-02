@@ -56,6 +56,19 @@ function AutoPath.getNode()
   return nodes[currentNode]
 end
 
+function AutoPath.goToNode(label)
+	for k, v in pairs(nodes) do
+		if v.label == label then
+			currentNode = k
+			return
+		end
+	end
+end
+
+function AutoPath.evalScript(script)
+	
+end
+
 function AutoPath.nextNodeFailed(player, code)
   local node = AutoPath.getNode()
   BotLogger.error("AutoPath: autoWalk to node " .. node:getName() .. " failed (" .. tostring(code) .. ") ")
@@ -75,8 +88,10 @@ function AutoPath.Event(event)
   if not node then
     BotLogger.error("AutoPath: No nodes to walk.")
   elseif Position.isInRange(playerPos, node:getPosition(), 1, 1) then
-    currentNode = currentNode + 1
-    return Helper.safeDelay(100, 500)
+  	if not node.script or AutoPath.evalScript(node.script) then
+	    currentNode = currentNode + 1
+	    return Helper.safeDelay(100, 500)
+	end
   elseif AutoLoot.isLooting() then
     BotLogger.debug("AutoPath: AutoLoot is working.")
   elseif g_game.isAttacking() then

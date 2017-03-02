@@ -45,6 +45,7 @@ function AttackMode.Event(event)
           local item = attack:getItem()
           local words = attack:getWords()
           local radius = attack:getRadius()
+          local radiusSqrt = math.floor(math.sqrt(radius))
 
           -- TODO: multi actions decider/queue
           if type == AttackModes.ItemMode and item > 0 then
@@ -60,26 +61,34 @@ function AttackMode.Event(event)
             local playerDist = math.sqrt(radius)+1
             playerDist = playerDist * playerDist
             local bestPos, bestScore, bestDist = nil, -1, 0
-            for x = -radius, radius do
-              for y = -radius, radius do
-                local curPos, curDist, curScore = {x=pos.x+x, y=pos.y+y, z=pos.z}, 0, 0
-                if g_map.isSightClear(playerPos, curPos) and g_map.getTile(curPos) then
-                  for k, v in pairs(spec) do
-                    local vp = v:getPosition()
-                    local dist = (vp.x-curPos.x)*(vp.x-curPos.x) + (vp.y-curPos.y)*(vp.y-curPos.y)
-                    if v:isLocalPlayer() then
-                      curDist = dist
-                    elseif v:isPlayer() and dist <= playerDist then
-                      curScore = -1
-                      break
-                    elseif dist <= radius then
-                      curScore = curScore + (table.contains(targets, v) and 1 or 0.1)
+            for x = -radiusSqrt, radiusSqrt do
+              if g_map.isAwareOfPosition({x=pos.x+x+radiusSqrt, y=pos.y, z=pos.z}) and
+                g_map.isAwareOfPosition({x=pos.x+x-radiusSqrt, y=pos.y, z=pos.z}) then
+                for y = -radiusSqrt, radiusSqrt do
+                  if g_map.isAwareOfPosition({x=pos.x, y=pos.y+y+radiusSqrt, z=pos.z}) and
+                    g_map.isAwareOfPosition({x=pos.x, y=pos.y+y-radiusSqrt, z=pos.z}) then
+                    local curPos, curDist, curScore = {x=pos.x+x, y=pos.y+y, z=pos.z}, 0, 0
+                    local tile = g_map.getTile(curPos)
+                    -- printContents('aware of ', curPos)
+                    if tile and tile:isLookPossible() and g_map.isSightClear(playerPos, curPos) then
+                      for k, v in pairs(spec) do
+                        local vp = v:getPosition()
+                        local dist = (vp.x-curPos.x)*(vp.x-curPos.x) + (vp.y-curPos.y)*(vp.y-curPos.y)
+                        if v:isLocalPlayer() then
+                          curDist = dist
+                        elseif v:isPlayer() and dist <= playerDist then
+                          curScore = -1
+                          break
+                        elseif dist <= radius and g_map.isSightClear(curPos, v:getPosition()) then
+                          curScore = curScore + (table.contains(targets, v) and 1 or 0.1)
+                        end
+                      end
+                      if curScore >= 0 and (curScore > bestScore or (curScore == bestScore and curDist < bestDist)) then
+                        bestPos = curPos
+                        bestDist = curDist
+                        bestScore = curScore
+                      end
                     end
-                  end
-                  if curScore >= 0 and (curScore > bestScore or (curScore == bestScore and curDist < bestDist)) then
-                    bestPos = curPos
-                    bestDist = curDist
-                    bestScore = curScore
                   end
                 end
               end
@@ -91,7 +100,7 @@ function AttackMode.Event(event)
           elseif type == AttackModes.SpellMode and words and words ~= "" then 
             local isPvP = false
             if radius > 0 then
-              for k, v in pairs(g_map.getSpectatorsInRange(creature:getPosition(), false, radius, radius)) do
+              for k, v in pairs(g_map.getSpectatorsInRange(creature:getPosition(), false, radiusSqrt, radiusSqrt)) do
                 if v:isPlayer() and not v:isLocalPlayer() then
                   isPvP = true
                   break
