@@ -113,7 +113,7 @@ Panel
       @onClick: |
           local setting = TargetsModule.getCurrentSetting()
           if setting then
-          	setting:getTarget():removeSetting(setting)
+            setting:getTarget():removeSetting(setting)
           end
 
     Panel
@@ -484,6 +484,24 @@ Panel
         anchors.left: parent.left
         anchors.top: prev.bottom
         margin-left: 10
+
+      Label
+        id: BackpackLabel
+        !text: tr('BPs:')
+        anchors.top: FastLooter.bottom
+        anchors.left: parent.left
+        margin-left: 10
+        margin-top: 5
+
+      MultilineTextEdit
+        id: BackpackEdit
+        anchors.top: BackpackLabel.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        text-wrap: true
+        margin-left: 10
+        margin-top: 5
 
   HorizontalSeparator
     anchors.left: parent.left

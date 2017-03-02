@@ -138,7 +138,8 @@ function TargetsModule.loadUI(panel)
     LootItemsList = panel:recursiveGetChildById('LootItemsList'),
     LootItemCountBox = panel:recursiveGetChildById('ItemCountBox'),
     FastLooter = panel:recursiveGetChildById('FastLooter'),
-    SettingRadiusBox = panel:recursiveGetChildById('SettingRadiusBox')
+    SettingRadiusBox = panel:recursiveGetChildById('SettingRadiusBox'),
+    BackpackEdit = panel:recursiveGetChildById('BackpackEdit')
   }
 
   -- Setting Mode List

@@ -13,6 +13,7 @@ AutoLoot.looting = false
 AutoLoot.lootProc = nil
 AutoLoot.itemsList = {}
 AutoLoot.containersList = {}
+AutoLoot.containers = {}
 
 
 modules.game_interface.addMenuHook("Looter", tr("Set loot count"), 
@@ -255,3 +256,78 @@ function AutoLoot.deleteLootItem(id)
   AutoLoot.itemsList[id] = nil
 end
 
+function AutoLoot.openContainer(id) 
+  local containers = AutoLoot.containers
+  local container = containers[id]
+  if not container then return end
+  local containerItem
+  local parentContainer = containers[container.parent]
+  local index = 0
+  if parentContainer then
+    local parent = g_game.getContainers()[parentContainer.id]
+    if not parent then
+      BotLogger.error('Opening container ' .. container.name .. ', but its parent ' .. container.parent .. ' is not yet open!')
+      return
+    end
+    for k, item in ipairs(parent:getItems()) do
+      if item and item:isContainer() then
+        index = index + 1
+        if index == container.index then
+          containerItem = item
+          break
+        end
+      end
+    end
+  elseif container.parent == '' then
+    local player = g_game.getLocalPlayer()
+    for i=InventorySlotFirst,InventorySlotLast do
+      local item = player:getInventoryItem(i)
+      if item and item:isContainer() then
+        index = index + 1
+        if index == container.index then
+          containerItem = item
+          break
+        end
+      end
+    end 
+  else
+    BotLogger.error('Opening container ' .. container.name .. ', but its parent ' .. container.parent .. ' is undefined!')
+    return
+  end
+  if not containerItem then
+    BotLogger.error('Opening container ' .. container.name .. ', but its parent ' .. container.parent .. ' doesn\'t have container index ' .. tostring(container.index) ..  '!')
+    return
+  end
+  local proc = OpenProcedure.create(containerItem, 10000)
+  connect(proc, { onFinished = function(openedContainer)
+    openedContainer.window:setText(container.name)
+    AutoLoot.openContainer(id+1)
+  end, onFail = function() 
+    BotLogger.error('Failed to open container ' .. container.name .. '.')
+  end })
+  proc:start()
+end
+
+function AutoLoot.refreshContainers()
+  local containers = {}
+  local bps = string.split(TargetsModule.getUI().BackpackEdit:getText(), '\n')
+  for k, v in ipairs(bps) do
+    local bp = v:split(' ')
+    local name, parent, index = bp[1], bp[2] or '', tonumber(bp[3]) or 1
+    if tostring(tonumber(parent)) == parent then
+      index = tonumber(parent)
+      parent = ''
+    end
+    if containers[name] then
+      BotLogger.error('BP name ' .. name .. ' not unique!')
+    else
+      containers[name] = { name = name, parent = parent, index = index, id = k-1 }
+      containers[k-1] = containers[name]
+    end
+  end
+  AutoLoot.containers = containers
+  for k, v in pairs(g_game.getContainers()) do
+    g_game.close(v)
+  end
+  AutoLoot.openContainer(0)
+end
