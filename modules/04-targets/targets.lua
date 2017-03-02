@@ -139,7 +139,8 @@ function TargetsModule.loadUI(panel)
     LootItemCountBox = panel:recursiveGetChildById('ItemCountBox'),
     FastLooter = panel:recursiveGetChildById('FastLooter'),
     SettingRadiusBox = panel:recursiveGetChildById('SettingRadiusBox'),
-    BackpackEdit = panel:recursiveGetChildById('BackpackEdit')
+    BackpackList = panel:recursiveGetChildById('BackpackList'),
+    BackpackFastEdit = panel:recursiveGetChildById('BackpackFastEdit')
   }
 
   -- Setting Mode List
@@ -210,8 +211,17 @@ function TargetsModule.bindHandlers()
         if focusedChild == nil then 
           UI.LootItemCountBox:setEnabled(false)
         else
-          UI.LootItemCountBox:setEnabled(true)
-          UI.LootItemCountBox:setValue(TargetsModule.AutoLoot.itemsList[focusedChild:getId()] or 0)
+          local option = UI.BackpackFastEdit:getCurrentOption().text
+          printContents('option: ', option)
+          local id = tonumber(focusedChild:getId())
+          local item = TargetsModule.AutoLoot.itemsList[id]
+          if AutoLoot.containers[option] then
+            item.bp = AutoLoot.containers[option].id
+            AutoLoot.updateEntry(id)
+          else
+            UI.LootItemCountBox:setEnabled(true)
+            UI.LootItemCountBox:setValue(item and item.count or -1)
+          end
         end
       end
     })
@@ -246,6 +256,22 @@ function TargetsModule.bindHandlers()
           setting:setMovementType(TargetsModule.Movement.Type[text])
           UI.SettingDistanceBox:setEnabled(text ~= "None")
         end
+      end
+    end
+  })
+
+  connect(UI.BackpackFastEdit, {
+    onOptionChange = function(self, option) 
+      printContents('option: ', option)
+      local focusedChild = UI.LootItemsList:getFocusedChild()
+      if not focusedChild then
+        return
+      end
+      local id = tonumber(focusedChild:getId())
+      local item = TargetsModule.AutoLoot.itemsList[id]
+      if AutoLoot.containers[option] then
+        item.bp = AutoLoot.containers[option].id
+        AutoLoot.updateEntry(id)
       end
     end
   })

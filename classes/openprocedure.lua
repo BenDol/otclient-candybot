@@ -8,7 +8,7 @@ end
 
 OpenProcedure = extends(Procedure, "OpenProcedure")
 
-OpenProcedure.create = function(thing, timeoutTicks)
+OpenProcedure.create = function(thing, timeoutTicks, oldContainer)
   local proc = OpenProcedure.internalCreate()
 
   if timeoutTicks then
@@ -19,6 +19,7 @@ OpenProcedure.create = function(thing, timeoutTicks)
   proc.hook = nil
   proc.containerId = nil
   proc.container = nil
+  proc.oldContainer = oldContainer
 
   if thing then
     local class = thing:getClassName()
@@ -46,7 +47,7 @@ function OpenProcedure:start()
 end
 
 function OpenProcedure:tryOpen()
-  self.containerId = g_game.open(self.thing)
+  self.containerId = g_game.open(self.thing, self.oldContainer)
   if self.containerId ~= -1 and not self.hook then
     self.hook = function(c, p) self:onOpen(c, p) end
     connect(Container, {onOpen = self.hook})

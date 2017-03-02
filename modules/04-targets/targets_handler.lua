@@ -21,6 +21,7 @@ TargetsModule.options = {
   ['AutoTarget'] = false,
   ['LoadList'] = '',
   ['FastLooter'] = false,
+  ['BackpackList'] = 'main 1\ninside main 1'
 }
 
 --[[ Register Events ]]

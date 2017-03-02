@@ -143,8 +143,8 @@ function LootProcedure:findCorpse()
 end
 
 function LootProcedure:shouldLootItem(item)
-  local refillCount = TargetsModule.AutoLoot.itemsList[item:getId()]
-  return refillCount == nil or g_game.getLocalPlayer():countItems(item:getId()) < refillCount
+  local loot = self.itemsList[item:getId()]
+  return not loot or loot.count == nil or loot.count == -1 or g_game.getLocalPlayer():countItems(item:getId()) < loot.count
 end
 
 function LootProcedure:useContainer(cid)
@@ -236,9 +236,16 @@ function LootProcedure:takeNextItem(itemCount)
     if not itemCount then 
       itemCount = item:getCount()
     end
-    local toPos, count = self:getBestContainer(item)
+    if not self.itemsList[item:getId()] then
+      AutoLoot.addLootItem(item:getId())
+    end
+    local toPos, count, rescheduleBp = self:getBestContainer(item)
     if count == nil or count > itemCount then 
       count = itemCount 
+    end
+    if rescheduleBp then
+      AutoLoot.openNextBP(rescheduleBp, function() self:takeNextItem() end)
+      return
     end
     local isAll = itemCount == count
     if not toPos then
@@ -316,6 +323,23 @@ function LootProcedure:getBestContainer(item)
         return invItem:getPosition(), 100-invItem:getCount()
       end
     end
+  end
+  local bp = self.itemsList[item:getId()].bp
+  printContents(item:getId(), bp)
+  if bp then
+    local container = g_game.getContainers()[bp]
+    if container then
+      for _, existingItem in pairs(container:getItems()) do
+        if existingItem:getId() == item:getId() and existingItem:getSubType() == item:getSubType() and 
+          item:isStackable() and existingItem:getCount() < 100 then 
+          return existingItem:getPosition(), 100-existingItem:getCount()
+        end
+      end
+      if container:getCapacity() > container:getItemsCount() then
+        return {x=65535, y=64+container:getId(), z=container:getCapacity()-1}, 100
+      end
+    end
+    return nil, nil, bp -- reschedule
   end
   local maxCid = -1
   for k, v in pairs(self.containersList) do

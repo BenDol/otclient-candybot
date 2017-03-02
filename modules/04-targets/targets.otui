@@ -4,7 +4,7 @@ Panel
   anchors.right: parent.right
   anchors.top: parent.top
   padding-right: 8
-  height: 565
+  height: 715
 
   BotOptionCheckBox
     id: AutoTarget
@@ -417,7 +417,7 @@ Panel
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: prev.bottom
-    height: 150
+    height: 300
 
     Label
       text: Looter
@@ -430,14 +430,14 @@ Panel
       id: LootItemsList
       anchors.top: prev.bottom
       anchors.left: prev.left
+      anchors.bottom: parent.bottom
       margin-bottom: 5
       margin-top: 5
       padding: 1
       focusable: false
       phantom: true
       vertical-scrollbar: LootItemsScrollBar
-      width: 190
-      height: 130
+      width: 230
 
     VerticalScrollBar
       id: LootItemsScrollBar
@@ -450,7 +450,7 @@ Panel
 
     Panel
       anchors.top: parent.top
-      anchors.bottom: parent.bottom
+      anchors.bottom: LootItemsList.bottom
       anchors.left: LootItemsScrollBar.right
       anchors.right: parent.right
       //border-width: 1
@@ -468,12 +468,13 @@ Panel
         enabled: false
         anchors.left: prev.right
         anchors.top: parent.top
+        anchors.right: parent.right
         phantom: true
         mouse-scroll: false
         margin-top: 2
         margin-left: 10
         focusable: true
-        minimum: 0
+        minimum: -1
         maximum: 10000
 
       BotOptionCheckBox
@@ -494,14 +495,35 @@ Panel
         margin-top: 5
 
       MultilineTextEdit
-        id: BackpackEdit
+        id: BackpackList
         anchors.top: BackpackLabel.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.bottom: parent.bottom
+        anchors.bottom: BackpackFastEdit.top
         text-wrap: true
         margin-left: 10
         margin-top: 5
+        margin-bottom: 5
+        cursor-visible: true
+        focusable: true
+
+      ComboBox
+        id: BackpackFastEdit
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        width: 70
+        margin-left: 10
+        mouse-scroll: false
+
+      Button
+        id: ReopenBackpacksButton
+        !text: tr('Apply')
+        anchors.left: prev.right
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        margin-left: 3
+        @onClick: |
+          AutoLoot.refreshContainers()
 
   HorizontalSeparator
     anchors.left: parent.left

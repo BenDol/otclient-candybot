@@ -30,9 +30,20 @@ function AutoLoot.init()
   AutoLoot.lootList = {}
   AutoLoot.looting = false
   AutoLoot.lootProc = nil
+  connect(LocalPlayer, {
+    onInventoryChange = AutoLoot.onInventoryChange
+  })
+  connect(g_game, { onGameStart = AutoLoot.onGameStart })
+  if g_game.isOnline() then
+    scheduleEvent(AutoLoot.refreshContainers, 100, true)
+  end
 end
 
 function AutoLoot.terminate()
+  disconnect(LocalPlayer, {
+    onInventoryChange = AutoLoot.onInventoryChange
+  })
+  disconnect(g_game, { onGameStart = AutoLoot.onGameStart })
   AutoLoot.onStopped()
   modules.game_interface.removeMenuHook("Looter")
 end
@@ -234,16 +245,41 @@ function AutoLoot.getItemListEntry(id)
   return item
 end
 
-function AutoLoot.addLootItem(id, count) 
-  id=tonumber(id)
-  if count == nil then
-    count = AutoLoot.itemsList[id] or 0
+function AutoLoot.updateEntry(id)
+  local loot = AutoLoot.itemsList[id]
+  local widget = AutoLoot.getItemListEntry(id)
+  local string = ''
+  if not loot.count or loot.count < 0 then
+    string = 'Loot'
+  elseif loot.count > 0 then
+    string = 'Refill (' .. loot.count .. ')';
+  elseif loot.count == 0 then
+    string = 'Ignore'
   end
-  AutoLoot.itemsList[id] = count
+  string = string .. ': ' .. id
+  if loot.bp then
+    string = string .. ' [' .. AutoLoot.containers[loot.bp].name .. ']'
+  end
+  widget:setText(string)
+end
 
-  BotLogger.debug("Item "..tostring(id) .." is refilled to " .. tostring(count) .. " by AutoLoot.")
+function AutoLoot.addLootItem(id, count, bp) 
+  id=tonumber(id)
 
-  AutoLoot.getItemListEntry(id):setText((count > 0 and 'Refill (' .. count .. '): ' or 'Ignore: ') .. id)
+  if not AutoLoot.itemsList[id] then
+    AutoLoot.itemsList[id] = {}
+  end
+
+  if count then
+    AutoLoot.itemsList[id].count = count
+  end
+
+  if bp then
+    AutoLoot.itemsList[id].bp = bp
+  end
+
+  BotLogger.debug("Item "..tostring(id) .." loot settings changed.")
+  AutoLoot.updateEntry(id)
 end
 
 function AutoLoot.deleteLootItem(id)
@@ -256,10 +292,43 @@ function AutoLoot.deleteLootItem(id)
   AutoLoot.itemsList[id] = nil
 end
 
-function AutoLoot.openContainer(id) 
+function AutoLoot.onGameStart(player)
+  if AutoLoot.refreshEvent then
+    AutoLoot.refreshEvent:cancel()
+  end
+  AutoLoot.refreshEvent = scheduleEvent(function() AutoLoot.openNextContainer(0) end, 500)
+end
+
+function AutoLoot.onInventoryChange(player, slot, item, oldItem)
+  if item and item:isContainer() then
+    if AutoLoot.refreshEvent then
+      AutoLoot.refreshEvent:cancel()
+    end
+    AutoLoot.refreshEvent = scheduleEvent(function() AutoLoot.openNextContainer(0) end, 1000)
+  end
+end
+
+function AutoLoot.openNextContainer(id, callback)
   local containers = AutoLoot.containers
   local container = containers[id]
-  if not container then return end
+  if not container then 
+    if callback then
+      callback()
+    end
+    return
+  end
+  AutoLoot.openContainer(id, function() AutoLoot.openNextContainer(id+1, callback) end)
+end
+
+function AutoLoot.openContainer(id, callback) 
+  local containers = AutoLoot.containers
+  local container = containers[id]
+  if not container then 
+    if callback then
+      callback()
+    end
+    return
+  end
   local containerItem
   local parentContainer = containers[container.parent]
   local index = 0
@@ -298,19 +367,26 @@ function AutoLoot.openContainer(id)
     BotLogger.error('Opening container ' .. container.name .. ', but its parent ' .. container.parent .. ' doesn\'t have container index ' .. tostring(container.index) ..  '!')
     return
   end
-  local proc = OpenProcedure.create(containerItem, 10000)
+  local proc = OpenProcedure.create(containerItem, 10000, g_game.getContainers()[id])
   connect(proc, { onFinished = function(openedContainer)
     openedContainer.window:setText(container.name)
-    AutoLoot.openContainer(id+1)
+    if callback then
+      callback()
+    end
   end, onFail = function() 
     BotLogger.error('Failed to open container ' .. container.name .. '.')
   end })
   proc:start()
 end
 
-function AutoLoot.refreshContainers()
+function AutoLoot.refreshContainers(init, callback)
   local containers = {}
-  local bps = string.split(TargetsModule.getUI().BackpackEdit:getText(), '\n')
+  local UI = TargetsModule.getUI()
+  local bps = UI.BackpackList:getText()
+  UI.BackpackFastEdit:clearOptions()
+  UI.BackpackFastEdit:addOption("Fast BP")
+  CandyBot.changeOption('BackpackList', bps, init)
+  bps = string.split(bps, '\n')
   for k, v in ipairs(bps) do
     local bp = v:split(' ')
     local name, parent, index = bp[1], bp[2] or '', tonumber(bp[3]) or 1
@@ -318,16 +394,31 @@ function AutoLoot.refreshContainers()
       index = tonumber(parent)
       parent = ''
     end
+    for _, b in pairs(containers) do
+      if parent == b.parent and index == b.index then
+        BotLogger.error('BP [' .. name .. '/' .. b.name ..'] ' .. parent .. ' ' .. index .. ' duplicated!')
+        return
+      end
+    end
     if containers[name] then
-      BotLogger.error('BP name ' .. name .. ' not unique!')
+      BotLogger.error('BP name ' .. name .. ' duplicated!')
+      return
     else
+      UI.BackpackFastEdit:addOption(name)
       containers[name] = { name = name, parent = parent, index = index, id = k-1 }
       containers[k-1] = containers[name]
     end
   end
   AutoLoot.containers = containers
-  for k, v in pairs(g_game.getContainers()) do
-    g_game.close(v)
+  AutoLoot.openNextContainer(0, callback)
+end
+
+function AutoLoot.openNextBP(bp, callback)
+  local container = g_game.getContainers()[AutoLoot.containers[bp].id]
+  if not container then
+    AutoLoot.openNextContainer(0, function() AutoLoot.openNextBP(bp, callback) end)
+    return
   end
-  AutoLoot.openContainer(0)
+  AutoLoot.containers[bp].index = AutoLoot.containers[bp].index + 1
+  AutoLoot.openContainer(bp, callback)
 end
