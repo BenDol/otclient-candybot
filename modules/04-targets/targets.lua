@@ -212,7 +212,6 @@ function TargetsModule.bindHandlers()
           UI.LootItemCountBox:setEnabled(false)
         else
           local option = UI.BackpackFastEdit:getCurrentOption().text
-          printContents('option: ', option)
           local id = tonumber(focusedChild:getId())
           local item = TargetsModule.AutoLoot.itemsList[id]
           if AutoLoot.containers[option] then
@@ -262,7 +261,6 @@ function TargetsModule.bindHandlers()
 
   connect(UI.BackpackFastEdit, {
     onOptionChange = function(self, option) 
-      printContents('option: ', option)
       local focusedChild = UI.LootItemsList:getFocusedChild()
       if not focusedChild then
         return
@@ -923,10 +921,11 @@ function parseTargets(config)
     index = index + 1
   end
 
-  if TargetsModule.AutoLoot then
-    for k, v in pairs(config:getNode("Loot")) do
-      TargetsModule.AutoLoot.addLootItem(k, tonumber(v))
+  for k, v in pairs(config:getNode("Loot")) do
+    for a,b in pairs(v) do
+      v[a] = tonumber(b)
     end
+    TargetsModule.AutoLoot.addLootItem(k, v.count, v.bp)
   end
 
   return targets

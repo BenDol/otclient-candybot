@@ -17,7 +17,7 @@ function CandyConfig:toNode()
   local node = {}
   for k,v in pairs(self) do
     local t = type(v)
-    if t ~= "function" and t ~= "userdata" and t ~= "table" then
+    if t ~= "function" and t ~= "userdata" and t ~= "table" and k ~= "__class" then
       node[k] = v
     end
   end

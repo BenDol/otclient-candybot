@@ -258,7 +258,11 @@ function AutoLoot.updateEntry(id)
   end
   string = string .. ': ' .. id
   if loot.bp then
-    string = string .. ' [' .. AutoLoot.containers[loot.bp].name .. ']'
+    if AutoLoot.containers[loot.bp] then
+      string = string .. ' [' .. AutoLoot.containers[loot.bp].name .. ']'
+    else
+      string = string .. ' [unknown]'
+    end
   end
   widget:setText(string)
 end
@@ -411,6 +415,11 @@ function AutoLoot.refreshContainers(init, callback)
   end
   AutoLoot.containers = containers
   AutoLoot.openNextContainer(0, callback)
+  for id, v in pairs(AutoLoot.itemsList) do
+    if v.bp then
+      AutoLoot.updateEntry(id)
+    end
+  end
 end
 
 function AutoLoot.openNextBP(bp, callback)
