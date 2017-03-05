@@ -5,6 +5,8 @@
 
 PathsModule.AutoPath = {}
 AutoPath = PathsModule.AutoPath
+AutoPath.ropeId = 0
+AutoPath.shovelId = 0
 local currentNode = 1
 
 -- Variables
@@ -30,14 +32,14 @@ function AutoPath.onAutoWalkAction(player, position, floorChange)
   if Bit.hasBit(floorChange, FloorChange.Up) then
     if topUseThing:isGround() then 
       -- use rope on rope spot
-      Helper.safeUseInventoryItemWith(3003, topUseThing, false) 
+      Helper.safeUseInventoryItemWith(AutoPath.ropeId, topUseThing, false) 
     else
       -- use ladder
       g_game.use(topUseThing)
     end
   else
     -- use shovel on stone pile
-    Helper.safeUseInventoryItemWith(3457, topUseThing, false) 
+    Helper.safeUseInventoryItemWith(AutoPath.shovelId, topUseThing, false) 
 
   end
   g_game.stop()
@@ -57,16 +59,13 @@ function AutoPath.getNode()
 end
 
 function AutoPath.goToNode(label)
-	for k, v in pairs(nodes) do
-		if v.label == label then
-			currentNode = k
-			return
-		end
-	end
-end
-
-function AutoPath.evalScript(script)
-	
+  for k, node in pairs(nodes) do
+    if node:getLabel() == label then
+      currentNode = k
+      return
+    end
+  end
+  g_game.stop()
 end
 
 function AutoPath.nextNodeFailed(player, code)
@@ -87,11 +86,11 @@ function AutoPath.Event(event)
 
   if not node then
     BotLogger.error("AutoPath: No nodes to walk.")
-  elseif Position.isInRange(playerPos, node:getPosition(), 1, 1) then
-  	if not node.script or AutoPath.evalScript(node.script) then
-	    currentNode = currentNode + 1
-	    return Helper.safeDelay(100, 500)
-	end
+  elseif Position.isInRange(playerPos, node:getPosition(), 2, 2) then
+    if node:executeScript() == nil then
+      currentNode = currentNode + 1
+      return Helper.safeDelay(100, 500)
+    end
   elseif AutoLoot.isLooting() then
     BotLogger.debug("AutoPath: AutoLoot is working.")
   elseif g_game.isAttacking() then
@@ -116,9 +115,22 @@ function AutoPath.Event(event)
 end
 
 function AutoPath.ConnectListener(listener)
-  connect(LocalPlayer, {onAutoWalkAction = AutoPath.onAutoWalkAction})
+  connect(LocalPlayer, {
+    onAutoWalkAction = AutoPath.onAutoWalkAction, 
+    onPositionChange = AutoPath.onPositionChange
+  })
 end
 
 function AutoPath.DisconnectListener(listener)
-  disconnect(LocalPlayer, {onAutoWalkAction = AutoPath.onAutoWalkAction})
+  disconnect(LocalPlayer, {
+    onAutoWalkAction = AutoPath.onAutoWalkAction, 
+    onPositionChange = AutoPath.onPositionChange
+  })
+end
+
+function AutoPath.onPositionChange(creature,newPos, oldPos) 
+  local node = AutoPath.getNode()
+  if node and Position.isInRange(newPos, node:getPosition(), 2, 2) then
+    AutoPath.Event()
+  end
 end

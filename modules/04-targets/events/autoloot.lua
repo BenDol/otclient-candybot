@@ -230,16 +230,23 @@ function AutoLoot.getItemListEntry(id)
   if item then 
     return item
   end
-  local item = g_ui.createWidget('ItemListRow', TargetsModule.getUI().LootItemsList)
+  local item = g_ui.createWidget('LootListRow', TargetsModule.getUI().LootItemsList)
   item:setId(id)
   local itemBox = item:getChildById('item')
   itemBox:setItemId(id)
-  local removeButton = item:getChildById('remove')
-  connect(removeButton, {
+  connect(item:getChildById('remove'), {
     onClick = function(button)
       local row = button:getParent()
       local id = row:getId()
       AutoLoot.deleteLootItem(id)
+    end
+  })
+  connect(item:getChildById('ignore'), {
+    onClick = function(button)
+      local row = button:getParent()
+      local id = row:getId()
+      button:setText(button:getText() == 'i' and '' or 'i')
+      AutoLoot.addLootItem(id, button:getText() == "i" and 0 or -1)
     end
   })
   return item
@@ -265,21 +272,33 @@ function AutoLoot.updateEntry(id)
     end
   end
   widget:setText(string)
+  widget:getChildById('ignore'):setText(loot.count and loot.count == 0 and 'i' or '')
+  local UI = TargetsModule.getUI()
+  if UI.LootItemsList:getFocusedChild() == widget then
+      UI.LootItemCountBox:setEnabled(true)
+      UI.LootItemCountBox:setValue(loot and loot.count or -1)
+  end
 end
 
 function AutoLoot.addLootItem(id, count, bp) 
   id=tonumber(id)
+  local item = AutoLoot.itemsList[id]
 
-  if not AutoLoot.itemsList[id] then
-    AutoLoot.itemsList[id] = {}
+  if not item then
+    item = {}
+    AutoLoot.itemsList[id] = item
   end
 
   if count then
-    AutoLoot.itemsList[id].count = count
+    item.count = count
   end
 
   if bp then
-    AutoLoot.itemsList[id].bp = bp
+    item.bp = bp
+  end
+
+  if item.count == 0 then
+    item.bp = nil
   end
 
   BotLogger.debug("Item "..tostring(id) .." loot settings changed.")

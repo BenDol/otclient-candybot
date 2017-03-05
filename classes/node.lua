@@ -2,92 +2,71 @@
   @Authors: Ben Dol (BeniS)
   @Details: Node class for pathing control/logic.
 ]]
-if not CandyConfig then
-  dofile("candyconfig.lua")
-end
 
-Node = extends(CandyConfig, "Node")
+Node = newclass("Node")
 
-Node.create = function(path, type, widget)
+Node.create = function(pos, script)
   local node = Node.internalCreate()
 
-  node.path = path
-  node.type = type
-  if type(widget) ~= "userdata" or widget:getClassName() ~= "UIWidget" then
-    perror(debug.traceback("invalid widget provided"))
-  end
-  node.widget = widget
-  node.index = 0
-
+  node.pos = pos or {}
+  node.script = script or ''
   return node
 end
 
--- gets/sets
-
-function Node:getPath()
-  return self.path
+function Node:getName() 
+  return tostring(self.pos.x) .. ':' .. tostring(self.pos.y) .. ':' .. tostring(self.pos.z)
 end
 
-function Node:setPath(path)
-  local oldPath = self.path
-  if path ~= oldPath then
-    self.path = path
-    
-    signalcall(self.onPathChange, self, path, oldPath)
-  end
+function Node:getPosition()
+	return self.pos
 end
 
-function Node:getType()
-  return self.type
+function Node:getScript()
+	return self.script
 end
 
-function Node:setType(type)
-  local oldType = self.type
-  if type ~= oldType then
-    self.type = type
-    
-    signalcall(self.onTypeChange, self, type, oldType)
-  end
+function Node:setScript(script)
+	self.script = script
 end
 
-function Node:getWidget()
-  return self.widget
+function getPos(a,b,c)
+	if type(a) == 'number' and b and c then
+		return {x=a, y=b, z=c}
+	elseif type(a) == 'table' and a[1] then
+		return {x=a[1], y=a[2], z=a[3]}
+	elseif type(a) == 'table' and a.x then
+		return a
+	end
+end
+function use(item, a, b, c) 
+	local destPos = getPos(a,b,c)
+	if destPos then
+		Helper.safeUseInventoryItemWith(item, g_map.getTile(destPos):getTopUseThing(), BotModule.isPrecisionMode())
+	else
+		g_game.use(g_map.getTile(getPos(item, a, b)):getTopUseThing())
+	end
 end
 
-function Node:setWidget(widget)
-  local oldWidget = self.widget
-  if widget ~= oldWidget then
-    self.widget = widget
-    
-    signalcall(self.onWidgetChange, self, widget, oldWidget)
-  end
+function Node:executeScript()
+	if not self.script or self.script == '' then 
+		return
+	end
+	local func, err = loadstring('local player, node, use = ...\n' .. self.script, "WalkerScript #" .. self:getName())
+	if not func then
+		if err then
+			BotLogger.error(err)
+		end
+		return
+	end
+	return func(g_game.getLocalPlayer(), self, use)
 end
 
-function Node:getIndex()
-  return self.index
+function Node:toString()
+	return tostring(self.pos.x) .. ':' .. tostring(self.pos.y) .. ':' .. tostring(self.pos.z) .. ':' .. self.script .. '\n'
 end
 
-function Node:setIndex(index)
-  local oldIndex = self.index
-  if index ~= oldIndex then
-    self.index = index
-    
-    signalcall(self.onIndexChange, self, index, oldIndex)
-  end
-end
-
--- methods
-
-function Node:toNode()
-  local node = CandyConfig.toNode(self)
-
-  -- complex nodes
-
-  return node
-end
-
-function Node:parseNode(node)
-  CandyConfig.parseNode(self, node)
-
-  -- complex parse
+function Node:fromString(str)
+	local t = string.explode(str, ':', 3)
+	self.pos = {x=tonumber(t[1]), y=tonumber(t[2]), z=tonumber(t[3])}
+	self.script = t[4]
 end

@@ -42,11 +42,15 @@ function PathsModule.init()
   local tabBuffer = tabPanel:getChildById('tabBuffer')
   Panel = g_ui.loadUI('paths.otui', tabBuffer)
 
+  PathsModule.mapWindow = g_ui.displayUI('window')
+  -- PathsModule
+
   PathsModule.loadUI(Panel)
 
   PathsModule.bindHandlers()
 
   PathsModule.parentUI = CandyBot.window
+
 
   g_keyboard.bindKeyPress('Shift+Escape', PathsModule.disable, gameRootPanel)
 
@@ -68,7 +72,7 @@ function PathsModule.init()
     onGameStart = PathsModule.online,
     onGameEnd = PathsModule.offline,
   })
-
+  
   connect(LocalPlayer, {
     onPositionChange = PathsModule.updateCameraPosition
   })
@@ -100,6 +104,10 @@ function PathsModule.terminate()
     --save here
   end
 
+  PathsModule.mapWindow:destroy()
+  PathsModule.mapWindow = nil
+
+
   disconnect(g_game, {
     onGameStart = PathsModule.online,
     onGameEnd = PathsModule.offline,
@@ -117,7 +125,6 @@ function PathsModule.terminate()
 
   -- event terminates
   SmartPath.terminate()
-
   PathsModule.unloadUI()
 end
 
@@ -135,12 +142,14 @@ function PathsModule.loadUI(panel)
   UI = {
     SmartPath = panel:recursiveGetChildById('SmartPath'),
     AutoPath = panel:recursiveGetChildById('AutoPath'),
-    PathMap = panel:recursiveGetChildById('PathMap'),
+    PathMap = PathsModule.mapWindow:recursiveGetChildById('PathMap'),
     PathList = panel:recursiveGetChildById('PathList'),
     SaveNameEdit = panel:recursiveGetChildById('SaveNameEdit'),
     SaveButton = panel:recursiveGetChildById('SaveButton'),
     LoadList = panel:recursiveGetChildById('LoadList'),
-    LoadButton = panel:recursiveGetChildById('LoadButton')
+    LoadButton = panel:recursiveGetChildById('LoadButton'),
+    NodeScript = panel:recursiveGetChildById('NodeScript'),
+    NodeScriptSave = panel:recursiveGetChildById('NodeScriptSave')
   }
 end
 
@@ -170,8 +179,15 @@ function PathsModule.bindHandlers()
 
   connect(UI.PathList, {
     onChildFocusChange = function(self, focusedChild)
-      if focusedChild == nil then return end
-      UI.PathMap:setCameraPosition(focusedChild.node:getPosition())
+      if focusedChild == nil then 
+        UI.NodeScript:setEnabled(false)
+        UI.NodeScriptSave:setEnabled(false)
+      else
+        UI.NodeScript:setEnabled(true)
+        UI.NodeScriptSave:setEnabled(true)
+        UI.NodeScript:setText(focusedChild.node:getScript())
+        UI.PathMap:setCameraPosition(focusedChild.node:getPosition())
+      end
     end
   })
 
@@ -287,6 +303,15 @@ function PathsModule.clearNodes()
     node.map:destroy()
   end
   nodes = {}
+end
+
+function PathsModule.saveNodeScript()
+  local focus = UI.PathList:getFocusedChild()
+  if not focus then 
+    return
+  end
+  focus.node:setScript(UI.NodeScript:getText())
+  BotLogger.info("[Walker] Node #" .. focus.node:getName() .. ' script saved!')
 end
 
 function PathsModule.addFile(file)

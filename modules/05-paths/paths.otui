@@ -40,32 +40,27 @@ Panel
     step: 16
     pixels-scroll: true
 
-  VerticalScrollBar
-    id: miniwindowScrollBar
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    anchors.right: parent.right
-    step: 14
-    margin-top: 22
-    margin-right: 3
-    margin-bottom: 3
-    pixels-scroll: true
-
-    $!on:
-      width: 0
-
-  ScrollablePanel
+  MultilineTextEdit
+    id: NodeScript
+    anchors.top: PathList.top
     anchors.left: PathListScrollBar.right
     anchors.right: parent.right
-    anchors.top: PathList.top
     anchors.bottom: PathList.bottom
-    border: 2 black
-    vertical-scrollbar: miniwindowScrollBar
+    text-wrap: true
+    margin-left: 10
+    cursor-visible: true
+    focusable: true
 
-    PathMap
-      id: PathMap
-      anchors.fill: parent
-      autowalk: false
+  Button
+    id: NodeScriptSave
+    anchors.left: NodeScript.left
+    anchors.right: NodeScript.right
+    anchors.bottom: PathList.bottom
+    height: 20
+    !text: tr('Save')
+    @onClick: |
+      PathsModule.saveNodeScript()
+
 
   BotOptionCheckBox
     id: SmartPath

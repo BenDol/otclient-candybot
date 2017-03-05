@@ -64,7 +64,7 @@ ListRowComplex < UIWidget
     margin-top: 1
 
 
-ItemListRow < UIWidget
+LootListRow < UIWidget
   height: 36
   background-color: alpha
   &updateOnStates: |
@@ -96,12 +96,23 @@ ItemListRow < UIWidget
   Button
     id: remove
     text: x
-    width: 12
-    height: 12
+    width: 14
+    height: 13
     anchors.top: parent.top
     anchors.right: parent.right
     margin-right: 4
-    margin-top: 1
+    margin-top: 4
+    text-offset: 1 -2
+
+  Button
+    id: ignore
+    width: 14
+    height: 13
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    margin-right: 4
+    margin-bottom: 4
+    text-offset: 0 -1
 
   Item
     id: item

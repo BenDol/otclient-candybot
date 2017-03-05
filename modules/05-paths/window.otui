@@ -1,0 +1,40 @@
+UIWindow
+  id: walkerWindow
+  background-color: #000000
+  opacity: 0.85
+  clipping: true
+  size: 300 150
+  border: 0 white
+  $on:
+    border: 1 black
+
+  Label
+    id: titleBar
+    !text: tr('CandyBot Walker')
+    border: 1 black
+    color: white
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    background-color: #ffffff11
+    text-align: center
+    text-offset: 4 0
+    height: 18
+
+  PathMap
+    id: PathMap
+    anchors.fill: parent
+    anchors.top: titleBar.bottom
+    autowalk: false
+
+  ResizeBorder
+    id: bottomResizeBorder
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+
+  ResizeBorder
+    id: rightResizeBorder
+    anchors.right: parent.right
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
