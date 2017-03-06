@@ -90,13 +90,18 @@ function LootProcedure:openBody()
     -- Run to corpse for looting
     local openFunc = function()
       local player = g_game.getLocalPlayer()
-      local maxDistance = LootProcedure:isAttacking() and 1 or 6
+      local isAttacking = LootProcedure:isAttacking()
+      local maxDistance = isAttacking and 1 or 6
 
       -- BotLogger.debug("LootProcedure: open function called, max open distance: " .. tostring(maxDistance))
       if Position.isInRange(self.position, player:getPosition(), maxDistance, maxDistance) then
         if #self.openProc < 1 then
           BotLogger.debug("LootProcedure: try open corpse")
 
+          if not isAttacking then
+            g_game.stop()
+          end
+          
           local proc = OpenProcedure.create(self:findCorpse())
           connect(proc, { onFinished = function(container)
             table.remove(self.openProc, 1)

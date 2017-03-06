@@ -11,6 +11,7 @@ AutoPath.timeoutEvent = nil
 AutoPath.lastPos = {}
 AutoPath.lastPosCounter = 0
 local currentNode = 1
+local nextForceWalk = false
 
 -- Variables
 
@@ -71,6 +72,13 @@ function AutoPath.goToNode(label)
   g_game.stop()
 end
 
+function AutoPath.goToNodeIndex(index)
+  if type(index) == 'number' then
+    currentNode = index
+    g_game.stop()
+  end
+end
+
 function AutoPath.onNodeFailed(player, code)
   local node = AutoPath.getNode()
   if node:execute() == Node.OK then
@@ -82,7 +90,7 @@ function AutoPath.onNodeFailed(player, code)
 end
 
 function AutoPath.Event(event)
-  return AutoPath.walkToNode(false)
+  return AutoPath.walkToNode(nextForceWalk)
 end
 
 function AutoPath.ConnectListener(listener)
@@ -101,17 +109,17 @@ end
 
 function AutoPath.onPositionChange(creature,newPos, oldPos) 
   local node = AutoPath.getNode()
-  if not node then return end
+if not node then return end
   if (Position.equals(oldPos, node:getPosition()) and (node:getType() == Node.LADDER or node:getType() == Node.ROPE)) or
     (Position.equals(newPos, node:getPosition()) and node:execute() == Node.OK) then
     g_game.stop()
-    AutoPath.goToNextNode(true)
+    addEvent(function()AutoPath.goToNextNode(true)end)
   end
 end
 
 function AutoPath.goToNextNode(ignoreWalking)
   currentNode = currentNode + 1
-  AutoPath.walkToNode()
+  AutoPath.walkToNode(ignoreWalking)
 end
 
 function AutoPath.walkToNode(ignoreWalking)
@@ -123,19 +131,29 @@ function AutoPath.walkToNode(ignoreWalking)
 
   local playerPos = player:getPosition()
   local node = AutoPath.getNode()
-
   if not node then
     BotLogger.error("AutoPath: No nodes to walk.")
-  elseif Position.isInRange(playerPos, node:getPosition(), 2, 2) then
-    local ret = node:execute() 
-    if ret == Node.OK then
-      AutoPath.goToNextNode()
-      return Helper.safeDelay(100, 500)
+    return 1000
+  end
+
+  if Position.isInRange(playerPos, node:getPosition(), 2, 2) and (not forceWalk or Position.equals(playerPos, node:getPosition())) then
+    local tile = g_map.getTile(node:getPosition())
+    if tile then
+      local forceWalk = not tile:getTopCreature() and not tile:isPathable() and tile:getTopLookThing() == tile:getGround()
+      if not forceWalk or Position.equals(playerPos, node:getPosition()) then
+        local ret = node:execute() 
+        if ret == Node.OK then
+          AutoPath.goToNextNode()
+          return Helper.safeDelay(100, 500)
+        end
+        if ret == Node.STOP then
+          return
+        end
+      end
     end
-    if ret == Node.STOP then
-      return
-    end
-  elseif AutoLoot.isLooting() then
+  end
+
+  if AutoLoot.isLooting() then
     BotLogger.debug("AutoPath: AutoLoot is working.")
   elseif g_game.isAttacking() then
     BotLogger.debug("AutoPath: Attacking someone.")
@@ -144,15 +162,18 @@ function AutoPath.walkToNode(ignoreWalking)
       AutoPath.lastPosCounter = AutoPath.lastPosCounter + 1
       if AutoPath.lastPosCounter > 6 then
         g_game.stop()
+        nextForceWalk = true
       end
     else
       AutoPath.lastPosCounter = 0
     end
-    BotLogger.debug("AutoPath: Already walking.")
+    BotLogger.debug("AutoPath: Already walking. (" .. AutoPath.lastPosCounter .. ")")
+    AutoPath.lastPos = playerPos
   else
     -- connect(player, {
     --   onAutoWalkFail = AutoPath.onNodeFailed
     -- })
+    nextForceWalk = false
     local ret = player:autoWalk(node:getPosition(), 0) or
       player:autoWalk(node:getPosition(), PathFindFlags.MultiFloor)
       or player:autoWalk(node:getPosition(), PathFindFlags.AllowNonPathable + PathFindFlags.MultiFloor)

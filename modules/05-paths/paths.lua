@@ -181,10 +181,7 @@ function PathsModule.bindHandlers()
         UI.NodeScript:setEnabled(false)
         UI.NodeScriptSave:setEnabled(false)
       else
-        UI.NodeScript:setEnabled(true)
-        UI.NodeScriptSave:setEnabled(true)
-        UI.NodeScript:setText(focusedChild.node:getScript())
-        UI.PathMap:setCameraPosition(focusedChild.node:getPosition())
+        PathsModule.selectNode(focusedChild.node)
       end
     end
   })
@@ -263,9 +260,21 @@ function PathsModule.hasNode(pos)
   return PathsModule.getNodeIndex(pos) ~= nil
 end
 
+function PathsModule.selectNode(node) 
+  node.list:focus()
+
+  UI.NodeScript:setEnabled(true)
+  UI.NodeScriptSave:setEnabled(true)
+  UI.NodeScript:setText(node:getScript())
+  UI.PathMap:setCameraPosition(node:getPosition())
+
+  if CandyBot.getOption('AutoPath') == false then
+    PathsModule.AutoPath.goToNodeIndex(PathsModule.getNodeIndex(node:getPosition()))
+  end
+end
+
 function PathsModule.onNodeClick(pos, mousePos, button)
   local node = PathsModule.getNode(pos)
-  printContents("nodeClicked", node, button)
   if button == MouseLeftButton then
     PathsModule.selectNode(node)
   elseif button == MouseRightButton then

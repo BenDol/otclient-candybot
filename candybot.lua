@@ -165,6 +165,15 @@ function CandyBot.getWriteDir()
   return writeDir
 end
 
+function CandyBot.getOptions()
+  local char = g_game.getCharacterName()
+  return CandyBot.options and CandyBot.options[char] or CandyBot.defaultOptions
+end
+
+function CandyBot.getOption(key)
+  return CandyBot.getOptions()[key]
+end
+
 function CandyBot.loadOptions()
   local char = g_game.getCharacterName()
 
