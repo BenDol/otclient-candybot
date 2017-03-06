@@ -546,7 +546,7 @@ Panel
       width: 130
 
     TextList
-      id: LoadList
+      id: TargetsFile
       anchors.top: prev.bottom
       anchors.left: prev.left
       margin-bottom: 5
@@ -560,23 +560,23 @@ Panel
 
     VerticalScrollBar
       id: LoadSettingScrollBar
-      anchors.top: LoadList.top
-      anchors.bottom: LoadList.bottom
-      anchors.left: LoadList.right
+      anchors.top: TargetsFile.top
+      anchors.bottom: TargetsFile.bottom
+      anchors.left: TargetsFile.right
       step: 14
       pixels-scroll: true
 
     Button
       id: LoadButton
       !text: tr('Load Selected')
-      anchors.top: LoadList.bottom
-      anchors.left: LoadList.left
+      anchors.top: TargetsFile.bottom
+      anchors.left: TargetsFile.left
       anchors.right: LoadSettingScrollBar.right
       margin-top: 3
       enabled: false
       @onClick: |
         local parent = self:getParent()
-        local focusedChild = parent:getChildById('LoadList'):getFocusedChild()
+        local focusedChild = parent:getChildById('TargetsFile'):getFocusedChild()
         if focusedChild then
           TargetsModule.loadTargets(focusedChild:getText())
         end

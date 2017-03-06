@@ -200,7 +200,8 @@ end
 function AutoLoot.canLoot(creature)
   local player = g_game.getLocalPlayer()
   local attacking = g_game.getAttackingCreature()
-  if not Position.isInRange(player:getPosition(), creature:getPosition(), 3, 3) and (not attacking or attacking ~= creature) then
+  local targets = TargetsModule.AutoTarget.getBestTarget()
+  if (not targets or not table.contains(targets, creature)) and not Position.isInRange(player:getPosition(), creature:getPosition(), 3, 3) and (not attacking or attacking ~= creature) then
     return false
   end
   local target = TargetsModule.getTarget(creature:getName())

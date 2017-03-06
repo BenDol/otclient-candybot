@@ -325,7 +325,6 @@ function LootProcedure:getBestContainer(item)
     end
   end
   local bp = self.itemsList[item:getId()].bp
-  printContents(item:getId(), bp)
   if bp then
     local container = g_game.getContainers()[bp]
     if container then

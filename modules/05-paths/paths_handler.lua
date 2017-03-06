@@ -19,7 +19,7 @@ PathsModule.dependencies = {
 
 PathsModule.options = {
   ['AutoPath'] = false,
-  ['LoadList'] = '',
+  ['PathsFile'] = '',
   ['SmartPath'] = false
 }
 

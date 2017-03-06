@@ -121,7 +121,7 @@ function TargetsModule.loadUI(panel)
     AddTargetButton = panel:recursiveGetChildById('AddTargetButton'),
     SaveNameEdit = panel:recursiveGetChildById('SaveNameEdit'),
     SaveButton = panel:recursiveGetChildById('SaveButton'),
-    LoadList = panel:recursiveGetChildById('LoadList'),
+    LoadList = panel:recursiveGetChildById('TargetsFile'),
     LoadButton = panel:recursiveGetChildById('LoadButton'),
     SettingModeItem = panel:recursiveGetChildById('SettingModeItem'),
     SelectModeItem = panel:recursiveGetChildById('SelectModeItem'),
@@ -337,7 +337,7 @@ function TargetsModule.onStopEvent(eventId)
 end
 
 function TargetsModule.onNotify(key, state)
-  if key == "LoadList" then
+  if key == UI.LoadList:getId() then
     TargetsModule.loadTargets(state, true)
   end
 end

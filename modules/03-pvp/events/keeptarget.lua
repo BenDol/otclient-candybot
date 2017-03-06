@@ -22,7 +22,6 @@ end
 
 function KeepTarget.connect()
   connect(Creature, { onAppear = KeepTarget.addCreature })
-  print('kt cre')
   connect(Creature, { onWalk = KeepTarget.onPositionChange, onPositionChange = KeepTarget.onPositionChange })
   g_keyboard.bindKeyPress('Escape', KeepTarget.forgetTarget, gameRootPanel)
 end

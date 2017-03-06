@@ -19,7 +19,7 @@ TargetsModule.dependencies = {
 
 TargetsModule.options = {
   ['AutoTarget'] = false,
-  ['LoadList'] = '',
+  ['TargetsFile'] = '',
   ['FastLooter'] = false,
   ['BackpackList'] = 'main 1\ninside main 1'
 }

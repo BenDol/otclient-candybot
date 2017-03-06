@@ -144,7 +144,7 @@ function PathsModule.loadUI(panel)
     PathList = panel:recursiveGetChildById('PathList'),
     SaveNameEdit = panel:recursiveGetChildById('SaveNameEdit'),
     SaveButton = panel:recursiveGetChildById('SaveButton'),
-    LoadList = panel:recursiveGetChildById('LoadList'),
+    LoadList = panel:recursiveGetChildById('PathsFile'),
     LoadButton = panel:recursiveGetChildById('LoadButton'),
     NodeScript = panel:recursiveGetChildById('NodeScript'),
     NodeScriptSave = panel:recursiveGetChildById('NodeScriptSave')
@@ -379,7 +379,7 @@ end
 
 
 function PathsModule.onNotify(key, state)
-  if key == "LoadList" then
+  if key == UI.LoadList:getId() then
     PathsModule.loadPaths(state, true)
   end
 end
