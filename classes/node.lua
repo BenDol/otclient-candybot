@@ -5,16 +5,38 @@
 
 Node = newclass("Node")
 
-Node.create = function(pos, script)
+Node.WALK = 1
+Node.ROPE = 2
+Node.LADDER = 3
+Node.SHOVEL = 4
+Node.SCRIPT = 5
+Node.DOOR = 6
+Node.types = {'Walk', 'Rope', 'Ladder', 'Shovel', 'Script', 'Door'}
+Node.images = {'walk', 'rope2', 'ladder2', 'stand', 'action', 'door'}
+
+Node.OK = 1
+Node.RETRY = 2
+Node.STOP = 3
+
+Node.create = function(pos, script, nodeType)
   local node = Node.internalCreate()
 
   node.pos = pos or {}
   node.script = script or ''
+  node.type = nodeType or Node.WALK
   return node
 end
 
 function Node:getName() 
-  return tostring(self.pos.x) .. ':' .. tostring(self.pos.y) .. ':' .. tostring(self.pos.z)
+  return self:getTypeName() .. ' ' .. tostring(self.pos.x) .. ':' .. tostring(self.pos.y) .. ':' .. tostring(self.pos.z)
+end
+
+function Node:getTypeName()
+	return Node.types[self.type] or 'Unknown'
+end
+
+function Node:getType()
+	return self.type
 end
 
 function Node:getPosition()
@@ -47,26 +69,62 @@ function use(item, a, b, c)
 	end
 end
 
-function Node:executeScript()
-	if not self.script or self.script == '' then 
-		return
-	end
-	local func, err = loadstring('local player, node, use = ...\n' .. self.script, "WalkerScript #" .. self:getName())
-	if not func then
-		if err then
-			BotLogger.error(err)
+function Node:execute()
+	local player = g_game.getLocalPlayer()
+	local playerPos = player:getPosition()
+	if self.type == Node.SCRIPT then
+		if not self.script or self.script == '' then 
+			return
 		end
-		return
+		local func, err = loadstring('local player, node, use = ...\n' .. self.script, "WalkerScript #" .. self:getName())
+		if not func then
+			if err then
+				BotLogger.error(err)
+			end
+			return
+		end
+		return func(player, self, use)
+	elseif self.type == Node.LADDER then
+		if playerPos.z ~= self.pos.z-1 then
+			use(self.pos)
+			return Node.RETRY
+		end
+	elseif self.type == Node.ROPE then
+		if playerPos.z ~= self.pos.z-1 then
+			use(AutoPath.ropeId, self.pos)
+			return Node.RETRY
+		end
+	elseif self.type == Node.SHOVEL then
+		if playerPos.z ~= self.pos.z+1 then
+			use(AutoPath.shovelId, self.pos)
+			return Node.RETRY
+		end
+	elseif self.type == Node.DOOR then
+		local tile = g_map.getTile(self.pos)
+		if tile and not tile:isWalkable() then
+			use(self.pos)
+			return Node.RETRY
+		end
+		return Node.OK
 	end
-	return func(g_game.getLocalPlayer(), self, use)
+	return Node.OK
 end
 
 function Node:toString()
-	return tostring(self.pos.x) .. ':' .. tostring(self.pos.y) .. ':' .. tostring(self.pos.z) .. ':' .. self.script .. '\n'
+	return tostring(self.type) .. ':' .. tostring(self.pos.x) .. ':' .. tostring(self.pos.y) .. ':' .. tostring(self.pos.z) .. ':' .. self.script .. '\n'
 end
 
 function Node:fromString(str)
-	local t = string.explode(str, ':', 3)
-	self.pos = {x=tonumber(t[1]), y=tonumber(t[2]), z=tonumber(t[3])}
-	self.script = t[4]
+	local t = string.explode(str, ':', 4)
+	if #t < 5 then
+		return false
+	end
+	self.type = tonumber(t[1])
+	self.pos = {x=tonumber(t[2]), y=tonumber(t[3]), z=tonumber(t[4])}
+	self.script = t[5]
+	return true
+end
+
+function Node:getImagePath() 
+	return 'images/'..Node.images[self.type]
 end

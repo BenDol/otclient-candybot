@@ -54,7 +54,7 @@ end
 
 function UIPathMap:getNode(pos)
   for _,node in pairs(self.nodes) do
-    if node.pos.x == pos.x and node.pos.y == pos.y and node.pos.z == pos.z then
+    if Position.equals(node.pos, pos) then
       return node
     end
   end
@@ -81,8 +81,10 @@ function UIPathMap:onMouseRelease(pos, button)
 
   if button == MouseRightButton then
     local menu = g_ui.createWidget('PopupMenu')
-    menu:addOption(tr('Walk node'), function() signalcall(self.onAddWalkNode, self, mapPos) end)
-    -- menu:addOption(tr('Avoid node'), function() signalcall(self.onAddAvoidNode, self, mapPos) end)
+    for k, v in pairs(Node.types) do
+	    menu:addOption(tr(v), function() signalcall(self.onAddNode, self, mapPos, k) end)
+	end
+    	
     menu:display(pos)
     return true
   end

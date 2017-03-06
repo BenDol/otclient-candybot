@@ -45,18 +45,20 @@ Panel
     anchors.top: PathList.top
     anchors.left: PathListScrollBar.right
     anchors.right: parent.right
-    anchors.bottom: PathList.bottom
+    anchors.bottom: NodeScriptSave.top
     text-wrap: true
     margin-left: 10
+    margin-bottom: 10
     cursor-visible: true
     focusable: true
 
   Button
     id: NodeScriptSave
-    anchors.left: NodeScript.left
-    anchors.right: NodeScript.right
+    anchors.left: PathListScrollBar.right
+    anchors.right: parent.right
     anchors.bottom: PathList.bottom
     height: 20
+    margin-left: 10
     !text: tr('Save')
     @onClick: |
       PathsModule.saveNodeScript()

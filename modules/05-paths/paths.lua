@@ -43,9 +43,13 @@ function PathsModule.init()
   Panel = g_ui.loadUI('paths.otui', tabBuffer)
 
   PathsModule.mapWindow = g_ui.displayUI('window')
+  PathsModule.mapWindow:hide()
   -- PathsModule
 
   PathsModule.loadUI(Panel)
+
+  UI.Tab = tab
+  UI.TabBar = botTabBar
 
   PathsModule.bindHandlers()
 
@@ -77,14 +81,14 @@ function PathsModule.init()
     onPositionChange = PathsModule.updateCameraPosition
   })
 
-  connect(UI.PathMap, {
-      onAddWalkNode = PathsModule.onAddWalkNode,
-      onNodeClick = PathsModule.onNodeClick
-    })
-
   if g_game.isOnline() then
     PathsModule.online()
   end
+
+
+  connect(botTabBar, {
+    onTabChange = PathsModule.onTabChange
+  })
 
   -- event inits  
   SmartPath.init()
@@ -116,12 +120,6 @@ function PathsModule.terminate()
   disconnect(LocalPlayer, {
     onPositionChange = PathsModule.updateCameraPosition
   })
-
-
-  disconnect(UI.PathMap, {
-      onAddWalkNode = PathsModule.onAddWalkNode,
-      onNodeClick = PathsModule.onNodeClick
-    })
 
   -- event terminates
   SmartPath.terminate()
@@ -191,6 +189,14 @@ function PathsModule.bindHandlers()
     end
   })
 
+  connect(UI.PathMap, {
+    onAddNode = PathsModule.onAddNode,
+    onNodeClick = PathsModule.onNodeClick
+  })
+
+  connect(CandyBot.window, {
+    onVisibilityChange = PathsModule.onVisibilityChange
+  })
 end
 
 function PathsModule.online()
@@ -200,6 +206,22 @@ end
 
 function PathsModule.offline()
   --save here
+end
+
+function PathsModule.onTabChange(tabBar, bar)
+  if bar == UI.Tab then
+    PathsModule.mapWindow:show()
+  else
+    PathsModule.mapWindow:hide()
+  end
+end
+
+function PathsModule.onVisibilityChange(widget, visible)
+  if visible and UI.TabBar:getCurrentTab() == UI.Tab then
+    PathsModule.mapWindow:show()
+  else
+    PathsModule.mapWindow:hide()
+  end
 end
 
 function PathsModule.updateCameraPosition()
@@ -226,7 +248,7 @@ end
 
 function PathsModule.getNodeIndex(pos)
   for k, v in pairs(nodes) do
-    if v and v.pos.x == pos.x and v.pos.y == pos.y and v.pos.z == pos.z then
+    if v and Position.equals(v.pos, pos) then
       return k
     end
   end
@@ -241,8 +263,9 @@ function PathsModule.hasNode(pos)
   return PathsModule.getNodeIndex(pos) ~= nil
 end
 
-function PathsModule.onNodeClick(node, pos, button)
-  printContents("nodeClicked", node, pos, button)
+function PathsModule.onNodeClick(pos, mousePos, button)
+  local node = PathsModule.getNode(pos)
+  printContents("nodeClicked", node, button)
   if button == MouseLeftButton then
     PathsModule.selectNode(node)
   elseif button == MouseRightButton then
@@ -255,7 +278,7 @@ function PathsModule.onNodeClick(node, pos, button)
   return true
 end
 
-function PathsModule.addWalkNode(node)
+function PathsModule.addNode(node)
   if PathsModule.hasNode(node:getPosition()) then return true end
   local item = g_ui.createWidget('ListRowComplex', UI.PathList)
   item:setText(node:getName())
@@ -263,38 +286,32 @@ function PathsModule.addWalkNode(node)
   item:setId(#UI.PathList:getChildren()+1)
   item.node = node
   node.list = item
-  node.map = UI.PathMap:addNode(node:getPosition(), g_resources.resolvePath('images/walk2'), node:getName())
+  node.map = UI.PathMap:addNode(node:getPosition(), g_resources.resolvePath(node:getImagePath()), node:getName())
   local removeButton = item:getChildById('remove')
   connect(removeButton, {
     onClick = function(button)
       local row = button:getParent()
       local nodePos = row.node:getPosition()
       local nodeName = row.node:getName()
-      row:destroy()
-      PathsModule.removeNode(nodePos)
+      PathsModule.removeNode(row.node)
     end
   })
   table.insert(nodes, node)
 end
 
-function PathsModule.onAddWalkNode(map, pos)
+function PathsModule.onAddNode(map, pos, type)
   if PathsModule.hasNode(pos) then return true end
-  local node = Node.create(pos)
+  local node = Node.create(pos, '', type)
 
-  if node.__class ~= "Node" or node:getName() == '' then return end
+  if node:getName() == '' then return end
 
-  PathsModule.addWalkNode(node)
+  PathsModule.addNode(node)
 end
 
-function PathsModule.removeNode(pos)
-  local node = PathsModule.getNode(pos)
-  if node then
-    local index = PathsModule.getNodeIndex(node:getPosition())
-    node.list:destroy()
-    node.map:destroy()
-    table.remove(nodes, index)
-    node:destroy()
-  end
+function PathsModule.removeNode(node)
+  node.list:destroy()
+  node.map:destroy()
+  table.removevalue(nodes, node)
 end
 
 function PathsModule.clearNodes()
@@ -370,12 +387,11 @@ end
 
 function PathsModule.savePaths(file)
   local path = pathsDir.."/"..file..".otml"
-  local config = g_configs.load(path)
-  if config then
+  if g_resources.fileExists(path) then
     local msg = "Are you sure you would like to save over "..file.."?"
 
     local yesCallback = function()
-      writePath(config)
+      writePath(path)
       
       saveOverWindow:destroy()
       saveOverWindow=nil
@@ -391,8 +407,7 @@ function PathsModule.savePaths(file)
       { text=tr('No'), callback = noCallback},
       anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
   else
-    config = g_configs.create(path)
-    writePath(config)
+    writePath(path)
   end
 
   local formatedFile = file..".otml"
@@ -404,16 +419,21 @@ end
 function PathsModule.loadPaths(file, force)
   BotLogger.debug("PathsModule.loadPaths("..file..")")
   local path = pathsDir.."/"..file
-  local config = g_configs.load(path)
+  local config = g_resources.readFileContents(path)
   if config then
     local loadFunc = function()
       PathsModule.clearNodes()
 
-      local nodes = parsePath(config)
-      for _,node in ipairs(nodes) do
-        if node then PathsModule.addWalkNode(node) end
+      local strings = string.explode(config, ';;')
+      for k, v in ipairs(strings) do
+        if v:len() > 0 then
+          local node = Node.create()
+          if node:fromString(v) then
+            PathsModule.addNode(node)
+          end
+        end
       end
-      
+
       if not force then
         currentFileLoaded = file
         CandyBot.changeOption(UI.LoadList:getId(), file)
@@ -446,37 +466,19 @@ function PathsModule.loadPaths(file, force)
 end
 
 -- local functions
-function writePath(config)
-  if not config then return end
+function writePath(path)
 
-  local path = PathsModule.getNodes()
-  local nodes = {}
+  local nodes = PathsModule.getNodes()
+  local content = ''
 
-  for k,v in pairs(path) do
-    nodes[k] = v:toNode()
+  for k,v in ipairs(nodes) do
+    content = content .. ';;' .. v:toString()
   end
-  config:setNode('Path', nodes)
-  config:save()
+  g_resources.writeFileContents(path, content)
 
-  BotLogger.debug("Saved "..tostring(#path) .." nodes to "..config:getFileName())
+  BotLogger.debug("Saved "..tostring(#nodes) .." nodes to "..path)
 end
 
-function parsePath(config)
-  if not config then return end
-
-  local nodes = {}
-
-  -- loop each target node
-  local index = 1
-  for k,v in pairs(config:getNode("Path")) do
-    local node = Node.create()
-    node:parseNode(v)
-    nodes[index] = node
-    index = index + 1
-  end
-
-  return nodes
-end
 
 
 return PathsModule

@@ -911,6 +911,7 @@ function parseTargets(config)
   if not config then return end
 
   local targets = {}
+  TargetsModule.AutoLoot.itemsList = {}
 
   -- loop each target node
   local index = 1
@@ -922,10 +923,14 @@ function parseTargets(config)
   end
 
   for k, v in pairs(config:getNode("Loot")) do
-    for a,b in pairs(v) do
-      v[a] = tonumber(b)
+    if type(v) ~= 'table' then
+      TargetsModule.AutoLoot.addLootItem(k, tonumber(v))
+    else
+      for a,b in pairs(v) do
+        v[a] = tonumber(b)
+      end
+      TargetsModule.AutoLoot.addLootItem(k, v.count, v.bp)
     end
-    TargetsModule.AutoLoot.addLootItem(k, v.count, v.bp)
   end
 
   return targets

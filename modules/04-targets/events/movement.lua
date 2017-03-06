@@ -18,7 +18,6 @@ function Movement.terminate()
 end
 
 function Movement.ConnectListener()
-	print('mvmt cre')
   connect(Creature, { onWalk = Movement.onPositionChange })
 end
 
