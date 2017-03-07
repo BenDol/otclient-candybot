@@ -62,11 +62,21 @@ function getPos(a,b,c)
 end
 function use(item, a, b, c) 
 	local destPos = getPos(a,b,c)
+	local playerPos = g_game.getLocalPlayer():getPosition()
+	if playerPos.z ~= destPos.z then
+		return false
+	end
 	if destPos then
 		Helper.safeUseInventoryItemWith(item, g_map.getTile(destPos):getTopUseThing(), BotModule.isPrecisionMode())
+		return item
 	else
-		g_game.use(g_map.getTile(getPos(item, a, b)):getTopUseThing())
+		local tile = g_map.getTile(getPos(item, a, b))
+		if not tile then 
+			return false
+		end
+		g_game.use(tile:getTopUseThing())
 	end
+	return true
 end
 
 function Node:execute()
@@ -85,25 +95,23 @@ function Node:execute()
 		end
 		return func(player, self, use)
 	elseif self.type == Node.LADDER then
-		if playerPos.z ~= self.pos.z-1 then
-			use(self.pos)
+		if use(self.pos) then
 			return Node.RETRY
 		end
 	elseif self.type == Node.ROPE then
-		if playerPos.z ~= self.pos.z-1 then
-			use(AutoPath.ropeId, self.pos)
+		if use(AutoPath.ropeId, self.pos) then
 			return Node.RETRY
 		end
 	elseif self.type == Node.SHOVEL then
-		if playerPos.z ~= self.pos.z+1 then
-			use(AutoPath.shovelId, self.pos)
+		if use(AutoPath.shovelId, self.pos) then
 			return Node.RETRY
 		end
 	elseif self.type == Node.DOOR then
 		local tile = g_map.getTile(self.pos)
 		if tile and not tile:isWalkable() then
-			use(self.pos)
-			return Node.RETRY
+			if use(self.pos) then
+				return Node.RETRY
+			end
 		end
 		return Node.OK
 	end

@@ -132,7 +132,7 @@ function AutoLoot.lootNext()
   elseif (not isAttacking and not player:isAutoWalking() and not player:isServerWalking()) or data.distance < 2 then
     if data.distance > 6 then
       BotLogger.debug("LootProcedure: try walk to corpse")
-      player:autoWalk(data.loot.position)
+      player:manualWalk(data.loot.position)
     end
     AutoLoot.lootProc = LootProcedure.create(data.creatureId, 
       data.loot.position, data.loot.corpse, isAttacking and 30000, AutoLoot.itemsList, 

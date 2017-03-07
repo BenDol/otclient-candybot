@@ -27,11 +27,11 @@ Foods = {
   ['Marlin'] = 901,
   ['Cream Cake'] = 904,
   ['Carrot'] = 3595,
-  ['Meat'] = 2666, -- raretibia
+  ['Meat'] = 3577,
   ['Fish'] = 3578,
   ['Salmon'] = 3579,
   ['Shrimp'] = 3581,
-  ['Ham'] = 2671, -- raretibia
+  ['Ham'] = 3582,
   ['Dragon Ham'] = 3583,
   ['Pears'] = 3584,
   ['Bread'] = 3600,
@@ -101,7 +101,9 @@ Foods = {
   ['Haunch of Boar'] = 12310,
   ['Deepling Filet'] = 14085,
   ['Soft Cheese'] = 17820,
-  ['Rat Cheese'] = 17821
+  ['Rat Cheese'] = 17821,
+  ['Meat @ Rare'] = 2666,
+  ['Ham @ Rare'] = 2671,
 }
 
 RingIds = {

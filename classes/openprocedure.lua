@@ -41,7 +41,7 @@ function OpenProcedure:start()
   BotLogger.debug("OpenProcedure:start() called")
   Procedure.start(self)
 
-  self.event = cycleEvent(function() self:tryOpen() end, 200)
+  self.event = cycleEvent(function() self:tryOpen() end, 400)
 
   signalcall(self.onStarted, self.id)
 end
