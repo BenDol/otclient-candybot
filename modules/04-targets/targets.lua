@@ -911,7 +911,9 @@ function parseTargets(config)
   if not config then return end
 
   local targets = {}
-  TargetsModule.AutoLoot.itemsList = {}
+  for id, v in pairs(TargetsModule.AutoLoot.itemsList) do
+    AutoLoot.deleteLootItem(id)
+  end
 
   -- loop each target node
   local index = 1
