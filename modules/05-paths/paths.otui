@@ -51,6 +51,7 @@ Panel
     margin-bottom: 10
     cursor-visible: true
     focusable: true
+    visible: false
 
   Button
     id: NodeScriptSave
@@ -59,9 +60,37 @@ Panel
     anchors.bottom: PathList.bottom
     height: 20
     margin-left: 10
+    visible: false
     !text: tr('Save')
     @onClick: |
       PathsModule.saveNodeScript()
+
+  Item
+    id: RopeItem
+    anchors.left: PathListScrollBar.right
+    anchors.top: PathList.top
+    margin-left: 10
+    virtual: true
+    item-id: 3003
+    @onClick: Helper.startChooseItem(function(widget, item) return PathsModule.onChooseItem(self, item) end)
+
+  Item
+    id: ShovelItem
+    anchors.left: RopeItem.right
+    anchors.top: PathList.top
+    margin-left: 10
+    virtual: true
+    item-id: 3457
+    @onClick: Helper.startChooseItem(function(widget, item) return PathsModule.onChooseItem(self, item) end)
+
+  Item
+    id: MacheteItem
+    anchors.left: ShovelItem.right
+    anchors.top: PathList.top
+    margin-left: 10
+    virtual: true
+    item-id: 3308
+    @onClick: Helper.startChooseItem(function(widget, item) return PathsModule.onChooseItem(self, item) end)
 
 
   BotOptionCheckBox

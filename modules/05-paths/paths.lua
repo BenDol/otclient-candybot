@@ -147,7 +147,10 @@ function PathsModule.loadUI(panel)
     LoadList = panel:recursiveGetChildById('PathsFile'),
     LoadButton = panel:recursiveGetChildById('LoadButton'),
     NodeScript = panel:recursiveGetChildById('NodeScript'),
-    NodeScriptSave = panel:recursiveGetChildById('NodeScriptSave')
+    NodeScriptSave = panel:recursiveGetChildById('NodeScriptSave'),
+    RopeItem = panel:recursiveGetChildById('RopeItem'),
+    ShovelItem = panel:recursiveGetChildById('ShovelItem'),
+    MacheteItem = panel:recursiveGetChildById('MacheteItem')
   }
 end
 
@@ -193,6 +196,10 @@ function PathsModule.bindHandlers()
 
   connect(CandyBot.window, {
     onVisibilityChange = PathsModule.onVisibilityChange
+  })
+
+  connect(UI.RopeItem, {
+    onClick = function() end
   })
 end
 
@@ -263,9 +270,19 @@ end
 function PathsModule.selectNode(node) 
   node.list:focus()
 
-  UI.NodeScript:setEnabled(true)
-  UI.NodeScriptSave:setEnabled(true)
-  UI.NodeScript:setText(node:getScript())
+  local isScript = node:getType() == Node.SCRIPT
+
+  UI.RopeItem:setVisible(not isScript)
+  UI.ShovelItem:setVisible(not isScript)
+  UI.MacheteItem:setVisible(not isScript)
+
+  UI.NodeScript:setVisible(isScript)
+  UI.NodeScriptSave:setVisible(isScript)
+  
+  if isScript then
+    UI.NodeScript:setText(node:getScript())
+  end
+
   UI.PathMap:setCameraPosition(node:getPosition())
 
   if CandyBot.getOption('AutoPath') == false then
@@ -284,6 +301,14 @@ function PathsModule.onNodeClick(pos, mousePos, button)
   else
     return false
   end
+  return true
+end
+
+function PathsModule.onChooseItem(self, item)
+  if self and item then
+    self:setItemId(item:getId())
+  end
+  CandyBot.show()
   return true
 end
 
