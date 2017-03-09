@@ -176,8 +176,13 @@ end
 
 function CandyBot.loadOptions()
   local char = g_game.getCharacterName()
+  local server = tostring(G.host) .. ':' .. tostring(G.port)
 
-  if CandyBot.options[char] ~= nil then
+  if CandyBot.options[char .. '@' .. server] ~= nil then
+    for i, v in pairs(CandyBot.options[char .. '@' .. server]) do
+      addEvent(function() CandyBot.changeOption(i, v, true) end)
+    end
+  elseif CandyBot.options[char] ~= nil then
     for i, v in pairs(CandyBot.options[char]) do
       addEvent(function() CandyBot.changeOption(i, v, true) end)
     end
@@ -241,7 +246,7 @@ function CandyBot.changeOption(key, state, loading)
 
     Modules.notifyChange(key, state)
 
-    local char = g_game.getCharacterName()
+    local char = g_game.getCharacterName() .. '@' .. tostring(G.host) .. ':' .. tostring(G.port)
 
     if CandyBot.options[char] == nil then
       CandyBot.options[char] = {}
