@@ -339,6 +339,8 @@ end
 function TargetsModule.onNotify(key, state)
   if key == UI.LoadList:getId() then
     TargetsModule.loadTargets(state, true)
+  elseif key == 'BackpackList' then
+    AutoLoot.onChangeContainersList()
   end
 end
 
@@ -575,6 +577,9 @@ function TargetsModule.clearTargetList()
     if t:getId() ~= "new" then
       TargetsModule.removeTarget(t:getText())
     end
+  end
+  for id, v in pairs(TargetsModule.AutoLoot.itemsList) do
+    AutoLoot.deleteLootItem(id)
   end
 end
 
@@ -911,9 +916,6 @@ function parseTargets(config)
   if not config then return end
 
   local targets = {}
-  for id, v in pairs(TargetsModule.AutoLoot.itemsList) do
-    AutoLoot.deleteLootItem(id)
-  end
 
   -- loop each target node
   local index = 1

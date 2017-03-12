@@ -197,10 +197,6 @@ function PathsModule.bindHandlers()
   connect(CandyBot.window, {
     onVisibilityChange = PathsModule.onVisibilityChange
   })
-
-  connect(UI.RopeItem, {
-    onClick = function() end
-  })
 end
 
 function PathsModule.online()
@@ -354,6 +350,16 @@ function PathsModule.clearNodes()
     node.map:destroy()
   end
   nodes = {}
+end
+
+function PathsModule.moveFocusedNode(offset) 
+  local focus = UI.PathList:getFocusedChild()
+  if focus then
+    local index = UI.PathList:getChildIndex(focus)
+    UI.PathList:moveChildToIndex(focus, index+offset)
+    nodes[index] = nodes[index+offset]
+    nodes[index+offset] = focus.node
+  end
 end
 
 function PathsModule.saveNodeScript()

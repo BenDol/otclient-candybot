@@ -33,17 +33,12 @@ function AutoLoot.init()
   connect(LocalPlayer, {
     onInventoryChange = AutoLoot.onInventoryChange
   })
-  connect(g_game, { onGameStart = AutoLoot.onGameStart })
-  if g_game.isOnline() then
-    scheduleEvent(AutoLoot.refreshContainers, 100, true)
-  end
 end
 
 function AutoLoot.terminate()
   disconnect(LocalPlayer, {
     onInventoryChange = AutoLoot.onInventoryChange
   })
-  disconnect(g_game, { onGameStart = AutoLoot.onGameStart })
   AutoLoot.onStopped()
   modules.game_interface.removeMenuHook("Looter")
 end
@@ -316,13 +311,6 @@ function AutoLoot.deleteLootItem(id)
   AutoLoot.itemsList[id] = nil
 end
 
-function AutoLoot.onGameStart(player)
-  if AutoLoot.refreshEvent then
-    AutoLoot.refreshEvent:cancel()
-  end
-  AutoLoot.refreshEvent = scheduleEvent(function() AutoLoot.openNextContainer(0) end, 500)
-end
-
 function AutoLoot.onInventoryChange(player, slot, item, oldItem)
   if item and item:isContainer() then
     if AutoLoot.refreshEvent then
@@ -403,13 +391,12 @@ function AutoLoot.openContainer(id, callback)
   proc:start()
 end
 
-function AutoLoot.refreshContainers(init, callback)
+function AutoLoot.onChangeContainersList()
   local containers = {}
   local UI = TargetsModule.getUI()
   local bps = UI.BackpackList:getText()
   UI.BackpackFastEdit:clearOptions()
   UI.BackpackFastEdit:addOption("Fast BP")
-  CandyBot.changeOption('BackpackList', bps, init)
   bps = string.split(bps, '\n')
   for k, v in ipairs(bps) do
     local bp = v:split(' ')
@@ -434,7 +421,7 @@ function AutoLoot.refreshContainers(init, callback)
     end
   end
   AutoLoot.containers = containers
-  AutoLoot.openNextContainer(0, callback)
+  AutoLoot.openNextContainer(0)
   for id, v in pairs(AutoLoot.itemsList) do
     if v.bp then
       AutoLoot.updateEntry(id)

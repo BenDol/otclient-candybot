@@ -19,9 +19,33 @@ Panel
     anchors.left: parent.left
     anchors.top: parent.top
 
+  Button
+    id: MoveUp
+    anchors.top: AutoPath.bottom
+    anchors.left: parent.left
+    margin-top: 8
+    height: 20
+    width: 72
+    visible: true
+    text: /\
+    @onClick: |
+      PathsModule.moveFocusedNode(-1)
+
+  Button
+    id: MoveDown
+    anchors.left: prev.right
+    anchors.top: AutoPath.bottom
+    margin-top: 8
+    margin-left: 10
+    height: 20
+    width: 72
+    text: \/
+    @onClick: |
+      PathsModule.moveFocusedNode(1)
+
   TextList
     id: PathList
-    anchors.top: AutoPath.bottom
+    anchors.top: MoveUp.bottom
     anchors.left: parent.left
     margin-bottom: 5
     margin-top: 8
@@ -76,7 +100,7 @@ Panel
 
   Item
     id: ShovelItem
-    anchors.left: RopeItem.right
+    anchors.left: prev.right
     anchors.top: PathList.top
     margin-left: 10
     virtual: true
@@ -85,7 +109,7 @@ Panel
 
   Item
     id: MacheteItem
-    anchors.left: ShovelItem.right
+    anchors.left: prev.right
     anchors.top: PathList.top
     margin-left: 10
     virtual: true

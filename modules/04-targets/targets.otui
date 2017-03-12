@@ -523,7 +523,7 @@ Panel
         anchors.bottom: parent.bottom
         margin-left: 3
         @onClick: |
-          AutoLoot.refreshContainers()
+          CandyBot.changeOption('BackpackList', TargetsModule.getUI().BackpackList:getText())
 
   HorizontalSeparator
     anchors.left: parent.left
@@ -608,3 +608,13 @@ Panel
         local parent = self:getParent()
         local file = parent:getChildById('SaveNameEdit'):getText()
         TargetsModule.saveTargets(file)
+
+    Button
+      id: ResetButton
+      !text: tr('Reset Targets')
+      anchors.top: prev.bottom
+      anchors.left: NewLabel.left
+      anchors.right: parent.right
+      margin-top: 8
+      @onClick: |
+        TargetsModule.clearTargetList()
