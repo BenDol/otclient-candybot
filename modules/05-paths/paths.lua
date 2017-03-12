@@ -25,7 +25,8 @@ local NodeTypes = {
   Rope = "rope",
   Shovel = "shovel",
   Stand = "stand",
-  Walk = "walk"
+  Walk = "walk",
+  Label = "label"
 }
 
 local pathsDir = CandyBot.getWriteDir().."/paths"
@@ -150,7 +151,10 @@ function PathsModule.loadUI(panel)
     NodeScriptSave = panel:recursiveGetChildById('NodeScriptSave'),
     RopeItem = panel:recursiveGetChildById('RopeItem'),
     ShovelItem = panel:recursiveGetChildById('ShovelItem'),
-    MacheteItem = panel:recursiveGetChildById('MacheteItem')
+    MacheteItem = panel:recursiveGetChildById('MacheteItem'),
+    LabelEdit = panel:recursiveGetChildById('LabelEdit'),
+    MoveUp = panel:recursiveGetChildById('MoveUp'),
+    MoveDown = panel:recursiveGetChildById('MoveDown')
   }
 end
 
@@ -170,6 +174,7 @@ function PathsModule.bindHandlers()
         if focusedChild == nil then 
           UI.LoadButton:setEnabled(false)
           loadListIndex = nil
+          UI.LabelEdit:setText('', true)
         else
           UI.LoadButton:setEnabled(true)
           UI.SaveNameEdit:setText(string.gsub(focusedChild:getText(), ".otml", ""))
@@ -181,8 +186,8 @@ function PathsModule.bindHandlers()
   connect(UI.PathList, {
     onChildFocusChange = function(self, focusedChild)
       if focusedChild == nil then 
-        UI.NodeScript:setEnabled(false)
-        UI.NodeScriptSave:setEnabled(false)
+        UI.NodeScript:setVisible(false)
+        UI.NodeScriptSave:setVisible(false)
       else
         PathsModule.selectNode(focusedChild.node)
       end
@@ -197,6 +202,39 @@ function PathsModule.bindHandlers()
   connect(CandyBot.window, {
     onVisibilityChange = PathsModule.onVisibilityChange
   })
+
+  connect(UI.LabelEdit, {
+    onTextChange = function(self, text) 
+      local label = UI.PathList:getFocusedChild()
+      if text:len() > 0 then
+        if not label or label.node:getType() ~= Node.LABEL then
+          local index = #nodes + 1
+          if label then
+            index = UI.PathList:getChildIndex(label) + 1
+          end
+          if nodes[index] and nodes[index]:getType() == Node.LABEL then
+            local node = nodes[index]
+            node.list:focus()
+            self:setText(text)
+          else
+            local node = Node.create(Node.LABEL, text)
+            PathsModule.addNode(node, index)
+            node.list:focus()
+          end
+        else
+          label.node:setText(text) 
+          label:setText(label.node:getName())
+        end
+      elseif label then
+        local index = UI.PathList:getChildIndex(label) - 1
+        if index < 1 then index = 1 end
+        PathsModule.removeNode(label.node)
+        if nodes[index] then
+          nodes[index].list:focus()
+        end
+      end
+    end
+    })
 end
 
 function PathsModule.online()
@@ -279,10 +317,18 @@ function PathsModule.selectNode(node)
     UI.NodeScript:setText(node:getScript())
   end
 
-  UI.PathMap:setCameraPosition(node:getPosition())
+  if node:getType() == Node.LABEL then
+    UI.LabelEdit:setText(node:getText())
+  else
+    UI.LabelEdit:setText('', true)
+  end
+
+  if node:hasPosition() then
+    UI.PathMap:setCameraPosition(node:getPosition())
+  end
 
   if CandyBot.getOption('AutoPath') == false then
-    PathsModule.AutoPath.goToNodeIndex(PathsModule.getNodeIndex(node:getPosition()))
+    PathsModule.AutoPath.goToNodeIndex(table.find(nodes, node))
   end
 end
 
@@ -308,15 +354,17 @@ function PathsModule.onChooseItem(self, item)
   return true
 end
 
-function PathsModule.addNode(node)
-  if PathsModule.hasNode(node:getPosition()) then return true end
+function PathsModule.addNode(node, index)
+  if node:hasPosition() and PathsModule.hasNode(node:getPosition()) then return true end
   local item = g_ui.createWidget('ListRowComplex', UI.PathList)
   item:setText(node:getName())
   item:setTextAlign(AlignLeft)
   item:setId(#UI.PathList:getChildren()+1)
   item.node = node
   node.list = item
-  node.map = UI.PathMap:addNode(node:getPosition(), g_resources.resolvePath(node:getImagePath()), node:getName())
+  if node:hasPosition() then
+    node.map = UI.PathMap:addNode(node:getPosition(), g_resources.resolvePath(node:getImagePath()), node:getName())
+  end
   local removeButton = item:getChildById('remove')
   connect(removeButton, {
     onClick = function(button)
@@ -326,28 +374,35 @@ function PathsModule.addNode(node)
       PathsModule.removeNode(row.node)
     end
   })
-  table.insert(nodes, node)
+
+  if index then 
+    UI.PathList:moveChildToIndex(item, index)
+    table.insert(nodes, index, node)
+  else
+    table.insert(nodes, node)
+  end
 end
 
 function PathsModule.onAddNode(map, pos, type)
   if PathsModule.hasNode(pos) then return true end
-  local node = Node.create(pos, '', type)
-
-  if node:getName() == '' then return end
-
+  local node = Node.create(type, pos)
   PathsModule.addNode(node)
 end
 
 function PathsModule.removeNode(node)
   node.list:destroy()
-  node.map:destroy()
+  if node.map then
+    node.map:destroy()
+  end
   table.removevalue(nodes, node)
 end
 
 function PathsModule.clearNodes()
   for _, node in pairs(nodes) do
     node.list:destroy()
-    node.map:destroy()
+    if node.map then
+      node.map:destroy()
+    end
   end
   nodes = {}
 end
@@ -356,9 +411,16 @@ function PathsModule.moveFocusedNode(offset)
   local focus = UI.PathList:getFocusedChild()
   if focus then
     local index = UI.PathList:getChildIndex(focus)
+
+    -- We are trying to move first item up or last item down
+    if index + offset < 1 or index + offset > UI.PathList:getChildCount() then 
+      return
+    end
+
+    local node = focus.node
     UI.PathList:moveChildToIndex(focus, index+offset)
-    nodes[index] = nodes[index+offset]
-    nodes[index+offset] = focus.node
+    table.remove(nodes, index)
+    table.insert(nodes, index+offset, node)
   end
 end
 
@@ -421,6 +483,13 @@ end
 function PathsModule.onNotify(key, state)
   if key == UI.LoadList:getId() then
     PathsModule.loadPaths(state, true)
+  elseif key == 'AutoPath' then
+    UI.MoveUp:setEnabled(not state)
+    UI.MoveDown:setEnabled(not state)
+    UI.PathList:setEnabled(not state)
+    UI.LabelEdit:setEnabled(not state)
+    UI.PathList:setEnabled(not state)
+    UI.NodeScript:setEnabled(not state)
   end
 end
 
@@ -463,16 +532,7 @@ function PathsModule.loadPaths(file, force)
   if config then
     local loadFunc = function()
       PathsModule.clearNodes()
-
-      local strings = string.explode(config, ';;')
-      for k, v in ipairs(strings) do
-        if v:len() > 0 then
-          local node = Node.create()
-          if node:fromString(v) then
-            PathsModule.addNode(node)
-          end
-        end
-      end
+      parsePath(config)
 
       if not force then
         currentFileLoaded = file
@@ -507,9 +567,8 @@ end
 
 -- local functions
 function writePath(path)
-
   local nodes = PathsModule.getNodes()
-  local content = ''
+  local content = ''..UI.RopeItem:getItemId()..':'..UI.ShovelItem:getItemId()..':'..UI.MacheteItem:getItemId()..';;'
 
   for k,v in ipairs(nodes) do
     content = content .. ';;' .. v:toString()
@@ -517,6 +576,26 @@ function writePath(path)
   g_resources.writeFileContents(path, content)
 
   BotLogger.debug("Saved "..tostring(#nodes) .." nodes to "..path)
+end
+
+function parsePath(content)
+  local strings = string.explode(content, ';;')
+  for k = 2, #strings do
+    local v = strings[k]
+    if strings[k]:len() > 0 then
+      local node = Node.create()
+      if node:fromString(strings[k]) then
+        PathsModule.addNode(node)
+      end
+    end
+  end
+  local tools = string.explode(strings[1], ':')
+  for k, v in pairs({'Rope', 'Shovel', 'Machete'}) do
+    local id = tonumber(tools[k])
+    if id then
+      UI[v..'Item']:setItemId(id)
+    end
+  end
 end
 
 

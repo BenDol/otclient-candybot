@@ -13,7 +13,40 @@ AutoPath.lastPosCounter = 0
 local currentNode = 1
 local nextForceWalk = false
 
+
 -- Variables
+
+-- Script Environment
+-- here are to be added all functions that can be called from a Walker Script
+-- for example counting items, depositing, trading etc.
+
+local ScriptEnv = {
+  walk = function(pos, flags)
+    g_game.getLocalPlayer():autoWalk(pos, flags, true)
+  end,
+  manualWalk = function(pos, flags)
+    g_game.getLocalPlayer():autoWalk(pos, flags, false)
+  end,
+  goToLabel = AutoPath.goToNode,
+  goToIndex = AutoPath.goToNodeIndex,
+  useWith = Helper.safeUseInventoryItemWith,
+  g_game = g_game,
+  g_map = g_map,
+  look = function(pos)
+    local tile = g_map.getTile(pos)
+    if tile then
+      local thing = tile:getTopLookThing()
+      if thing then
+        g_game.look(thing)
+      end
+    end
+  end,
+  OK = Node.OK,
+  STOP = Node.STOP,
+  RETRY = Node.RETRY
+}
+
+table.merge(ScriptEnv, Helper)
 
 -- Methods
 
@@ -59,12 +92,14 @@ function AutoPath.getNode()
   if currentNode > #nodes then
     currentNode = 1
   end
-  return nodes[currentNode]
+  local node = nodes[currentNode]
+  node.list:focus()
+  return node
 end
 
 function AutoPath.goToNode(label)
   for k, node in pairs(nodes) do
-    if node:getLabel() == label then
+    if node:getText() == label then
       currentNode = k
       return
     end
@@ -81,11 +116,11 @@ end
 
 function AutoPath.onNodeFailed(player, code)
   local node = AutoPath.getNode()
-  if node:execute() == Node.OK then
+  if node:execute(ScriptEnv) == Node.OK then
     if node:getType() == Node.WALK then
       BotLogger.error("AutoPath: autoWalk to node " .. node:getName() .. " failed (" .. tostring(code) .. ") ")
     end
-    currentNode = currentNode + 1
+    AutoPath.goToNextNode()
   end
 end
 
@@ -111,7 +146,7 @@ function AutoPath.onPositionChange(creature,newPos, oldPos)
   local node = AutoPath.getNode()
 if not node then return end
   if (Position.equals(oldPos, node:getPosition()) and (node:getType() == Node.LADDER or node:getType() == Node.ROPE)) or
-    (Position.equals(newPos, node:getPosition()) and node:execute() == Node.OK) then
+    (Position.equals(newPos, node:getPosition()) and node:execute(ScriptEnv) == Node.OK) then
     g_game.stop()
     addEvent(function()AutoPath.goToNextNode(true)end)
   end
@@ -136,27 +171,12 @@ function AutoPath.walkToNode(ignoreWalking)
     return 1000
   end
 
-  if Position.isInRange(playerPos, node:getPosition(), 2, 2) and (not forceWalk or Position.equals(playerPos, node:getPosition())) then
-    local tile = g_map.getTile(node:getPosition())
-    if tile then
-      local forceWalk = not tile:getTopCreature() and not tile:isPathable() and tile:getTopLookThing() == tile:getGround()
-      if not forceWalk or Position.equals(playerPos, node:getPosition()) then
-        local ret = node:execute() 
-        if ret == Node.OK then
-          AutoPath.goToNextNode()
-          return Helper.safeDelay(100, 500)
-        end
-        if ret == Node.STOP then
-          return
-        end
-      end
-    end
-  end
-
   if AutoLoot.isLooting() then
     BotLogger.debug("AutoPath: AutoLoot is working.")
+    return Helper.safeDelay(1000, 1400)
   elseif g_game.isAttacking() then
     BotLogger.debug("AutoPath: Attacking someone.")
+    return Helper.safeDelay(1000, 1400)
   elseif not ignoreWalking and (not player:canWalk() or player:isAutoWalking() or player:isServerWalking()) then
     if Position.equals(playerPos, AutoPath.lastPos) then
       AutoPath.lastPosCounter = AutoPath.lastPosCounter + 1
@@ -169,26 +189,53 @@ function AutoPath.walkToNode(ignoreWalking)
     end
     BotLogger.debug("AutoPath: Already walking. (" .. AutoPath.lastPosCounter .. ")")
     AutoPath.lastPos = playerPos
-  else
-    -- connect(player, {
-    --   onAutoWalkFail = AutoPath.onNodeFailed
-    -- })
-    nextForceWalk = false
-    local ret = player:autoWalk(node:getPosition(), 0) or
-      player:autoWalk(node:getPosition(), PathFindFlags.MultiFloor)
-      or player:autoWalk(node:getPosition(), PathFindFlags.AllowNonPathable + PathFindFlags.MultiFloor)
-
-    if not ret then
-      AutoPath.onNodeFailed(player, -1)
-      return Helper.safeDelay(1000, 2000)
-    end
-    -- disconnect(player, {
-    --   onAutoWalkFail = AutoPath.onNodeFailed
-    -- })
-    return Helper.safeDelay(5000, 10000)
+    return Helper.safeDelay(1000, 1400)
   end
 
-  -- Keep the event live
-  return Helper.safeDelay(1000, 1400)
+  if not node:hasPosition() then
+    local ret = node:execute(ScriptEnv) 
+    if ret == Node.STOP then
+      return
+    end
+    if ret == Node.OK then
+      AutoPath.goToNextNode()
+    end
+    return Helper.safeDelay(100, 500)
+  elseif Position.isInRange(playerPos, node:getPosition(), 2, 2) and (not forceWalk or Position.equals(playerPos, node:getPosition())) then
+    local tile = g_map.getTile(node:getPosition())
+    if tile then
+      local forceWalk = not tile:getTopCreature() and not tile:isPathable() and tile:getTopLookThing() == tile:getGround()
+      if not forceWalk or Position.equals(playerPos, node:getPosition()) then
+        local ret = node:execute(ScriptEnv) 
+        if ret == Node.STOP then
+          return
+        end
+        if ret == Node.OK then
+          AutoPath.goToNextNode()
+        end
+        return Helper.safeDelay(100, 500)
+      end
+    end
+  end
 
+  -- connect(player, {
+  --   onAutoWalkFail = AutoPath.onNodeFailed
+  -- })
+
+  nextForceWalk = false
+  local ret = player:autoWalk(node:getPosition(), 0) or
+    player:autoWalk(node:getPosition(), PathFindFlags.MultiFloor)
+    or player:autoWalk(node:getPosition(), PathFindFlags.AllowNonPathable + PathFindFlags.MultiFloor)
+
+  if not ret then
+    AutoPath.onNodeFailed(player, -1)
+    return Helper.safeDelay(1000, 2000)
+  end
+
+  -- disconnect(player, {
+  --   onAutoWalkFail = AutoPath.onNodeFailed
+  -- })
+
+  -- Keep the event live
+  return Helper.safeDelay(5000, 10000)
 end

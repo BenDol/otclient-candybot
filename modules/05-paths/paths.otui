@@ -9,7 +9,7 @@ Panel
   anchors.right: parent.right
   anchors.top: parent.top
   padding-right: 8
-  height: 450
+  height: 480
 
   BotOptionCheckBox
     id: AutoPath
@@ -42,6 +42,13 @@ Panel
     text: \/
     @onClick: |
       PathsModule.moveFocusedNode(1)
+
+  TextEdit
+    id: LabelEdit
+    anchors.left: prev.right
+    anchors.top: AutoPath.bottom
+    anchors.right: parent.right
+    margin-left: 6
 
   TextList
     id: PathList
