@@ -179,11 +179,9 @@ function LootProcedure:loot(container) -- it is most probably this container
       self:useContainer(cid)
     end
     if item:isContainer() then
-      print('opening bp... from container ' .. tostring(cid))
       local proc = OpenProcedure.create(item, 10000)
       self:useContainer(cid)
       connect(proc, { onFinished = function(container)
-        print('opening bp... success! from container ' .. tostring(cid))
         table.removevalue(self.openProc, proc)
         self:freeContainer(cid)
         self:loot(container)

@@ -153,8 +153,10 @@ end
 function Node:toString()
   if self:hasPosition() then
     return tostring(self.type) .. ':' .. tostring(self.pos.x) .. ':' .. tostring(self.pos.y) .. ':' .. tostring(self.pos.z)
-  else
+  elseif self.type == Node.SCRIPT then
     return tostring(self.type) .. ':' .. tostring(self.script)
+  elseif self.type == Node.LABEL then
+    return tostring(self.type) .. ':' .. tostring(self.text)
   end
 end
 

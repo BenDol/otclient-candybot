@@ -166,7 +166,7 @@ function CandyBot.getWriteDir()
 end
 
 function CandyBot.getOptions()
-  local char = g_game.getCharacterName()
+  local char = g_game.getCharacterName() .. '@' .. tostring(G.host) .. ':' .. tostring(G.port)
   return CandyBot.options and CandyBot.options[char] or CandyBot.defaultOptions
 end
 

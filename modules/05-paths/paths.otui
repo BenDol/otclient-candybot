@@ -48,7 +48,8 @@ Panel
     anchors.left: prev.right
     anchors.top: AutoPath.bottom
     anchors.right: parent.right
-    margin-left: 6
+    margin-top:8
+    margin-left: 9
 
   TextList
     id: PathList

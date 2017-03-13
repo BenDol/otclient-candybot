@@ -13,3 +13,111 @@ Panel
     !tooltip: tr('Automatically attack creature previously attacked.')
     anchors.left: parent.left
     anchors.top: parent.top
+
+
+  HorizontalSeparator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 10
+
+  BotOptionCheckBox
+    id: Healer
+    width: 90
+    !text: tr('Heal Friends')
+    anchors.left: parent.left
+    anchors.top: prev.bottom
+    margin-top: 10
+
+  Label
+    id: HealerTresholdLabel
+    !text: tr('On friend health lower than:')
+    anchors.right: parent.right
+    anchors.top: Healer.top
+    margin-left: 18
+
+  BotOptionHorizontalScrollBar
+    id: HealerTreshold
+    width: 150
+    anchors.right: parent.right
+    anchors.top: HealerTresholdLabel.bottom
+    margin-top: 8
+    mouse-scroll: false
+    show-value: true
+    symbol: %
+    minimum: 1
+    maximum: 100
+
+  Label
+    id: HealerSelfHealthLabel
+    !text: tr('On self health higher than:')
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 10
+    margin-left: 18
+
+  BotOptionHorizontalScrollBar
+    id: HealerSelfHealth
+    width: 150
+    anchors.right: parent.right
+    anchors.top: HealerSelfHealthLabel.bottom
+    margin-top: 8
+    mouse-scroll: false
+    show-value: true
+    symbol: %
+    minimum: 1
+    maximum: 100
+
+
+  Label
+    id: HealerSelfManaLabel
+    !text: tr('On self mana higher than:')
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 10
+    margin-left: 18
+
+  BotOptionHorizontalScrollBar
+    id: HealerSelfMana
+    width: 150
+    anchors.right: parent.right
+    anchors.top: HealerSelfManaLabel.bottom
+    margin-top: 8
+    mouse-scroll: false
+    show-value: true
+    symbol: %
+    minimum: 1
+    maximum: 100
+
+  Label
+    id: HealerSpellLabel
+    !text: tr('Healer spell:')
+    anchors.right: parent.right
+    anchors.top: prev.bottom
+    margin-top: 10
+    margin-left: 18
+
+  BotOptionLineEdit
+    id: HealerSpell
+    anchors.top: prev.bottom
+    anchors.right: parent.right
+    margin-top: 8
+    width: 150
+
+  Label
+    id: FriendsList
+    anchors.left: parent.left
+    anchors.top: Healer.bottom
+    margin-top: 15
+    !text: tr('Friends List:')
+
+  MultilineTextEdit
+    id: FriendsListEdit
+    anchors.left: parent.left
+    anchors.top: prev.bottom
+    height: 150
+    width: 150
+    margin-top: 10
+    multiline: true
+    @onTextChange: |
+      CandyBot.changeOption('FriendsList', self:getText():gsub('\n', ';'))

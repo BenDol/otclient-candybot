@@ -99,7 +99,18 @@ end
 
 function MoveProcedure:tryMove()
   self.count = math.min(self.thing:getCount(), self.count)
+  self:highlightItem(self.thing, true)
   g_game.move(self.thing, self.position, self.count)
+end
+
+function MoveProcedure:highlightItem(item, enabled)
+  local pos = item:getPosition()
+  local container = g_game.getContainers()[pos.y-64]
+  if not container or not container.itemsPanel then return false end
+  local itemWidget = container.itemsPanel:getChildById('item' .. pos.z)
+  if itemWidget then
+    itemWidget:setBorderWidth(enabled and 1 or 0)
+  end
 end
 
 function MoveProcedure:onUpdateItem(container, slot, item, oldItem)
@@ -187,6 +198,8 @@ function MoveProcedure:clean()
   Procedure.clean(self)
 
   self:stopTryMove()
+
+  self:highlightItem(self.thing, false)
 
   if self.hooks then
     disconnect(Container, self.hooks)

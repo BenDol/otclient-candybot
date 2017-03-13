@@ -8,21 +8,22 @@ PvpModule = {}
 -- load module events
 dofiles('events')
 
-local Panel = {
-  --
-}
+local Panel = nil
+local UI = {}
+PvpModule.Friends = {}
 
 function PvpModule.getPanel() return Panel end
 function PvpModule.setPanel(panel) Panel = panel end
 
 function PvpModule.init()
-  -- create tab
   local botTabBar = CandyBot.window:getChildById('botTabBar')
   local tab = botTabBar:addTab(tr('PvP'))
 
   local tabPanel = botTabBar:getTabPanel(tab)
   local tabBuffer = tabPanel:getChildById('tabBuffer')
   Panel = g_ui.loadUI('pvp.otui', tabBuffer)
+  
+  PvpModule.loadUI(Panel)
 
   PvpModule.parentUI = CandyBot.window
 
@@ -32,7 +33,6 @@ function PvpModule.init()
 end
 
 function PvpModule.terminate()
-  --CreatureList.terminate()
   PvpModule.stop()
 
   Panel:destroy()
@@ -43,9 +43,16 @@ end
 function PvpModule.loadUI(panel)
   UI = {
     KeepTarget = panel:recursiveGetChildById('KeepTarget'),
+    FriendsList = panel:recursiveGetChildById('FriendsListEdit')
   }
 end
 
+function PvpModule.onNotify(key, state)
+  if key == 'FriendsList' then
+    UI.FriendsList:setText(state:gsub(';', '\n'))
+    PvpModule.Friends = string.split(state, ';')
+  end
+end
 
 function PvpModule.onStopEvent(eventId)
 end

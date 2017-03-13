@@ -568,7 +568,7 @@ end
 -- local functions
 function writePath(path)
   local nodes = PathsModule.getNodes()
-  local content = ''..UI.RopeItem:getItemId()..':'..UI.ShovelItem:getItemId()..':'..UI.MacheteItem:getItemId()..';;'
+  local content = ''..UI.RopeItem:getItemId()..':'..UI.ShovelItem:getItemId()..':'..UI.MacheteItem:getItemId()
 
   for k,v in ipairs(nodes) do
     content = content .. ';;' .. v:toString()
