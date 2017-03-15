@@ -166,7 +166,7 @@ function CandyBot.getWriteDir()
 end
 
 function CandyBot.getOptions()
-  local char = g_game.getCharacterName() .. '@' .. tostring(G.host) .. ':' .. tostring(G.port)
+  local char = g_game.getCharacterName() .. '@' .. tostring(G.host) .. '@' .. tostring(G.port)
   return CandyBot.options and CandyBot.options[char] or CandyBot.defaultOptions
 end
 
@@ -176,7 +176,7 @@ end
 
 function CandyBot.loadOptions()
   local char = g_game.getCharacterName()
-  local server = tostring(G.host) .. ':' .. tostring(G.port)
+  local server = tostring(G.host) .. '@' .. tostring(G.port)
 
   if CandyBot.options[char .. '@' .. server] ~= nil then
     for i, v in pairs(CandyBot.options[char .. '@' .. server]) do
@@ -246,7 +246,7 @@ function CandyBot.changeOption(key, state, loading)
 
     Modules.notifyChange(key, state)
 
-    local char = g_game.getCharacterName() .. '@' .. tostring(G.host) .. ':' .. tostring(G.port)
+    local char = g_game.getCharacterName() .. '@' .. tostring(G.host) .. '@' .. tostring(G.port)
 
     if CandyBot.options[char] == nil then
       CandyBot.options[char] = {}
