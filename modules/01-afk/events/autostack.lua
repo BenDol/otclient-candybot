@@ -8,6 +8,13 @@ AutoStack = AfkModule.AutoStack
 
 function parseItem(item, items)
   if item and item:isStackable() and item:getCount() ~= 100 then
+    local container = item:getPosition().y-64
+    if container >= 0 and container < 16 then
+      local containerName = g_game.getContainers()[container]:getName():lower()
+      if containerName == 'locker' or containerName == 'depot chest' then
+        return false
+      end
+    end
     local destItem = items[item:getId()]
     if destItem == nil then
       items[item:getId()] = item
