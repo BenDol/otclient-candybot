@@ -147,7 +147,8 @@ Fishing = {
 }
 
 Runes = {
-  blank = 2260 -- raretibia
+  blank = 3147
+  -- blank = 2260 -- raretibia
 }
 
 Water = { 4597,4598,4599,4600,4601,4602,4635,4639,4640 }
