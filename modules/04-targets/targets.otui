@@ -385,6 +385,20 @@ Panel
             target:setLoot(self:isChecked())
           end
 
+      CheckBox
+        id: SettingAntiKS
+        !text: tr('Anti-KS')
+        !tooltip: tr('Avoid kill stealing this monster from other players.')
+        width: 70
+        margin-left: 10
+        anchors.left: SettingLoot.right
+        anchors.bottom: parent.bottom
+        @onCheckChange: |
+          local target = TargetsModule.getSelectedTarget()
+          if target then
+            target:setAntiKS(self:isChecked())
+          end
+
       FightOffensiveBox
         id: StanceOffensiveBox
         !tooltip: tr('Attack target in offensive stance')

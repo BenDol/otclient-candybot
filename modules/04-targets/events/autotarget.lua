@@ -14,12 +14,18 @@ AutoTarget.notValidTargetCount = 0
 -- Methods
 
 function AutoTarget.init()
-  connect(Creature, { onAppear = AutoTarget.addCreature })
+  connect(Creature, {
+    onAppear = AutoTarget.addCreature,
+    onTimedSquare = AutoTarget.onTimedSquare
+  })
   connect(TargetsModule, { onAddTarget = AutoTarget.scan })
 end
 
 function AutoTarget.terminate()
-  disconnect(Creature, { onAppear = AutoTarget.addCreature })
+  disconnect(Creature, {
+    onAppear = AutoTarget.addCreature,
+    onTimedSquare = AutoTarget.onTimedSquare
+  })
   disconnect(TargetsModule, { onAddTarget = AutoTarget.scan })
 end
 
@@ -82,6 +88,12 @@ function AutoTarget.removeCreature(creature)
   end
 end
 
+function AutoTarget.onTimedSquare(creature, color)
+  if color == 0 then
+    creature.attackedUs = true
+  end
+end
+
 function AutoTarget.checkStance(target)
   if not target then return end
   local t = TargetsModule.getTarget(target:getName())
@@ -97,11 +109,38 @@ function AutoTarget.onTargetHealthChange(creature)
 
 end
 
+function AutoTarget.directionMatches(creature, player)
+  local dir, creatureDir = getDirectionFromPos(creature:getPosition(), player:getPosition()), creature:getDirection()
+  if dir < 4 then
+    return creatureDir == dir
+  end
+  return creatureDir == dir - 4 or creatureDir == dir-3 or creatureDir == dir-7
+end
+
 function AutoTarget.isValidTarget(creature)
   local player = g_game.getLocalPlayer()
-  return Position.isInRange(player:getPosition(), creature:getPosition(), 7, 5) and 
-    TargetsModule.hasTarget(creature:getName()) and 
-    player:canStandBy(creature, 200)
+  local target = TargetsModule.getTarget(creature:getName())
+  local creaturePos = creature:getPosition()
+  if not Position.isInRange(player:getPosition(), creaturePos, 7, 5) or
+    not target or
+    not player:canStandBy(creature, 200) then
+    return false
+  end
+  if not target:getAntiKS() or creature.attackedUs then
+    return true
+  end
+  local spec = g_map.getSpectators(creaturePos, false)
+  local dist, closest
+  local playerDist = Position.manhattanDistance(player:getPosition(), creaturePos)
+  for _, neighbor in pairs(spec) do
+    if neighbor:isPlayer() and neighbor ~= player and
+      Position.manhattanDistance(creaturePos, neighbor:getPosition()) <= playerDist and
+      (AutoTarget.directionMatches(creature, neighbor) or creature:isWalking() or neighbor:isWalking())
+    then
+      return false
+    end
+  end
+  return AutoTarget.directionMatches(creature, player)
 end
 
 function AutoTarget.getBestTarget()

@@ -117,6 +117,7 @@ function TargetsModule.loadUI(panel)
     SettingModeList = panel:recursiveGetChildById('SettingModeList'),
     SettingModeText = panel:recursiveGetChildById('SettingModeText'),
     SettingLoot = panel:recursiveGetChildById('SettingLoot'),
+    SettingAntiKS = panel:recursiveGetChildById('SettingAntiKS'),
     SettingDistanceBox = panel:recursiveGetChildById('SettingDistanceBox'),
     AddTargetText = panel:recursiveGetChildById('AddTargetText'),
     AddTargetButton = panel:recursiveGetChildById('AddTargetButton'),
@@ -400,24 +401,22 @@ function TargetsModule.addTarget(target)
       onNameChange = function(target, name, oldName)
         local item = TargetsModule.getTargetListItem(target)
         if item then item:setText(name) end
-      end
-    })
+      end,
 
-    connect(target, {
       onLootChange = function(target, loot)
         BotLogger.debug("["..target:getName().."] Loot Changed: " .. tostring(loot))
-      end
-    })
+      end,
 
-    connect(target, {
+      onAntiKSChange = function(target, AntiKS)
+        BotLogger.debug("["..target:getName().."] Anti-KS Changed: " .. tostring(AntiKS))
+      end,
+
       onAddSetting = function(target, setting)
         if selectedTarget == target then
           TargetsModule.setCurrentSetting(setting)
         end
-      end
-    })
+      end,
 
-    connect(target, {
       onRemoveSetting = function(target, setting)
         if selectedTarget == target then
           local newSetting = target:getSetting(setting:getIndex()) or target:getSetting(setting:getIndex() - 1)
@@ -588,6 +587,7 @@ function TargetsModule.syncSetting()
   if selectedTarget then
     UI.SettingNameEdit:setText(selectedTarget:getName(), true)
     UI.SettingLoot:setChecked(selectedTarget:getLoot())
+    UI.SettingAntiKS:setChecked(selectedTarget:getAntiKS())
 
     if currentSetting then
       UI.TargetSettingNumber:setText('#'..currentSetting:getIndex()..' of ' .. #selectedTarget:getSettings());
@@ -598,6 +598,7 @@ function TargetsModule.syncSetting()
       UI.SettingDistanceBox:setEnabled(currentSetting:getMovement().type ~= Movement.None)
 
       UI.SettingLoot:setEnabled(true)
+      UI.SettingAntiKS:setEnabled(true)
       UI.SettingDistanceBox:setEnabled(true)
       UI.SettingModeList:setEnabled(true)
       UI.SettingStrategyList:setEnabled(true)
@@ -630,7 +631,6 @@ function TargetsModule.syncSetting()
     UI.SettingHpRange1:setText("100", true)
     UI.SettingHpRange2:setText("0", true)
     UI.SettingDangerBox:setValue(0)
-    UI.SettingLoot:setChecked(false)
     UI.SettingDistanceBox:setValue(1)
     UI.SettingModeText:setHeight(1)
     UI.SettingModeText:setVisible(false)
@@ -639,8 +639,11 @@ function TargetsModule.syncSetting()
     UI.SelectModeItem:setHeight(1)
     UI.SelectModeItem:setVisible(false)
     UI.SettingModeList:setCurrentOption("No Mode", true)
+    UI.SettingLoot:setChecked(true)
+    UI.SettingAntiKS:setChecked(true)
 
     UI.SettingLoot:setEnabled(false)
+    UI.SettingAntiKS:setEnabled(false)
     UI.SettingDistanceBox:setEnabled(false)
     UI.SettingModeList:setEnabled(false)
     UI.SettingStrategyList:setEnabled(false)

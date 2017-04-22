@@ -232,12 +232,13 @@ end
 
 Target = extends(CandyConfig, "Target")
 
-Target.create = function(name, settings, loot)
+Target.create = function(name, settings, loot, antiks)
   local target = Target.internalCreate()
   
   target.name = name or ""
   target.settings = settings or {}
   target.loot = loot ~= nil and loot or true
+  target.antiks = antiks ~= nil and antiks or true
   
   return target
 end
@@ -292,6 +293,19 @@ function Target:removeSetting(setting)
       v:setIndex(k)
     end
     signalcall(self.onRemoveSetting, self, setting)
+  end
+end
+
+function Target:getAntiKS()
+  return self.antiks
+end
+
+function Target:setAntiKS(AntiKS)
+  local oldAntiKS = self.antiks
+  if AntiKS ~= oldAntiKS then
+    self.antiks = AntiKS
+
+    signalcall(self.onAntiKSChange, self, AntiKS, oldAntiKS)
   end
 end
 
