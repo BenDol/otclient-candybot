@@ -45,7 +45,7 @@ function TargetsModule.init()
   
   TargetsModule.bindHandlers()
 
-  g_keyboard.bindKeyPress('Shift+Escape', TargetsModule.disable, gameRootPanel)
+  g_keyboard.bindKeyPress('Ctrl+Escape', TargetsModule.toggle, gameRootPanel)
 
   TargetsModule.parentUI = CandyBot.window
 
@@ -71,7 +71,7 @@ end
 function TargetsModule.terminate()
   TargetsModule.stop()
 
-  g_keyboard.unbindKeyPress('Shift+Escape', TargetsModule.disable, gameRootPanel)
+  g_keyboard.unbindKeyPress('Ctrl+Escape', TargetsModule.toggle, gameRootPanel)
 
   g_keyboard.unbindKeyPress('Up', UI.TargetsPanel)
   g_keyboard.unbindKeyPress('Down', UI.TargetsPanel)
@@ -90,9 +90,10 @@ function TargetsModule.terminate()
   Movement.terminate()
 end
 
-function TargetsModule.disable()
-  UI.AutoTarget:setChecked(false)
-  modules.game_textmessage.displayBroadcastMessage("AutoTarget disabled.")
+function TargetsModule.toggle()
+  local toggledState = not UI.AutoTarget:isChecked();
+  UI.AutoTarget:setChecked(toggledState)
+  modules.game_textmessage.displayBroadcastMessage("AutoTarget " .. (toggledState and "enabled." or "disabled."))
 end
 
 function TargetsModule.loadUI(panel)
@@ -740,7 +741,7 @@ end
 function TargetsModule.getTarget(name)
   for _,child in pairs(UI.TargetList:getChildren()) do
     local t = child.target
-    if t and t:getName() == name then return t end
+    if t and name and name:match(t:getName()) then return t end
   end
 end
 
