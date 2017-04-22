@@ -743,7 +743,7 @@ end
 function TargetsModule.getTarget(name)
   for _,child in pairs(UI.TargetList:getChildren()) do
     local t = child.target
-    if t and t:getName() == name then return t end
+    if t and name and name:match(t:getName()) then return t end
   end
 end
 
