@@ -70,7 +70,7 @@ end
 function AutoTarget.addCreature(creature)
   -- Avoid adding new targets when attacking
   if creature and creature:isMonster() then
-    --connect(creature, { onHealthPercentChange = AutoTarget.onTargetHealthChange })
+    connect(creature, { onHealthPercentChange = AutoTarget.onTargetHealthChange })
     connect(creature, { onDeath = AutoLoot.onTargetDeath })
     connect(creature, { onDisappear = AutoTarget.removeCreature })
 
@@ -80,7 +80,7 @@ end
 
 function AutoTarget.removeCreature(creature)
   if creature then
-    --disconnect(creature, { onHealthPercentChange = AutoTarget.onTargetHealthChange })
+    disconnect(creature, { onHealthPercentChange = AutoTarget.onTargetHealthChange })
     disconnect(creature, { onDeath = AutoLoot.onTargetDeath })
     disconnect(creature, { onDisappear = AutoTarget.removeCreature })
 
@@ -106,7 +106,10 @@ function AutoTarget.checkStance(target)
 end
 
 function AutoTarget.onTargetHealthChange(creature)
-
+  if creature:getHealthPercent() < 1 then
+    AutoTarget.removeCreature(creature)
+    AutoLoot.onTargetDeath(creature)
+  end
 end
 
 function AutoTarget.directionMatches(creature, player)
@@ -121,7 +124,9 @@ function AutoTarget.isValidTarget(creature)
   local player = g_game.getLocalPlayer()
   local target = TargetsModule.getTarget(creature:getName())
   local creaturePos = creature:getPosition()
-  if not Position.isInRange(player:getPosition(), creaturePos, 7, 5) or
+  if creature:getHealthPercent() < 1 or
+    not creaturePos or
+    not Position.isInRange(player:getPosition(), creaturePos, 7, 5) or
     not target or
     not player:canStandBy(creature, 200) then
     return false
