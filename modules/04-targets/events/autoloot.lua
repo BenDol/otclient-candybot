@@ -199,6 +199,9 @@ function AutoLoot.canLoot(creature)
   if (not targets or not table.contains(targets, creature)) and not Position.isInRange(player:getPosition(), creature:getPosition(), 3, 3) and (not attacking or attacking ~= creature) then
     return false
   end
+  if AutoLoot.lootList[creature:getId()] then 
+    return false
+  end
   local target = TargetsModule.getTarget(creature:getName())
   if target then
     return target:getLoot()
