@@ -14,8 +14,8 @@ CandyBot is an OTClient bot module that helps with Tibia game-play automation. C
 Licensed under MIT, see LICENSE for more information.
 
 ## Showcase
-![Screenshot](http://www.thewaystudios.com/public/otclient/candybot_support.png)
-![Screenshot](http://www.thewaystudios.com/public/otclient/candybot_afk.png)
+![Screenshot]()
+![Screenshot]()
 
 ## Installation
 To install CandyBot all you need to do is copy the root directory `otclient-candybot` into the [otclient](https://github.com/edubart/otclient) `/mods` directory and start otclient. If you don't have `otclient-candybot` directory you need to pull this repository (I haven't tagged any releases yet because it's too early in development).
